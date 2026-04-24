@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Pendaftaran Murid Mutasi - SMAN 68 Jakarta</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="pendaftaran-murid-mutasi.css">
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68" class="header-logo">
+            <div class="header-text">
+                <h1>Pendaftaran Murid Mutasi</h1>
+                <p>SMA Negeri 68 Jakarta - Tahun Ajaran 2026/2027</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Info Banner -->
+        <div class="info-banner">
+            <i class="fas fa-info-circle"></i>
+            <div>
+                <strong>Pendaftaran dibuka:</strong> 15 Mei 2026, 08.00 WIB<br>
+                <strong>Kuota terbatas:</strong> Maksimal 10% dari total siswa per kelas
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" id="mainTabs">
+            <button class="tab active" data-tab="register">
+                <i class="fas fa-user-plus"></i> Daftar
+            </button>
+            <button class="tab" data-tab="check">
+                <i class="fas fa-search"></i> Cek Status
+            </button>
+        </div>
+
+        <!-- Register Form -->
+        <div class="tab-content active" id="registerTab">
+            <form id="registerForm">
+                <!-- Section: Data Diri -->
+                <div class="section card">
+                    <div class="section-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h2>Data Diri Calon Siswa</h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Nama Lengkap <span class="required">*</span></label>
+                        <input type="text" id="nama" class="form-input" placeholder="Nama lengkap sesuai akta kelahiran" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> Tanggal Lahir <span class="required">*</span></label>
+                            <input type="date" id="tglLahir" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-venus-mars"></i> Jenis Kelamin <span class="required">*</span></label>
+                            <select id="jk" class="form-input" required>
+                                <option value="">Pilih</option>
+                                <option value="L">Laki-laki</option>
+                                <option value="P">Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-star-of-david"></i> Agama <span class="required">*</span></label>
+                        <select id="agama" class="form-input" required>
+                            <option value="">Pilih Agama</option>
+                            <option value="Islam">Islam</option>
+                            <option value="Kristen">Kristen</option>
+                            <option value="Katolik">Katolik</option>
+                            <option value="Hindu">Hindu</option>
+                            <option value="Buddha">Buddha</option>
+                            <option value="Konghucu">Konghucu</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-school"></i> Sekolah Asal <span class="required">*</span></label>
+                        <input type="text" id="sekolahAsal" class="form-input" placeholder="Nama sekolah sebelumnya" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-question-circle"></i> Alasan Pindah <span class="required">*</span></label>
+                        <textarea id="alasanPindah" class="form-input" rows="3" placeholder="Jelaskan alasan pindah ke SMAN 68 Jakarta..." required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-envelope"></i> Email <span class="required">*</span></label>
+                            <input type="email" id="email" class="form-input" placeholder="Email aktif" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-phone"></i> No. Telepon Murid <span class="required">*</span></label>
+                            <input type="tel" id="telpMurid" class="form-input" placeholder="0812xxxxxxxx" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> No. Telepon Orang Tua/Wali <span class="required">*</span></label>
+                        <input type="tel" id="telpOrtu" class="form-input" placeholder="0812xxxxxxxx" required>
+                    </div>
+                </div>
+
+                <!-- Section: Dokumen -->
+                <div class="section card">
+                    <div class="section-header">
+                        <i class="fas fa-folder-open"></i>
+                        <h2>Dokumen Persyaratan</h2>
+                    </div>
+                    <p class="section-note">
+                        <i class="fas fa-info-circle"></i> 
+                        Upload semua dokumen ke Google Drive, pastikan akses diatur ke <strong>"Siapa saja yang memiliki link"</strong>, lalu tempel linknya di bawah.
+                    </p>
+
+                    <div class="doc-list" id="docList"></div>
+                </div>
+
+                <!-- Section: Download Surat Pernyataan -->
+                <div class="section card">
+                    <div class="section-header">
+                        <i class="fas fa-file-signature"></i>
+                        <h2>Surat Pernyataan Siap Pindah</h2>
+                    </div>
+                    <p class="section-note">Download, cetak, isi, tanda tangani, lalu upload kembali ke Google Drive dan tempel linknya.</p>
+                    
+                    <a href="#" class="btn-download" id="downloadSurat">
+                        <i class="fas fa-download"></i> Download Surat Pernyataan
+                    </a>
+                    
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label><i class="fab fa-google-drive"></i> Link Surat Pernyataan (Sudah Ditandatangani) <span class="required">*</span></label>
+                        <input type="url" id="linkSuratPernyataan" class="form-input" placeholder="https://drive.google.com/file/d/..." required>
+                    </div>
+                </div>
+
+                <!-- Section: Peraturan -->
+                <div class="section card">
+                    <div class="section-header">
+                        <i class="fas fa-gavel"></i>
+                        <h2>Peraturan & Ketentuan</h2>
+                    </div>
+                    <div class="rules-list">
+                        <ol>
+                            <li>Calon siswa mutasi wajib mematuhi seluruh tata tertib yang berlaku di SMAN 68 Jakarta.</li>
+                            <li>Calon siswa mutasi harus memiliki nilai rapor rata-rata minimal 80 untuk semua mata pelajaran.</li>
+                            <li>Calon siswa mutasi tidak pernah tinggal kelas selama menempuh pendidikan di sekolah sebelumnya.</li>
+                            <li>Calon siswa mutasi tidak pernah terlibat kasus kriminal, narkoba, atau pelanggaran hukum lainnya.</li>
+                            <li>Calon siswa mutasi wajib mengikuti tes penempatan dan wawancara sesuai jadwal yang ditentukan.</li>
+                            <li>Calon siswa mutasi wajib menyerahkan seluruh dokumen persyaratan yang telah ditentukan.</li>
+                            <li>Calon siswa mutasi bersedia mengikuti masa orientasi dan adaptasi selama 1 bulan pertama.</li>
+                            <li>Calon siswa mutasi wajib menggunakan seragam resmi SMAN 68 Jakarta setelah dinyatakan diterima.</li>
+                            <li>Calon siswa mutasi tidak diperkenankan membawa kendaraan bermotor ke sekolah.</li>
+                            <li>Orang tua/wali wajib hadir saat proses wawancara dan daftar ulang.</li>
+                            <li>Calon siswa mutasi yang diterima wajib mengikuti seluruh kegiatan akademik dan non-akademik.</li>
+                            <li>Calon siswa mutasi bersedia menjaga nama baik sekolah dan almamater.</li>
+                            <li>Data yang diberikan dalam formulir ini adalah benar dan dapat dipertanggungjawabkan.</li>
+                            <li>Jika terbukti memberikan data palsu, pendaftaran akan dibatalkan.</li>
+                            <li>Keputusan panitia seleksi bersifat mutlak dan tidak dapat diganggu gugat.</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="checkbox-agree">
+                        <input type="checkbox" id="agreeRules" required>
+                        <label for="agreeRules">Saya telah membaca, memahami, dan menyetujui seluruh peraturan di atas</label>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Proses Pendaftaran
+                </button>
+            </form>
+        </div>
+
+        <!-- Check Status Tab -->
+        <div class="tab-content" id="checkTab">
+            <div class="card">
+                <div class="section-header">
+                    <i class="fas fa-search"></i>
+                    <h2>Cek Status Pendaftaran</h2>
+                </div>
+                <p class="section-note">Masukkan nomor pendaftaran yang telah diberikan saat mendaftar.</p>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-hashtag"></i> Nomor Pendaftaran</label>
+                    <input type="text" id="cekNoDaftar" class="form-input" placeholder="198168XXXXXXXX" maxlength="14">
+                </div>
+                <button class="btn-submit" id="cekStatusBtn">
+                    <i class="fas fa-search"></i> Cek Status
+                </button>
+                <div class="status-result" id="statusResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-container">
+            <div class="modal-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Pendaftaran Berhasil!</h2>
+            <p class="modal-message">Nomor pendaftaran Anda:</p>
+            <div class="nomor-pendaftaran" id="nomorPendaftaran">198168XXXXXXXX</div>
+            <p class="modal-note">
+                <i class="fas fa-info-circle"></i> 
+                Simpan nomor pendaftaran ini untuk mengecek status pendaftaran Anda.
+                Berkas akan diverifikasi oleh operator dalam 1x24 jam.
+            </p>
+            <button class="btn-submit" onclick="document.getElementById('successModal').style.display='none'">
+                <i class="fas fa-check"></i> Saya Mengerti
+            </button>
+        </div>
+    </div>
+
+    <script src="pendaftaran-murid-mutasi.js"></script>
+</body>
+</html>

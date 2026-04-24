@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>SMAN 68 Jakarta - Website Resmi</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <link rel="preload" as="image" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+    <link rel="shortcut icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            transition: background 0.5s ease;
+        }
+
+        /* Normal Mode Background */
+        body.normal-mode {
+            background: linear-gradient(135deg, #006633 0%, #004d26 30%, #0088cc 70%, #006699 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        /* Maintenance Mode Background */
+        body.maintenance-mode {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e293b 100%);
+            background-size: 200% 200%;
+            animation: maintenanceBg 5s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes maintenanceBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Background Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.3; }
+            25% { transform: translateY(-40px) translateX(20px) scale(1.2); opacity: 0.6; }
+            50% { transform: translateY(-20px) translateX(-10px) scale(0.9); opacity: 0.4; }
+            75% { transform: translateY(-30px) translateX(-20px) scale(1.1); opacity: 0.5; }
+        }
+
+        /* Main Container */
+        .splash-container {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 40px;
+            animation: fadeInUp 1s ease;
+            transition: all 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Logo Section */
+        .logo-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .logo-ring {
+            position: absolute;
+            inset: -15px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            animation: ringRotate 10s linear infinite;
+        }
+
+        .logo-ring:nth-child(2) {
+            inset: -25px;
+            border-style: dashed;
+            animation-duration: 15s;
+            animation-direction: reverse;
+        }
+
+        .logo-ring:nth-child(3) {
+            inset: -35px;
+            border-style: dotted;
+            animation-duration: 20s;
+        }
+
+        @keyframes ringRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logo-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: white;
+            padding: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 80px rgba(0, 136, 204, 0.3);
+            animation: logoPulse 2s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 80px rgba(0, 136, 204, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4), 0 0 120px rgba(0, 136, 204, 0.5); }
+        }
+
+        /* Text Content */
+        .welcome-text {
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .welcome-text h1 {
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            font-weight: 800;
+            margin-bottom: 12px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .welcome-text .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            font-weight: 400;
+            opacity: 0.95;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .slogan-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .slogan-item {
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: sloganFade 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .slogan-item:nth-child(1) { animation-delay: 0.5s; }
+        .slogan-item:nth-child(2) { animation-delay: 0.8s; }
+        .slogan-item:nth-child(3) { animation-delay: 1.1s; }
+
+        @keyframes sloganFade {
+            to { opacity: 1; }
+        }
+
+        .slogan-dot {
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        /* Loading Indicator */
+        .loading-area {
+            margin-top: 40px;
+            color: white;
+            opacity: 0.9;
+        }
+
+        .loading-bar-container {
+            width: 200px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin: 15px auto 0;
+            overflow: hidden;
+        }
+
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #0088cc, #006633);
+            border-radius: 10px;
+            animation: loadingFill 5s linear forwards;
+            width: 0;
+        }
+
+        @keyframes loadingFill {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .loading-text {
+            font-size: 0.85rem;
+            margin-top: 10px;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .loading-dots span {
+            animation: dotBounce 1.4s infinite;
+            font-size: 1.2rem;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dotBounce {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+
+        .countdown {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 15px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .countdown span {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            line-height: 30px;
+            margin: 0 3px;
+            font-weight: 700;
+        }
+
+        .skip-btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .skip-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ============================================ */
+        /* MAINTENANCE MODE STYLES */
+        /* ============================================ */
+        .maintenance-container {
+            display: none;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 40px;
+            animation: fadeInUp 1s ease;
+            max-width: 600px;
+        }
+
+        body.maintenance-mode .splash-container {
+            display: none;
+        }
+
+        body.maintenance-mode .maintenance-container {
+            display: block;
+        }
+
+        .maintenance-icon {
+            font-size: 5rem;
+            color: #f59e0b;
+            margin-bottom: 25px;
+            animation: wrenchBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes wrenchBounce {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+
+        .maintenance-title {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .maintenance-message {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 30px;
+            line-height: 1.7;
+        }
+
+        .maintenance-time {
+            display: inline-block;
+            padding: 10px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .maintenance-time i {
+            color: #f59e0b;
+            margin-right: 8px;
+        }
+
+        .maintenance-contact {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .maintenance-contact a {
+            color: #0088cc;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .maintenance-contact a:hover {
+            text-decoration: underline;
+        }
+
+        .maintenance-progress {
+            width: 250px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+
+        .maintenance-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b);
+            border-radius: 10px;
+            animation: progressMove 3s ease-in-out infinite;
+            width: 40%;
+        }
+
+        @keyframes progressMove {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(350%); }
+        }
+
+        .retry-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: rgba(245, 158, 11, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(245, 158, 11, 0.4);
+            color: #f59e0b;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .retry-btn:hover {
+            background: rgba(245, 158, 11, 0.3);
+            border-color: #f59e0b;
+            transform: translateY(-2px);
+        }
+
+        /* Loading overlay */
+        .checking-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .checking-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .logo-image { width: 100px; height: 100px; }
+            .welcome-text h1 { font-size: 1.5rem; }
+            .slogan-container { gap: 10px; }
+            .slogan-item { font-size: 0.75rem; padding: 6px 15px; letter-spacing: 1.5px; }
+            .slogan-dot { display: none; }
+            .maintenance-icon { font-size: 3.5rem; }
+        }
+    </style>
+</head>
+<body class="normal-mode" id="bodyElement">
+    <!-- Checking Overlay -->
+    <div class="checking-overlay" id="checkingOverlay">
+        <div class="checking-spinner"></div>
+    </div>
+
+    <!-- Background Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Normal Splash Screen -->
+    <div class="splash-container" id="normalSplash">
+        <div class="logo-wrapper">
+            <div class="logo-ring"></div>
+            <div class="logo-ring"></div>
+            <div class="logo-ring"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68 Jakarta" class="logo-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'120\' height=\'120\' viewBox=\'0 0 120 120\'%3E%3Crect width=\'120\' height=\'120\' fill=\'%23006633\' rx=\'60\'/%3E%3Ctext x=\'50%25\' y=\'55%25\' text-anchor=\'middle\' fill=\'white\' font-size=\'50\' font-weight=\'bold\'%3E68%3C/text%3E%3C/svg%3E'">
+        </div>
+
+        <div class="welcome-text">
+            <h1>Selamat Datang di Website Resmi</h1>
+            <p class="subtitle">SMAN 68 JAKARTA</p>
+            <div class="slogan-container">
+                <span class="slogan-item">Disiplin</span>
+                <span class="slogan-dot"></span>
+                <span class="slogan-item">Kreasi</span>
+                <span class="slogan-dot"></span>
+                <span class="slogan-item">Prestasi</span>
+            </div>
+        </div>
+
+        <div class="loading-area">
+            <div class="loading-bar-container">
+                <div class="loading-bar" id="loadingBar"></div>
+            </div>
+            <p class="loading-text">
+                <span id="loadingStatus">Mengalihkan ke halaman utama</span>
+                <span class="loading-dots">
+                    <span>.</span><span>.</span><span>.</span>
+                </span>
+            </p>
+            <div class="countdown" id="countdown">
+                <span id="countdownNumber">5</span> detik
+            </div>
+        </div>
+
+        <a href="./sman68.html" class="skip-btn" id="skipBtn">
+            <i class="fas fa-arrow-right"></i> Masuk Sekarang
+        </a>
+    </div>
+
+    <!-- Maintenance Screen -->
+    <div class="maintenance-container" id="maintenanceScreen">
+        <div class="logo-wrapper">
+            <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68 Jakarta" class="logo-image" style="animation: none;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'120\' height=\'120\' viewBox=\'0 0 120 120\'%3E%3Crect width=\'120\' height=\'120\' fill=\'%23006633\' rx=\'60\'/%3E%3Ctext x=\'50%25\' y=\'55%25\' text-anchor=\'middle\' fill=\'white\' font-size=\'50\' font-weight=\'bold\'%3E68%3C/text%3E%3C/svg%3E'">
+        </div>
+
+        <div class="maintenance-icon">
+            <i class="fas fa-tools"></i>
+        </div>
+
+        <h1 class="maintenance-title" id="maintenanceTitleDisplay">Website Sedang Dalam Pemeliharaan</h1>
+        <p class="maintenance-message" id="maintenanceMessageDisplay">
+            Mohon maaf, website resmi SMAN 68 Jakarta sedang dalam proses pemeliharaan dan peningkatan sistem. Silakan kunjungi kembali beberapa saat lagi.
+        </p>
+
+        <div class="maintenance-time" id="maintenanceTimeDisplay">
+            <i class="fas fa-clock"></i>
+            <span id="maintenanceEndTimeText">Estimasi selesai: Segera</span>
+        </div>
+
+        <div class="maintenance-progress">
+            <div class="maintenance-progress-bar"></div>
+        </div>
+
+        <button class="retry-btn" onclick="checkMaintenanceStatus()">
+            <i class="fas fa-sync-alt"></i> Coba Lagi
+        </button>
+
+        <div class="maintenance-contact">
+            <p>Hubungi kami: <a href="mailto:info@sman68jkt.sch.id">info@sman68jkt.sch.id</a> | <a href="tel:0213901234">(021) 3901234</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDAcKcg3alPOTH3FFGelYmsW7jcMMe2PLI",
+            authDomain: "upnvjdatsystem.firebaseapp.com",
+            databaseURL: "https://upnvjdatsystem-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "upnvjdatsystem",
+            storageBucket: "upnvjdatsystem.firebasestorage.app",
+            messagingSenderId: "57095309946",
+            appId: "1:57095309946:web:b0e9f3f86380d549ffc9c3"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Global variables
+        let isMaintenance = false;
+        let maintenanceData = null;
+        let countdownValue = 5;
+        let countdownInterval = null;
+        let redirectTimeout = null;
+
+        // Create particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = [
+                'rgba(255,255,255,0.1)', 
+                'rgba(0,136,204,0.1)', 
+                'rgba(0,102,51,0.1)',
+                'rgba(245,158,11,0.08)'
+            ];
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 10 + 5;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const delay = Math.random() * 6;
+                const duration = Math.random() * 6 + 4;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.cssText = `
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${posX}%;
+                    top: ${posY}%;
+                    background: ${color};
+                    animation-delay: ${delay}s;
+                    animation-duration: ${duration}s;
+                `;
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Check Maintenance Status
+        async function checkMaintenanceStatus() {
+            const checkingOverlay = document.getElementById('checkingOverlay');
+            if (checkingOverlay) checkingOverlay.style.display = 'flex';
+            
+            try {
+                const doc = await db.collection('settings').doc('maintenance').get();
+                
+                if (doc.exists) {
+                    maintenanceData = doc.data();
+                    
+                    // Cek apakah maintenance aktif
+                    if (maintenanceData.active === true) {
+                        // Cek apakah endTime sudah lewat
+                        if (maintenanceData.endTime) {
+                            const endTime = maintenanceData.endTime.toDate();
+                            const now = new Date();
+                            
+                            if (now > endTime) {
+                                // Maintenance sudah berakhir, nonaktifkan
+                                await db.collection('settings').doc('maintenance').update({
+                                    active: false,
+                                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                                showNormalMode();
+                            } else {
+                                // Maintenance masih aktif
+                                showMaintenanceMode(maintenanceData);
+                            }
+                        } else {
+                            // Maintenance aktif tanpa endTime
+                            showMaintenanceMode(maintenanceData);
+                        }
+                    } else {
+                        // Maintenance tidak aktif
+                        showNormalMode();
+                    }
+                } else {
+                    // Tidak ada data maintenance
+                    showNormalMode();
+                }
+            } catch (error) {
+                console.error('Error checking maintenance status:', error);
+                // Jika gagal cek Firebase, tampilkan normal
+                showNormalMode();
+            } finally {
+                if (checkingOverlay) checkingOverlay.style.display = 'none';
+            }
+        }
+
+        // Show Normal Mode
+        function showNormalMode() {
+            isMaintenance = false;
+            document.getElementById('bodyElement').className = 'normal-mode';
+            document.getElementById('normalSplash').style.display = 'block';
+            document.getElementById('maintenanceScreen').style.display = 'none';
+            
+            // Start countdown
+            startCountdown();
+        }
+
+        // Show Maintenance Mode
+        function showMaintenanceMode(data) {
+            isMaintenance = true;
+            document.getElementById('bodyElement').className = 'maintenance-mode';
+            document.getElementById('normalSplash').style.display = 'none';
+            document.getElementById('maintenanceScreen').style.display = 'block';
+            
+            // Update maintenance info
+            const title = data.title || 'Website Sedang Dalam Pemeliharaan';
+            const message = data.message || 'Mohon maaf, website sedang dalam pemeliharaan. Silakan kunjungi kembali nanti.';
+            
+            document.getElementById('maintenanceTitleDisplay').textContent = title;
+            document.getElementById('maintenanceMessageDisplay').textContent = message;
+            
+            // Update end time
+            if (data.endTime) {
+                const endTime = data.endTime.toDate();
+                const formattedTime = endTime.toLocaleString('id-ID', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                document.getElementById('maintenanceEndTimeText').textContent = 
+                    `Estimasi selesai: ${formattedTime} WIB`;
+                
+                // Auto check when endTime is reached
+                const now = new Date();
+                const delay = endTime.getTime() - now.getTime();
+                
+                if (delay > 0) {
+                    setTimeout(async () => {
+                        console.log('✅ Maintenance time ended, auto-checking...');
+                        await checkMaintenanceStatus();
+                    }, delay + 1000); // +1 detik buffer
+                }
+            } else {
+                document.getElementById('maintenanceEndTimeText').textContent = 
+                    'Estimasi selesai: Segera';
+            }
+            
+            // Clear countdown jika ada
+            if (countdownInterval) clearInterval(countdownInterval);
+            if (redirectTimeout) clearTimeout(redirectTimeout);
+        }
+
+        // Start Countdown
+        function startCountdown() {
+            countdownValue = 5;
+            const countdownEl = document.getElementById('countdownNumber');
+            const loadingBar = document.getElementById('loadingBar');
+            const loadingStatus = document.getElementById('loadingStatus');
+            
+            if (countdownEl) countdownEl.textContent = countdownValue;
+            if (loadingBar) loadingBar.style.animation = 'none';
+            
+            // Reset loading bar
+            if (loadingBar) {
+                loadingBar.offsetHeight; // Trigger reflow
+                loadingBar.style.animation = 'loadingFill 5s linear forwards';
+            }
+            
+            if (loadingStatus) loadingStatus.textContent = 'Mengalihkan ke halaman utama';
+            
+            countdownInterval = setInterval(() => {
+                countdownValue--;
+                if (countdownEl) countdownEl.textContent = countdownValue;
+                
+                if (countdownValue <= 0) {
+                    clearInterval(countdownInterval);
+                    redirectToMain();
+                }
+            }, 1000);
+            
+            // Redirect after 5 seconds
+            redirectTimeout = setTimeout(() => {
+                redirectToMain();
+            }, 5000);
+        }
+
+        // Redirect to main website
+        function redirectToMain() {
+            if (!isMaintenance) {
+                window.location.href = './sman68.html';
+            }
+        }
+
+        // Skip button
+        document.getElementById('skipBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!isMaintenance) {
+                if (countdownInterval) clearInterval(countdownInterval);
+                if (redirectTimeout) clearTimeout(redirectTimeout);
+                window.location.href = './sman68.html';
+            }
+        });
+
+        // Auto-refresh maintenance status setiap 30 detik
+        function setupAutoRefresh() {
+            setInterval(async () => {
+                if (isMaintenance) {
+                    try {
+                        const doc = await db.collection('settings').doc('maintenance').get();
+                        if (doc.exists) {
+                            const data = doc.data();
+                            if (!data.active) {
+                                // Maintenance sudah dinonaktifkan
+                                showNormalMode();
+                            } else if (data.endTime) {
+                                const endTime = data.endTime.toDate();
+                                const now = new Date();
+                                if (now > endTime) {
+                                    await db.collection('settings').doc('maintenance').update({
+                                        active: false,
+                                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
+                                    showNormalMode();
+                                } else {
+                                    // Update display time
+                                    document.getElementById('maintenanceEndTimeText').textContent = 
+                                        `Estimasi selesai: ${endTime.toLocaleString('id-ID', {
+                                            weekday: 'long',
+                                            day: 'numeric',
+                                            month: 'long',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })} WIB`;
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.log('Auto-refresh check failed');
+                    }
+                }
+            }, 30000); // Cek setiap 30 detik
+        }
+
+        // Listen for realtime changes in maintenance settings
+        function setupMaintenanceListener() {
+            db.collection('settings').doc('maintenance')
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        
+                        if (data.active === true) {
+                            // Maintenance diaktifkan
+                            if (!isMaintenance) {
+                                showMaintenanceMode(data);
+                            } else {
+                                // Update info jika berubah
+                                maintenanceData = data;
+                                document.getElementById('maintenanceTitleDisplay').textContent = 
+                                    data.title || 'Website Sedang Dalam Pemeliharaan';
+                                document.getElementById('maintenanceMessageDisplay').textContent = 
+                                    data.message || 'Mohon maaf, website sedang dalam pemeliharaan.';
+                            }
+                        } else {
+                            // Maintenance dinonaktifkan
+                            if (isMaintenance) {
+                                showNormalMode();
+                            }
+                        }
+                    }
+                }, (error) => {
+                    console.log('Maintenance listener error:', error);
+                });
+        }
+
+        // Initialize
+        function initialize() {
+            createParticles();
+            checkMaintenanceStatus();
+            setupAutoRefresh();
+            setupMaintenanceListener();
+            
+            console.log('✅ SMAN 68 Jakarta - Splash Screen Loaded');
+            console.log('🔧 Maintenance detection active');
+        }
+
+        // Global function for retry button
+        window.checkMaintenanceStatus = checkMaintenanceStatus;
+
+        initialize();
+    </script>
+</body>
+</html>

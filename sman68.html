@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>SMAN 68 Jakarta | Disiplin, Kreasi, Prestasi</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+    <link rel="shortcut icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="sman68.css">
+</head>
+<body>
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <div class="loader">
+            <svg class="loader-svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="251" stroke-dashoffset="251">
+                    <animate attributeName="stroke-dashoffset" from="251" to="0" dur="1.5s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+            <div class="loader-text">SMAN 68 JAKARTA</div>
+        </div>
+    </div>
+
+    <!-- Top Bar (Hanya tampil di desktop/tablet) -->
+    <div class="top-bar desktop-only">
+        <div class="top-bar-container">
+            <div class="top-bar-left">
+                <a href="tel:0213142929"><i class="fas fa-phone-alt"></i> (021) 3142929</a>
+                <a href="mailto:emailsman68@gmail.com"><i class="fas fa-envelope"></i> emailsman68@gmail.com</a>
+            </div>
+            <div class="top-bar-right">
+                <a href="#" class="top-link" id="topLoginSiswa"><i class="fas fa-graduation-cap"></i> Login Siswa</a>
+                <a href="#" class="top-link" id="topLoginGuru"><i class="fas fa-chalkboard-user"></i> Login Guru</a>
+                <a href="#" class="top-link highlight" id="topPPDB"><i class="fas fa-star"></i> SPMB 2026/2027</a>
+                <a href="#" class="top-link" id="topVirsch"><i class="fas fa-trophy"></i> VIRSCH 68</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68" class="nav-logo">
+                <div class="brand-text">
+                    <h1>SMAN 68 JAKARTA</h1>
+                    <span>Disiplin, Kreasi, Prestasi</span>
+                </div>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#home" class="nav-link active">Beranda</a></li>
+                <li><a href="#profil" class="nav-link">Profil</a></li>
+                <li><a href="#program" class="nav-link">Program</a></li>
+                <li><a href="#berita" class="nav-link">Berita</a></li>
+                <li><a href="#agenda" class="nav-link">Agenda</a></li>
+                <li><a href="#galeri" class="nav-link">Galeri</a></li>
+                <li><a href="#kontak" class="nav-link">Kontak</a></li>
+            </ul>
+            <div class="nav-toggle" id="navToggle">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with YouTube Video -->
+    <section id="home" class="hero">
+        <div class="hero-video-wrapper">
+            <div id="youtubePlayer"></div>
+            <div class="hero-overlay"></div>
+        </div>
+        <button class="video-sound-toggle" id="soundToggle">
+            <i class="fas fa-volume-mute"></i>
+        </button>
+        <div class="hero-content">
+            <h1 data-aos="fade-up">SMAN 68 JAKARTA</h1>
+            <div class="hero-slogan" data-aos="fade-up" data-aos-delay="200">
+                <span>DISIPLIN</span>
+                <span class="slogan-dot">•</span>
+                <span>KREASI</span>
+                <span class="slogan-dot">•</span>
+                <span>PRESTASI</span>
+            </div>
+            <div class="hero-scroll" data-aos="fade-up" data-aos-delay="400">
+                <a href="#profil" class="scroll-down">
+                    <span>Scroll Down</span>
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Access Floating (Mobile) -->
+    <div class="floating-menu mobile-only">
+        <button class="floating-toggle" id="floatingToggle">
+            <i class="fas fa-plus"></i>
+        </button>
+        <div class="floating-items" id="floatingItems">
+            <a href="#" class="floating-item" id="floatLoginSiswa" data-tooltip="Login Siswa"><i class="fas fa-graduation-cap"></i></a>
+            <a href="#" class="floating-item" id="floatLoginGuru" data-tooltip="Login Guru"><i class="fas fa-chalkboard-user"></i></a>
+            <a href="#" class="floating-item highlight" id="floatPPDB" data-tooltip="SPMB 2026/2027"><i class="fas fa-school"></i></a>
+            <a href="#" class="floating-item" id="floatVirsch" data-tooltip="VIRSCH 68"><i class="fas fa-trophy"></i></a>
+        </div>
+    </div>
+
+    <!-- Live Chat Widget -->
+    <div class="livechat-widget" id="livechatWidget">
+        <button class="livechat-toggle" id="livechatToggle">
+            <i class="fas fa-headset"></i>
+        </button>
+        <div class="livechat-window" id="livechatWindow">
+            <div class="livechat-header">
+                <div class="livechat-agent">
+                    <div class="agent-avatar"><i class="fas fa-user-tie"></i></div>
+                    <div class="agent-info">
+                        <h4>Helpdesk SMAN 68</h4>
+                        <p id="chatStatusText"><span class="online-dot"></span> Mengecek status...</p>
+                    </div>
+                </div>
+                <button class="livechat-close" id="livechatClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="livechat-body">
+                <div class="chat-offline" id="chatOffline" style="display:none;">
+                    <div class="offline-icon"><i class="fas fa-headset"></i></div>
+                    <h4>Helpdesk Sedang Offline</h4>
+                    <p>Maaf, helpdesk sedang tidak tersedia. Silakan coba lagi nanti atau hubungi kami melalui email.</p>
+                    <a href="mailto:emailsman68@gmail.com" class="btn-email-contact"><i class="fas fa-envelope"></i> Hubungi via Email</a>
+                </div>
+                <div class="chat-registration" id="chatRegistration">
+                    <div class="reg-header">
+                        <i class="fas fa-message"></i>
+                        <h5>Sebelum memulai obrolan</h5>
+                        <p>Silakan isi data Anda terlebih dahulu</p>
+                    </div>
+                    <form id="chatRegForm">
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="chatName" placeholder="Nama Lengkap" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-phone"></i>
+                            <input type="tel" id="chatPhone" placeholder="Nomor Telepon" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-users"></i>
+                            <select id="chatStatusSelect" required>
+                                <option value="">Pilih Status</option>
+                                <option value="Siswa SMAN 68 Jakarta">Siswa SMAN 68 Jakarta</option>
+                                <option value="Orang Tua Murid SMAN 68 Jakarta">Orang Tua Murid SMAN 68 Jakarta</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-chat-start">
+                            <span>Mulai Obrolan</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="chat-messages" id="chatMessages" style="display:none;">
+                    <div class="message-bot">Terima kasih telah menghubungi helpdesk SMAN 68 JAKARTA, operator segera membalas pertanyaan atau keluhan anda, silahkan kirimkan pesan pertanyaan atau keluhan.</div>
+                    <div id="chatMessageList"></div>
+                </div>
+                <!-- Chat Ended Notification -->
+                <div class="chat-ended-notification" id="chatEndedNotification" style="display:none;">
+                    <div class="ended-icon"><i class="fas fa-check-circle"></i></div>
+                    <h5>Chat Telah Diakhiri</h5>
+                    <p>Jika ada yang ingin ditanyakan lagi, silahkan memulai obrolan baru.</p>
+                    <button class="btn-new-chat" id="btnNewChat"><i class="fas fa-plus"></i> Mulai Obrolan Baru</button>
+                </div>
+            </div>
+            <div class="livechat-footer" id="chatFooter" style="display:none;">
+                <input type="text" id="chatInput" placeholder="Ketik pesan Anda...">
+                <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+                <button id="endChatBtn" class="btn-end-session" title="Akhiri Chat"><i class="fas fa-phone-slash"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Trigger -->
+    <div class="tutorial-trigger" id="tutorialTrigger">
+        <i class="fas fa-question"></i>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div class="tutorial-modal" id="tutorialModal">
+        <div class="tutorial-container">
+            <div class="tutorial-header">
+                <h3><i class="fas fa-info-circle"></i> Tutorial Kritik & Saran</h3>
+                <button class="tutorial-close" id="tutorialClose">&times;</button>
+            </div>
+            <div class="tutorial-body">
+                <div class="tutorial-step"><div class="step-number">1</div><p>Scroll ke bagian <strong>"Hubungi Kami"</strong></p></div>
+                <div class="tutorial-step"><div class="step-number">2</div><p>Isi formulir dengan nama, email, kategori, dan pesan</p></div>
+                <div class="tutorial-step"><div class="step-number">3</div><p>Klik tombol <strong>"Kirim Pesan"</strong></p></div>
+                <div class="tutorial-step"><div class="step-number">4</div><p>Simpan email untuk melihat balasan dari operator</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sambutan Kepala Sekolah -->
+    <section class="welcome-section" id="profil">
+        <div class="container">
+            <div class="welcome-wrapper">
+                <div class="welcome-image" data-aos="fade-right">
+                    <div class="image-frame">
+                        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEgUteNa0xE5xd_0sNFvfTzrIA3kbcmSN3pL0o-HdedObYC9JQGbMhHrN7Q9I8Dc8AzVvaqhwO4Lpsruhc0skhX1tuDS6hDQyGaj0ICXpqI5k7eK0YdLJ54CYoBtRHbVPgGV5nWlHallEsuF2O1HpWYP65gt6RMJpvqWd7XSo3BYOxSAzs6OeeD1iPOH9BN9" alt="Kepala Sekolah">
+                    </div>
+                </div>
+                <div class="welcome-content" data-aos="fade-left">
+                    <span class="section-subtitle">Sambutan</span>
+                    <h2 class="section-title-left">Kepala SMA Negeri 68 Jakarta</h2>
+                    <div class="welcome-quote">
+                        <i class="fas fa-quote-left quote-icon"></i>
+                        <p>Kami berkomitmen untuk menciptakan lingkungan belajar yang inspiratif, di mana setiap siswa dapat tumbuh dan berkembang secara optimal.</p>
+                    </div>
+                    <div class="welcome-author">
+                        <h3>Tjahyani, M.Pd.</h3>
+                        <p>Kepala SMA Negeri 68 Jakarta</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tentang Kami -->
+    <section class="about-section">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">Mengenal Lebih Dekat</span>
+                <h2 class="section-title">Tentang SMAN 68 Jakarta</h2>
+            </div>
+            <div class="about-grid">
+                <div class="about-main" data-aos="fade-right">
+                    <p>SMAN 68 Jakarta merupakan salah satu sekolah menengah atas negeri unggulan yang berlokasi di Jakarta dan dikenal sebagai institusi pendidikan yang berkomitmen mencetak generasi berprestasi, berkarakter, serta berdaya saing tinggi di tingkat nasional maupun global.</p>
+                    <p>Sejak berdiri, SMAN 68 Jakarta telah menunjukkan konsistensi dalam memberikan layanan pendidikan yang berkualitas dengan mengedepankan keseimbangan antara pencapaian akademik dan pengembangan karakter peserta didik. Sekolah ini didukung oleh tenaga pendidik yang profesional, berpengalaman, dan berdedikasi tinggi dalam membimbing siswa untuk mencapai potensi terbaik mereka.</p>
+                    <p>Dalam proses pembelajaran, SMAN 68 Jakarta mengintegrasikan kurikulum nasional dengan berbagai program pengayaan, inovasi pembelajaran berbasis teknologi, serta kegiatan ekstrakurikuler yang beragam.</p>
+                    <p>SMAN 68 Jakarta juga dikenal aktif dalam berbagai kompetisi akademik maupun non-akademik, baik di tingkat kota, provinsi, nasional, hingga internasional. Prestasi-prestasi tersebut menjadi bukti nyata komitmen sekolah dalam menciptakan lingkungan belajar yang kompetitif sekaligus suportif.</p>
+                    <p>Selain itu, sekolah ini menjunjung tinggi nilai-nilai kedisiplinan, integritas, tanggung jawab, serta semangat kebangsaan dalam setiap aspek kegiatan pendidikan. Lingkungan sekolah yang kondusif dan inklusif menjadi salah satu faktor utama dalam mendukung perkembangan siswa secara menyeluruh.</p>
+                    <p>Dengan visi untuk menjadi lembaga pendidikan yang unggul dan berkarakter, SMAN 68 Jakarta terus berinovasi dan beradaptasi dengan perkembangan zaman guna mempersiapkan generasi muda yang siap menghadapi tantangan masa depan.</p>
+                </div>
+                <div class="about-side" data-aos="fade-left">
+                    <div class="about-card">
+                        <img src="https://media.indozone.id/crop/0x0:0x0/images/2026/01/14/1768352620_6966eb6c54bf6_maxresdefault.jpg" alt="SMAN 68 Jakarta" class="about-image">
+                        <div class="about-overlay-card">
+                            <h3>DISIPLIN, KREASI, PRESTASI</h3>
+                        </div>
+                    </div>
+                    <div class="accreditation-box">
+                        <div class="accred-item">
+                            <div class="accred-icon"><i class="fas fa-star"></i></div>
+                            <div class="accred-info"><h4>Akreditasi A</h4><p>Unggul</p></div>
+                        </div>
+                        <div class="accred-item">
+                            <div class="accred-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="accred-info"><h4>Indeks 96</h4><p>Sangat Baik</p></div>
+                        </div>
+                        <div class="accred-item">
+                            <div class="accred-icon"><i class="fas fa-trophy"></i></div>
+                            <div class="accred-info"><h4>Peringkat 10</h4><p>Nasional</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Visi Misi -->
+            <div class="vision-mission-wrapper" data-aos="fade-up">
+                <div class="vision-card">
+                    <div class="card-icon"><i class="fas fa-eye"></i></div>
+                    <h3>Visi</h3>
+                    <p>Menjadi sekolah unggul yang menghasilkan lulusan berkualitas, berkarakter, berakhlak mulia, dan mampu bersaing di tingkat nasional maupun internasional.</p>
+                </div>
+                <div class="mission-card">
+                    <div class="card-icon"><i class="fas fa-bullseye"></i></div>
+                    <h3>Misi</h3>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> Menyelenggarakan proses pembelajaran yang efektif, inovatif, dan berorientasi pada pengembangan potensi peserta didik.</li>
+                        <li><i class="fas fa-check-circle"></i> Menanamkan nilai-nilai karakter seperti disiplin, tanggung jawab, jujur, dan peduli terhadap sesama.</li>
+                        <li><i class="fas fa-check-circle"></i> Mengembangkan budaya berprestasi dalam bidang akademik maupun non-akademik.</li>
+                        <li><i class="fas fa-check-circle"></i> Mendorong pemanfaatan teknologi dalam proses pembelajaran.</li>
+                        <li><i class="fas fa-check-circle"></i> Mewujudkan lingkungan sekolah yang bersih, sehat, dan berwawasan lingkungan.</li>
+                        <li><i class="fas fa-check-circle"></i> Membekali peserta didik dengan keterampilan abad 21 agar mampu bersaing secara global.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sebaran Lulusan PTN -->
+    <section class="alumni-section">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">Prestasi Lulusan</span>
+                <h2 class="section-title">Profil Penyebaran Lulusan ke PTN Favorit</h2>
+                <p>Data akumulasi dari tahun 2011 hingga sekarang</p>
+            </div>
+            <div class="alumni-filter" data-aos="fade-up">
+                <label><i class="fas fa-calendar-alt"></i> Filter Tahun:</label>
+                <select id="yearSelect"><option value="all">Semua Tahun (2011-Sekarang)</option></select>
+            </div>
+            <div class="ptn-grid" id="ptnGrid" data-aos="fade-up"></div>
+        </div>
+    </section>
+
+    <!-- Program Belajar -->
+    <section id="program" class="program-section">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">Kurikulum</span>
+                <h2 class="section-title">Program Belajar</h2>
+            </div>
+            <div class="program-hero" data-aos="fade-up">
+                <div class="program-hero-content">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/25/Kurikulum_Merdeka.png" alt="Kurikulum Merdeka" class="merdeka-logo">
+                    <div class="program-description">
+                        <p>Kurikulum Merdeka merupakan pendekatan pembelajaran yang dirancang untuk memberikan fleksibilitas dan kebebasan kepada satuan pendidikan dalam mengembangkan proses belajar sesuai dengan kebutuhan peserta didik. Kurikulum ini berfokus pada pengembangan kompetensi, karakter, serta minat dan bakat siswa secara menyeluruh.</p>
+                        <p>Dalam implementasinya, Kurikulum Merdeka menekankan pembelajaran yang lebih mendalam (deep learning), relevan, dan kontekstual. Peserta didik didorong untuk aktif berpikir kritis, kreatif, serta mampu memecahkan masalah melalui berbagai kegiatan berbasis proyek.</p>
+                        <p>Salah satu ciri utama Kurikulum Merdeka adalah adanya Projek Penguatan Profil Pelajar Pancasila (P5), yaitu kegiatan pembelajaran lintas disiplin yang bertujuan membentuk karakter siswa sesuai nilai-nilai Pancasila, seperti gotong royong, kemandirian, kreativitas, dan kebhinekaan global.</p>
+                        <p>Selain itu, kurikulum ini memberikan keleluasaan bagi guru untuk menyesuaikan metode pembelajaran dengan tingkat kemampuan siswa. Materi pembelajaran disusun lebih sederhana dan esensial sehingga memungkinkan peserta didik memahami konsep secara lebih mendalam tanpa terbebani oleh banyaknya konten.</p>
+                        <p>Dengan penerapan Kurikulum Merdeka Belajar, diharapkan tercipta lingkungan belajar yang lebih menyenangkan, inklusif, dan bermakna, sehingga mampu menghasilkan lulusan yang tidak hanya unggul secara akademik, tetapi juga memiliki karakter kuat dan siap menghadapi tantangan masa depan.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="subjects-section" data-aos="fade-up">
+                <h3><i class="fas fa-book-open"></i> Mata Pelajaran yang Dipelajari</h3>
+                <p class="subjects-intro">Dalam mendukung penerapan Kurikulum Merdeka, SMAN 68 Jakarta menyelenggarakan berbagai mata pelajaran yang dirancang untuk mengembangkan kemampuan akademik, keterampilan berpikir, serta karakter peserta didik secara menyeluruh. Adapun mata pelajaran yang dipelajari meliputi:</p>
+                
+                <div class="subjects-grid">
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <span class="subject-number">1</span>
+                            <h4>Mata Pelajaran Wajib</h4>
+                        </div>
+                        <ul class="subject-list">
+                            <li>Pendidikan Agama dan Budi Pekerti</li>
+                            <li>Pendidikan Pancasila</li>
+                            <li>Bahasa Indonesia</li>
+                            <li>Matematika</li>
+                            <li>Ilmu Pengetahuan Alam (IPA)</li>
+                            <li>Ilmu Pengetahuan Sosial (IPS)</li>
+                            <li>Bahasa Inggris</li>
+                            <li>Pendidikan Jasmani, Olahraga, dan Kesehatan</li>
+                            <li>Informatika</li>
+                            <li>Seni dan Budaya</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <span class="subject-number">2</span>
+                            <h4>Mata Pelajaran Pilihan</h4>
+                            <span class="subject-badge">Kelas XI & XII</span>
+                        </div>
+                        <p class="subject-note">Sesuai minat dan bakat peserta didik:</p>
+                        <ul class="subject-list two-columns">
+                            <li>Fisika</li>
+                            <li>Kimia</li>
+                            <li>Biologi</li>
+                            <li>Ekonomi</li>
+                            <li>Geografi</li>
+                            <li>Sosiologi</li>
+                            <li>Sejarah</li>
+                            <li>Bahasa dan Sastra Indonesia</li>
+                            <li>Bahasa dan Sastra Inggris</li>
+                            <li>Bahasa Asing Lainnya</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="subject-card p5-card">
+                        <div class="subject-header">
+                            <span class="subject-number">3</span>
+                            <h4>Projek Penguatan Profil Pelajar Pancasila (P5)</h4>
+                        </div>
+                        <p>Selain mata pelajaran intrakurikuler, siswa juga mengikuti kegiatan Projek Penguatan Profil Pelajar Pancasila (P5) yang berfokus pada pengembangan karakter, kreativitas, kolaborasi, serta kepedulian terhadap lingkungan dan masyarakat.</p>
+                        <div class="p5-pillars">
+                            <span><i class="fas fa-heart"></i> Beriman</span>
+                            <span><i class="fas fa-globe"></i> Berkebinekaan</span>
+                            <span><i class="fas fa-hands-helping"></i> Gotong Royong</span>
+                            <span><i class="fas fa-lightbulb"></i> Kreatif</span>
+                            <span><i class="fas fa-brain"></i> Bernalar Kritis</span>
+                            <span><i class="fas fa-user-check"></i> Mandiri</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="subjects-footer">Dengan susunan mata pelajaran tersebut, SMAN 68 Jakarta berupaya menciptakan proses pembelajaran yang seimbang antara ilmu pengetahuan, keterampilan, dan pembentukan karakter, sehingga peserta didik siap melanjutkan pendidikan ke jenjang yang lebih tinggi maupun menghadapi tantangan di masa depan.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Berita Terkini -->
+    <section id="berita" class="news-section">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">Informasi Terbaru</span>
+                <h2 class="section-title">Berita Terkini</h2>
+            </div>
+            <div class="news-grid" id="newsGrid" data-aos="fade-up"></div>
+            <div class="news-modal" id="newsModal">
+                <div class="news-modal-container">
+                    <button class="modal-close-btn">&times;</button>
+                    <div class="modal-body" id="newsModalBody"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Agenda Kegiatan -->
+    <section id="agenda" class="agenda-section">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">Jadwal Kegiatan</span>
+                <h2 class="section-title">Agenda Kegiatan</h2>
+            </div>
+            <div class="agenda-grid" id="agendaGrid" data-aos="fade-up"></div>
+        </div>
+    </section>
+
+    <!-- Galeri Foto -->
+    <section id="galeri" class="gallery-section">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">Dokumentasi</span>
+                <h2 class="section-title">Galeri Foto</h2>
+            </div>
+            <div class="gallery-grid" id="galleryGrid" data-aos="fade-up"></div>
+        </div>
+    </section>
+
+    <!-- Kata Mereka -->
+    <section class="testimonial-section">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">Testimoni</span>
+                <h2 class="section-title">Kata Mereka</h2>
+            </div>
+            <div class="testimonial-grid" id="testimonialGrid" data-aos="fade-up"></div>
+        </div>
+    </section>
+
+    <!-- Sarana Prasarana -->
+    <section class="facility-section">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">Fasilitas</span>
+                <h2 class="section-title">Sarana & Prasarana</h2>
+            </div>
+            <div class="facility-grid" id="facilityGrid" data-aos="fade-up"></div>
+        </div>
+    </section>
+
+    <!-- Hubungi Kami -->
+    <section id="kontak" class="contact-section">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">Terhubung Dengan Kami</span>
+                <h2 class="section-title">Hubungi Kami</h2>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-info-card" data-aos="fade-right">
+                    <div class="map-wrapper">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.4542156789!2d106.8656789!3d-6.2034567!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f4b7c3a5b5b5%3A0x5b5b5b5b5b5b5b5b!2sSMAN%2068%20Jakarta!5e0!3m2!1sid!2sid!4v1620000000000!5m2!1sid!2sid" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                    <div class="contact-details">
+                        <div class="contact-info-item">
+                            <div class="contact-icon"><i class="fas fa-map-pin"></i></div>
+                            <div><h4>Alamat</h4><p>Jl. Salemba Raya No. 18, Jakarta Pusat, DKI Jakarta 10430</p></div>
+                        </div>
+                        <div class="contact-info-item">
+                            <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
+                            <div><h4>Telepon</h4><p>(021) 3901234 / 0812-3456-7890</p></div>
+                        </div>
+                        <div class="contact-info-item">
+                            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                            <div><h4>Email</h4><p>info@sman68jkt.sch.id</p></div>
+                        </div>
+                        <div class="contact-info-item">
+                            <div class="contact-icon"><i class="fas fa-clock"></i></div>
+                            <div><h4>Jam Operasional</h4><div id="operationalHours"></div></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form-card" data-aos="fade-left">
+                    <div class="form-header">
+                        <h3>Kritik & Saran</h3>
+                        <p>Sampaikan kritik dan saran Anda untuk kemajuan SMAN 68 Jakarta</p>
+                    </div>
+                    <form id="feedbackForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nama Lengkap</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-user"></i>
+                                    <input type="text" id="feedbackName" placeholder="Nama atau Anonymous">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Email <span class="required">*</span></label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-envelope"></i>
+                                    <input type="email" id="feedbackEmail" placeholder="Email aktif" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Kategori <span class="required">*</span></label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-tag"></i>
+                                <select id="feedbackCategory" required>
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="Akademik">Akademik</option>
+                                    <option value="Fasilitas">Fasilitas</option>
+                                    <option value="Pelayanan">Pelayanan</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Pesan <span class="required">*</span></label>
+                            <textarea id="feedbackMessage" rows="5" placeholder="Tulis pesan kritik/saran Anda..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit-feedback"><i class="fas fa-paper-plane"></i> Kirim Pesan</button>
+                    </form>
+                    <div class="feedback-history-link">
+                        <button id="showHistoryBtn" class="btn-history-link"><i class="fas fa-history"></i> Lihat Riwayat Aduan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Riwayat Aduan Modal -->
+    <div class="history-modal" id="historyModal">
+        <div class="history-container">
+            <div class="history-header">
+                <h3><i class="fas fa-history"></i> Riwayat Aduan</h3>
+                <button class="history-close">&times;</button>
+            </div>
+            <div class="history-body">
+                <div class="history-form">
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="historyEmail" placeholder="Masukkan email Anda">
+                    </div>
+                    <button id="loadHistoryBtn">Lihat</button>
+                </div>
+                <div class="history-list" id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-about">
+                        <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68" class="footer-logo">
+                        <h3>SMAN 68 Jakarta</h3>
+                        <p>Disiplin, Kreasi, Prestasi</p>
+                        <div class="footer-social">
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                            <a href="#"><i class="fab fa-tiktok"></i></a>
+                        </div>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Tautan Cepat</h4>
+                        <ul>
+                            <li><a href="#home">Beranda</a></li>
+                            <li><a href="#profil">Profil</a></li>
+                            <li><a href="#program">Program</a></li>
+                            <li><a href="#berita">Berita</a></li>
+                            <li><a href="#galeri">Galeri</a></li>
+                            <li><a href="#kontak">Kontak</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Layanan</h4>
+                        <ul>
+                            <li><a href="#" id="footerLoginSiswa">Login Siswa</a></li>
+                            <li><a href="#" id="footerLoginGuru">Login Guru</a></li>
+                            <li><a href="#" id="footerPPDB">SPMB 2026/2027</a></li>
+                            <li><a href="#" id="footerVirsch">VIRSCH 68</a></li>
+                            <li><a href="#" id="privacyLink">Kebijakan Privasi</a></li>
+                            <li><a href="./pendaftaran-murid-mutasi.html" id="targetblank">Pendaftaran murid mutasi</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-contact">
+                        <h4>Kontak</h4>
+                        <ul>
+                            <li><i class="fas fa-map-marker-alt"></i> Jl. Salemba Raya No. 18, Jakarta Pusat</li>
+                            <li><i class="fas fa-phone-alt"></i> (021) 3142929</li>
+                            <li><i class="fas fa-envelope"></i> emailsman68@gmail.com</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container"><p>&copy; 2026 SMAN 68 Jakarta (V2.5.0). All rights reserved.</p></div>
+        </div>
+    </footer>
+
+    <!-- Privacy Modal -->
+    <div class="privacy-modal" id="privacyModal">
+        <div class="privacy-container">
+            <div class="privacy-header">
+                <h3><i class="fas fa-shield-alt"></i> Kebijakan Privasi</h3>
+                <button class="privacy-close">&times;</button>
+            </div>
+            <div class="privacy-body">
+                <ol>
+                    <li><strong>Pengumpulan Informasi:</strong> Kami mengumpulkan informasi pribadi seperti nama, email, dan nomor telepon hanya untuk keperluan komunikasi dan layanan sekolah.</li>
+                    <li><strong>Penggunaan Informasi:</strong> Informasi yang dikumpulkan digunakan untuk merespon pertanyaan, memberikan informasi akademik, dan meningkatkan layanan sekolah.</li>
+                    <li><strong>Perlindungan Data:</strong> Kami menerapkan langkah-langkah keamanan teknis dan organisasi untuk melindungi data pribadi dari akses tidak sah.</li>
+                    <li><strong>Berbagi Informasi:</strong> Kami tidak menjual, memperdagangkan, atau mentransfer informasi pribadi kepada pihak ketiga tanpa persetujuan.</li>
+                    <li><strong>Cookie:</strong> Website ini menggunakan cookie untuk meningkatkan pengalaman pengguna dan menganalisis traffic.</li>
+                    <li><strong>Hak Pengguna:</strong> Pengguna berhak mengakses, memperbaiki, atau menghapus data pribadi mereka dengan menghubungi kami.</li>
+                    <li><strong>Penyimpanan Data:</strong> Data disimpan selama diperlukan untuk tujuan layanan atau sesuai ketentuan hukum yang berlaku.</li>
+                    <li><strong>Keamanan Anak:</strong> Kami melindungi privasi anak di bawah umur dan memerlukan persetujuan orang tua untuk pengumpulan data.</li>
+                    <li><strong>Perubahan Kebijakan:</strong> Kebijakan ini dapat diperbarui sewaktu-waktu dan perubahan akan diumumkan di halaman ini.</li>
+                    <li><strong>Kontak:</strong> Untuk pertanyaan tentang kebijakan privasi, hubungi kami di info@sman68jkt.sch.id.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="sman68.js"></script>
+</body>
+</html>
