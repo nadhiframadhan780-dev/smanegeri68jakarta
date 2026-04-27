@@ -828,7 +828,7 @@ function setupRealtimeListeners() {
 document.getElementById('btnDownloadAPK')?.addEventListener('click', function(e) {
     e.preventDefault();
     // Ganti dengan link APK Anda
-    const apkUrl = 'SMAN 68 JAKARTA.apk'; // GANTI INI
+    const apkUrl = 'https://github.com/nadhiframadhan780-dev/smanegeri68jakarta/raw/78150adfc28909acbe3716d8f935d0c90c43ccb6/SMAN%2068%20JAKARTA.apk'; // GANTI INI
     window.open(apkUrl, '_blank');
 });
 
