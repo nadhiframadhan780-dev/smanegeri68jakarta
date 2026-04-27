@@ -39,6 +39,7 @@ const ptnList = [
     { name: 'ITS', fullName: 'Institut Teknologi Sepuluh Nopember', logo: 'https://upload.wikimedia.org/wikipedia/id/c/c4/Badge_ITS.png' },
     { name: 'UNJ', fullName: 'Universitas Negeri Jakarta', logo: 'https://unj.ac.id/wp-content/uploads/2025/02/UNJ-LOGO-512-PX-1.png' },
     { name: 'UPNVJ', fullName: 'UPN Veteran Jakarta', logo: 'https://www.upnvj.ac.id/id/files/large/89f8a80e388ced3704b091e21f510755' }
+    { name: 'UNAND', fullName: 'Universitas Andalas', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Logo_Unand.svg/1280px-Logo_Unand.svg.png' }
 ];
 
 const defaultAlumniData = {
