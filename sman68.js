@@ -828,7 +828,7 @@ function setupRealtimeListeners() {
 document.getElementById('btnDownloadAPK')?.addEventListener('click', function(e) {
     e.preventDefault();
     // Ganti dengan link APK Anda
-    const apkUrl = 'https://drive.google.com/file/d/YOUR_APK_ID/view'; // GANTI INI
+    const apkUrl = 'SMAN 68 JAKARTA.apk'; // GANTI INI
     window.open(apkUrl, '_blank');
 });
 
