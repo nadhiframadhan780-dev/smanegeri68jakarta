@@ -350,11 +350,28 @@ function createNewsCard(id, data) {
 
 function showNewsDetail(data, date) {
     if (!DOM.newsModal || !DOM.newsModalBody) return;
+    
+    // Ubah konten jadi paragraf yang rapi
+    let contentHtml = data.content || 'Konten lengkap akan segera tersedia.';
+    if (contentHtml.includes('\n')) {
+        contentHtml = contentHtml
+            .split('\n\n')
+            .map(p => p.trim())
+            .filter(p => p.length > 0)
+            .map(p => `<p style="margin-bottom:20px;line-height:1.9;color:var(--dark-gray);text-indent:30px;">${p.replace(/\n/g, '<br>')}</p>`)
+            .join('');
+    } else {
+        contentHtml = `<p style="margin-bottom:20px;line-height:1.9;color:var(--dark-gray);text-indent:30px;">${contentHtml}</p>`;
+    }
+    
     DOM.newsModalBody.innerHTML = `
-        <h2>${data.title}</h2>
-        <p style="color:var(--primary-blue);margin-bottom:20px;"><i class="far fa-calendar-alt"></i> ${date}</p>
-        ${data.image ? `<img src="${data.image}" style="width:100%;border-radius:12px;margin-bottom:20px;">` : ''}
-        <div style="line-height:1.8;">${data.content || 'Konten lengkap akan segera tersedia.'}</div>
+        <h2 style="color:var(--dark);margin-bottom:10px;font-size:1.5rem;font-weight:700;">${data.title}</h2>
+        <div style="display:flex;gap:20px;margin-bottom:25px;color:var(--primary-blue);font-size:0.9rem;">
+            <span><i class="far fa-calendar-alt"></i> ${date}</span>
+            <span><i class="far fa-folder"></i> Berita</span>
+        </div>
+        ${data.image ? `<img src="${data.image}" style="width:100%;border-radius:12px;margin-bottom:25px;box-shadow:var(--shadow-md);">` : ''}
+        ${contentHtml}
     `;
     DOM.newsModal.classList.add('active');
 }
