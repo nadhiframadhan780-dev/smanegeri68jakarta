@@ -89,7 +89,8 @@ const DOM = {
 // ============================================
 const videoList = [
     'hDZ3-jZ4Rnw',  // ID Video 1
-    'cBbahZk3mMc'    // ID Video 2 (GANTI dengan ID video kedua)
+    'cBbahZk3mMc',    // ID Video 2 (GANTI dengan ID video kedua)
+    '9D_JcXY4Sr8'    // ID Video 3 (GANTI dengan ID video ketiga)
 ];
 
 let currentVideoIndex = 0;
