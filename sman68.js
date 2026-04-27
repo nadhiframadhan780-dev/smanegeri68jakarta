@@ -822,4 +822,14 @@ function setupRealtimeListeners() {
     db.collection('settings').doc('operationalHours').onSnapshot(() => loadOperationalHours());
 }
 
+// ============================================
+// DOWNLOAD APK BUTTON
+// ============================================
+document.getElementById('btnDownloadAPK')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    // Ganti dengan link APK Anda
+    const apkUrl = 'https://drive.google.com/file/d/YOUR_APK_ID/view'; // GANTI INI
+    window.open(apkUrl, '_blank');
+});
+
 console.log('✅ SMAN 68 Jakarta - Website Updated Successfully');
