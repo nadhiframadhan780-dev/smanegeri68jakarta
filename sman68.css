@@ -436,7 +436,7 @@ body {
    ============================================ */
 .floating-menu {
     position: fixed;
-    bottom: 110px;
+    bottom: 170px;
     right: 20px;
     z-index: 999;
 }
