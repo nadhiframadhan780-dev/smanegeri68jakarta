@@ -59,7 +59,7 @@ const linkUrls = {
     loginGuru: 'portal-guru.html',
     ppdb: './countdown-SPMB-2026-2027.html',
     virsch: './virsch-68.html',
-    Penmurmut: './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html'
+    penmurmut: './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html'
 };
 
 // ============================================
@@ -221,7 +221,8 @@ function setupLinks() {
     const linkIds = [
         'topLoginSiswa','topLoginGuru','topPPDB','topVirsch',
         'floatLoginSiswa','floatLoginGuru','floatPPDB','floatVirsch',
-        'footerLoginSiswa','footerLoginGuru','footerPPDB','footerVirsch'
+        'footerLoginSiswa','footerLoginGuru','footerPPDB','footerVirsch',
+        'topPenmurmut',
     ];
     linkIds.forEach(id => {
         const el = document.getElementById(id);
@@ -232,6 +233,7 @@ function setupLinks() {
                 else if (id.includes('Guru') || id.includes('LoginGuru')) window.open(linkUrls.loginGuru, '_blank');
                 else if (id.includes('PPDB') || id.includes('ppdb')) window.open(linkUrls.ppdb, '_blank');
                 else if (id.includes('Virsch') || id.includes('virsch')) window.open(linkUrls.virsch, '_blank');
+                else if (id.includes('Penmurmut') || id.includes('penmurmut')) window.open(linkUrls.penmurmut, '_blank');
             });
         }
     });
