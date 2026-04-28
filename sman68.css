@@ -2780,3 +2780,106 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* ============================================
+   FLOATING ANNOUNCEMENT
+   ============================================ */
+.floating-announcement {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    animation: slideDown 0.5s ease;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-100%); opacity: 0; }
+}
+
+.floating-announcement.hide {
+    animation: slideUp 0.5s ease forwards;
+}
+
+.announcement-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 25px;
+    background: linear-gradient(135deg, #006633 0%, #0088cc 100%);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 700px;
+    margin: 0 auto;
+    border-radius: 0 0 20px 20px;
+    position: relative;
+}
+
+.announcement-logo {
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+}
+
+.announcement-logo img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: white;
+    padding: 3px;
+    object-fit: cover;
+}
+
+.announcement-content {
+    flex: 1;
+    color: white;
+}
+
+.announcement-content p {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.announcement-close {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.announcement-close:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: rotate(90deg);
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    .announcement-container {
+        padding: 12px 18px;
+        border-radius: 0 0 16px 16px;
+        gap: 10px;
+    }
+    .announcement-logo {
+        width: 35px;
+        height: 35px;
+    }
+    .announcement-content p {
+        font-size: 0.85rem;
+    }
+}
