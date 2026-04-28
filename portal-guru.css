@@ -1,0 +1,297 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --primary-green: #006633;
+    --primary-blue: #0088cc;
+    --gradient-primary: linear-gradient(135deg, #006633 0%, #0088cc 100%);
+    --white: #ffffff;
+    --off-white: #f8fafc;
+    --light-gray: #e2e8f0;
+    --dark-gray: #475569;
+    --dark: #1e293b;
+    --shadow-md: 0 10px 30px rgba(0,0,0,0.1);
+    --shadow-lg: 0 20px 50px rgba(0,0,0,0.15);
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-full: 9999px;
+    --transition: all 0.3s ease;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #f1f5f9;
+    color: var(--dark);
+    min-height: 100vh;
+}
+
+/* Preloader */
+.preloader {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--white); z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+}
+.preloader.hide { opacity: 0; visibility: hidden; }
+.loader-spinner {
+    width: 50px; height: 50px;
+    border: 4px solid var(--light-gray);
+    border-top-color: var(--primary-green);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Login Overlay */
+.login-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+}
+.login-bg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: url('https://media.indozone.id/crop/0x0:0x0/images/2026/01/14/1768352620_6966eb6c54bf6_maxresdefault.jpg') center/cover no-repeat;
+    filter: brightness(0.35);
+}
+.login-card {
+    position: relative; z-index: 1;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 40px 35px;
+    max-width: 420px; width: 100%;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+}
+.login-logo-wrapper { position: relative; display: inline-block; margin-bottom: 20px; }
+.login-logo-ring { position: absolute; inset: -10px; border-radius: 50%; border: 2px solid rgba(0,102,51,0.3); }
+.login-logo { width: 80px; height: 80px; border-radius: 50%; background: white; padding: 5px; position: relative; z-index: 1; }
+.login-card h2 { font-size: 1.5rem; font-weight: 700; color: var(--dark); margin-bottom: 5px; }
+.login-card p { color: var(--dark-gray); margin-bottom: 25px; }
+
+.input-group { position: relative; margin-bottom: 15px; }
+.input-group i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--dark-gray); }
+.toggle-pass { left: auto !important; right: 14px; cursor: pointer; }
+.input-group input {
+    width: 100%; padding: 14px 14px 14px 42px;
+    border: 2px solid var(--light-gray);
+    border-radius: var(--radius-sm);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.95rem;
+}
+.input-group input:focus { outline: none; border-color: var(--primary-green); }
+
+.btn-login, .btn-submit {
+    width: 100%; padding: 14px;
+    background: var(--gradient-primary);
+    color: var(--white); border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 700; font-size: 1rem;
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    gap: 8px; transition: var(--transition);
+}
+.btn-login:hover, .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,102,51,0.3); }
+.btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* Main Portal */
+.main-portal { min-height: 100vh; }
+
+/* Topbar */
+.topbar {
+    background: var(--white); padding: 15px 25px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: var(--shadow-md); position: sticky; top: 0; z-index: 100;
+    flex-wrap: wrap; gap: 15px;
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-logo { width: 45px; height: 45px; border-radius: 10px; }
+.topbar-left h1 { font-size: 1.2rem; font-weight: 700; color: var(--primary-green); }
+.topbar-left span { font-size: 0.75rem; color: var(--dark-gray); }
+.topbar-right { display: flex; align-items: center; gap: 15px; }
+.datetime { font-size: 0.85rem; color: var(--dark-gray); }
+.user-badge { padding: 8px 16px; background: var(--off-white); border-radius: var(--radius-full); font-weight: 600; font-size: 0.85rem; }
+.btn-logout { padding: 8px 16px; background: #ef4444; color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; }
+
+/* Tabs */
+.tabs-container {
+    background: var(--white); padding: 10px 25px;
+    box-shadow: var(--shadow-sm); position: sticky; top: 80px; z-index: 50;
+}
+.tabs { display: flex; gap: 8px; }
+.tab {
+    padding: 12px 24px; border: none; background: transparent;
+    border-radius: var(--radius-full); font-weight: 600; font-size: 0.9rem;
+    cursor: pointer; transition: var(--transition); color: var(--dark-gray);
+    display: flex; align-items: center; gap: 8px;
+}
+.tab:hover { background: var(--off-white); color: var(--primary-green); }
+.tab.active { background: var(--gradient-primary); color: var(--white); }
+
+/* Content */
+.content { padding: 25px; max-width: 1000px; margin: 0 auto; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Card */
+.card {
+    background: var(--white); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md); overflow: hidden;
+}
+.card-header {
+    padding: 20px 25px; border-bottom: 1px solid var(--light-gray);
+    display: flex; align-items: center; gap: 12px;
+}
+.card-header i { font-size: 1.3rem; color: var(--primary-green); }
+.card-header h3 { font-size: 1.1rem; font-weight: 700; }
+.today-date { margin-left: auto; font-size: 0.85rem; color: var(--primary-blue); font-weight: 600; }
+.card-body { padding: 25px; }
+
+/* Status Options */
+.status-options {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 12px; margin-bottom: 25px;
+}
+.status-card {
+    text-align: center; padding: 20px 10px;
+    border-radius: var(--radius-sm); border: 3px solid var(--light-gray);
+    cursor: pointer; transition: var(--transition);
+}
+.status-card:hover { transform: translateY(-3px); }
+.status-card.active { border-color: var(--primary-green); }
+.status-card .status-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.3rem; }
+.status-card.hadir .status-icon { background: #d1fae5; color: #059669; }
+.status-card.sakit .status-icon { background: #fee2e2; color: #dc2626; }
+.status-card.izin .status-icon { background: #fef3c7; color: #d97706; }
+.status-card.dispendinas .status-icon { background: #dbeafe; color: #2563eb; }
+.status-card.dispensekolah .status-icon { background: #e0e7ff; color: #4f46e5; }
+.status-card h4 { font-size: 0.85rem; font-weight: 700; }
+
+/* Form */
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; }
+.form-group label i { color: var(--primary-green); margin-right: 6px; }
+.required { color: #ef4444; }
+.form-group textarea, .form-group input {
+    width: 100%; padding: 12px 15px;
+    border: 2px solid var(--light-gray);
+    border-radius: var(--radius-sm);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.9rem;
+}
+.form-group textarea:focus, .form-group input:focus { outline: none; border-color: var(--primary-green); }
+
+/* History */
+.history-list { max-height: 400px; overflow-y: auto; }
+.history-item {
+    display: flex; align-items: center; gap: 15px;
+    padding: 15px; border-bottom: 1px solid var(--light-gray);
+}
+.history-icon {
+    width: 45px; height: 45px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+}
+.history-icon.hadir { background: #d1fae5; color: #059669; }
+.history-icon.sakit { background: #fee2e2; color: #dc2626; }
+.history-icon.izin { background: #fef3c7; color: #d97706; }
+.history-icon.dispensasi_dinas { background: #dbeafe; color: #2563eb; }
+.history-icon.dispensasi_sekolah { background: #e0e7ff; color: #4f46e5; }
+.history-info { flex: 1; }
+.history-info .date { font-weight: 600; font-size: 0.9rem; }
+.history-info .time { font-size: 0.8rem; color: var(--dark-gray); }
+.history-info .status-text { font-size: 0.85rem; }
+.history-link { color: var(--primary-blue); text-decoration: none; font-size: 0.8rem; }
+.history-link:hover { text-decoration: underline; }
+
+/* Kalender */
+.kalender-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; }
+.kalender-day-header {
+    text-align: center; font-weight: 700; padding: 10px;
+    background: var(--gradient-primary); color: white; border-radius: var(--radius-sm);
+}
+.kalender-day {
+    text-align: center; padding: 12px 8px;
+    border-radius: var(--radius-sm); cursor: pointer;
+    transition: var(--transition); font-size: 0.9rem; font-weight: 500;
+    border: 1px solid var(--light-gray); min-height: 50px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+}
+.kalender-day:hover { background: var(--off-white); }
+.kalender-day.empty { border: none; cursor: default; }
+.kalender-day.merah { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+.kalender-day.kuning { background: #fef3c7; color: #d97706; border-color: #fcd34d; }
+.kalender-day.hijau { background: #d1fae5; color: #059669; border-color: #6ee7b7; }
+.kalender-day.biru { background: #dbeafe; color: #2563eb; border-color: #93c5fd; }
+.kalender-day.today { border: 3px solid var(--primary-green); font-weight: 800; }
+.kalender-event { font-size: 0.65rem; opacity: 0.8; font-weight: 600; }
+.kalender-legend { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+.legend-color { width: 20px; height: 20px; border-radius: 5px; }
+.legend-color.merah { background: #fee2e2; border: 1px solid #fca5a5; }
+.legend-color.kuning { background: #fef3c7; border: 1px solid #fcd34d; }
+.legend-color.hijau { background: #d1fae5; border: 1px solid #6ee7b7; }
+.legend-color.biru { background: #dbeafe; border: 1px solid #93c5fd; }
+
+/* Jadwal */
+.jadwal-list { display: flex; flex-direction: column; gap: 12px; }
+.jadwal-item {
+    display: flex; align-items: center; gap: 15px;
+    padding: 20px; border-radius: var(--radius-sm);
+    border: 2px solid var(--light-gray); transition: var(--transition);
+}
+.jadwal-item:hover { border-color: var(--primary-green); }
+.jadwal-item.done { opacity: 0.6; background: var(--off-white); }
+.jadwal-item.done .jadwal-kelas { text-decoration: line-through; }
+.jadwal-time {
+    width: 100px; text-align: center; font-weight: 700;
+    color: var(--primary-green); font-size: 1rem; flex-shrink: 0;
+}
+.jadwal-info { flex: 1; }
+.jadwal-kelas { font-weight: 700; font-size: 1rem; }
+.jadwal-mapel { font-size: 0.85rem; color: var(--dark-gray); }
+.jadwal-check {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 3px solid var(--light-gray); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; transition: var(--transition); flex-shrink: 0;
+}
+.jadwal-check:hover { border-color: var(--primary-green); }
+.jadwal-check.checked { background: #10b981; border-color: #10b981; color: white; }
+
+/* Toast */
+.toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+    background: var(--white); padding: 16px 22px;
+    border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
+    display: flex; align-items: center; gap: 12px;
+    transform: translateX(120%); animation: toastIn 0.4s ease forwards;
+    border-left: 5px solid var(--primary-green); max-width: 400px;
+}
+@keyframes toastIn { to { transform: translateX(0); } }
+.toast.success { border-left-color: #10b981; }
+.toast.error { border-left-color: #ef4444; }
+.toast.warning { border-left-color: #f59e0b; }
+.toast i { font-size: 1.3rem; }
+.toast.success i { color: #10b981; }
+.toast.error i { color: #ef4444; }
+.toast-content { flex: 1; }
+.toast-title { font-weight: 700; font-size: 0.9rem; }
+.toast-message { font-size: 0.8rem; color: var(--dark-gray); }
+
+.empty-state { text-align: center; padding: 30px; color: var(--dark-gray); }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .status-options { grid-template-columns: repeat(3, 1fr); }
+    .topbar { padding: 15px; }
+    .content { padding: 15px; }
+    .kalender-grid { gap: 4px; }
+    .kalender-day { padding: 8px 4px; font-size: 0.75rem; min-height: 40px; }
+}
+@media (max-width: 480px) {
+    .status-options { grid-template-columns: repeat(2, 1fr); }
+    .tabs { overflow-x: auto; }
+    .tab { padding: 10px 16px; font-size: 0.8rem; white-space: nowrap; }
+    .topbar-right { gap: 8px; }
+    .datetime { display: none; }
+    .jadwal-time { width: 70px; font-size: 0.85rem; }
+}
