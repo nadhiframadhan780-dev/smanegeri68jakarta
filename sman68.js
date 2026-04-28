@@ -58,7 +58,8 @@ const linkUrls = {
     loginSiswa: './login-siswa-sman-68-jakarta.html',
     loginGuru: 'portal-guru.html',
     ppdb: './countdown-SPMB-2026-2027.html',
-    virsch: './virsch-68.html'
+    virsch: './virsch-68.html',
+    Penmurmut: './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html'
 };
 
 // ============================================
