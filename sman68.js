@@ -41,7 +41,8 @@ const ptnList = [
     { name: 'UPNVJ', fullName: 'UPN Veteran Jakarta', logo: 'https://www.upnvj.ac.id/id/files/large/89f8a80e388ced3704b091e21f510755' },
     { name: 'UNAND', fullName: 'Universitas Andalas', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Logo_Unand.svg/1280px-Logo_Unand.svg.png' },
     { name: 'UNHAS', fullName: 'Universitas Hasanuddin', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Logo-Resmi-Unhas-1.png' },
-    { name: 'UPNVYK', fullName: 'UPN Veteran Yogyakarta', logo: 'https://kompaspedia.kompas.id/wp-content/uploads/2020/08/logo_Universitas-Pembangunan-Nasional-Veteran-Yogyakarta.png' }
+    { name: 'UPNVYK', fullName: 'UPN Veteran Yogyakarta', logo: 'https://kompaspedia.kompas.id/wp-content/uploads/2020/08/logo_Universitas-Pembangunan-Nasional-Veteran-Yogyakarta.png' },
+    { name: 'PNJ', fullName: 'Politeknik Negeri Jakarta', logo: 'https://upload.wikimedia.org/wikipedia/id/1/16/Logo_Politeknik_Negeri_Jakarta.jpg' }
 ];
 
 const defaultAlumniData = {
