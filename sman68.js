@@ -222,7 +222,7 @@ function setupLinks() {
         'topLoginSiswa','topLoginGuru','topPPDB','topVirsch',
         'floatLoginSiswa','floatLoginGuru','floatPPDB','floatVirsch',
         'footerLoginSiswa','footerLoginGuru','footerPPDB','footerVirsch',
-        'topPenmurmut',
+        'topPenmurmut', 'floatPenmurmut'
     ];
     linkIds.forEach(id => {
         const el = document.getElementById(id);
