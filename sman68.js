@@ -43,7 +43,7 @@ const ptnList = [
     { name: 'UNHAS', fullName: 'Universitas Hasanuddin', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Logo-Resmi-Unhas-1.png' },
     { name: 'UPNVYK', fullName: 'UPN Veteran Yogyakarta', logo: 'https://kompaspedia.kompas.id/wp-content/uploads/2020/08/logo_Universitas-Pembangunan-Nasional-Veteran-Yogyakarta.png' },
     { name: 'PNJ', fullName: 'Politeknik Negeri Jakarta', logo: 'https://upload.wikimedia.org/wikipedia/id/1/16/Logo_Politeknik_Negeri_Jakarta.jpg' },
-    { name: 'MONASH', fullName: 'Monash University', logo: 'https://yeah-net.org/wp-content/uploads/2020/12/monash-university-logo-vector-free-download-11574248228l3ldprvtjm-copy.png' },
+    { name: 'MONASH', fullName: 'Monash University', logo: 'https://p7.hiclipart.com/preview/518/816/1021/monash-university-faculty-of-business-and-economics-logo-monash-university-malaysia-campus-others.jpg' },
     { name: 'UT', fullName: 'University of Toronto', logo: 'https://download.logo.wine/logo/University_of_Toronto/University_of_Toronto-Logo.wine.png' },
     { name: 'UWA', fullName: 'The University of Western Australia', logo: 'https://www.freelogovectors.net/wp-content/uploads/2021/04/university-of-western-australia-logo-freelogovectors.net_.png' }
 ];
