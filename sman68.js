@@ -42,12 +42,16 @@ const ptnList = [
     { name: 'UNAND', fullName: 'Universitas Andalas', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Logo_Unand.svg/1280px-Logo_Unand.svg.png' },
     { name: 'UNHAS', fullName: 'Universitas Hasanuddin', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Logo-Resmi-Unhas-1.png' },
     { name: 'UPNVYK', fullName: 'UPN Veteran Yogyakarta', logo: 'https://kompaspedia.kompas.id/wp-content/uploads/2020/08/logo_Universitas-Pembangunan-Nasional-Veteran-Yogyakarta.png' },
-    { name: 'PNJ', fullName: 'Politeknik Negeri Jakarta', logo: 'https://upload.wikimedia.org/wikipedia/id/1/16/Logo_Politeknik_Negeri_Jakarta.jpg' }
+    { name: 'PNJ', fullName: 'Politeknik Negeri Jakarta', logo: 'https://upload.wikimedia.org/wikipedia/id/1/16/Logo_Politeknik_Negeri_Jakarta.jpg' },
+    { name: 'MONASH', fullName: 'Monash University', logo: 'https://yeah-net.org/wp-content/uploads/2020/12/monash-university-logo-vector-free-download-11574248228l3ldprvtjm-copy.png' },
+    { name: 'UT', fullName: 'University of Toronto', logo: 'https://download.logo.wine/logo/University_of_Toronto/University_of_Toronto-Logo.wine.png' },
+    { name: 'UWA', fullName: 'The University of Western Australia', logo: 'https://www.freelogovectors.net/wp-content/uploads/2021/04/university-of-western-australia-logo-freelogovectors.net_.png' }
 ];
 
 const defaultAlumniData = {
     'UI': 2450, 'UGM': 1850, 'ITB': 1650, 'UNAIR': 1420, 'IPB': 1350,
-    'UNDIP': 1280, 'UNPAD': 1150, 'UB': 980, 'ITS': 890, 'UNJ': 750, 'UPNVJ': 520
+    'UNDIP': 1280, 'UNPAD': 1150, 'UB': 980, 'ITS': 890, 'UNJ': 750, 'UPNVJ': 520,
+    'MONASH': 1, 'UT': 2, 'UWA': 1
 };
 
 const linkUrls = {
