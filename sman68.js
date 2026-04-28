@@ -156,6 +156,10 @@ function initializeApp() {
     setupRealtimeListeners();
     populateYearSelect();
     checkChatStatus();
+
+    loadFloatingAnnouncement();
+    setupFloatingAnnouncement();
+    listenAnnouncementChanges();
 }
 
 // ============================================
@@ -831,5 +835,96 @@ document.getElementById('btnDownloadAPK')?.addEventListener('click', function(e)
     const apkUrl = 'https://nadhiframadhan780-dev.github.io/smanegeri68jakarta/SMAN 68 JAKARTA.apk'; // GANTI INI
     window.open(apkUrl, '_blank');
 });
+
+// ============================================
+// FLOATING ANNOUNCEMENT
+// ============================================
+async function loadFloatingAnnouncement() {
+    try {
+        const doc = await db.collection('settings').doc('announcement').get();
+        if (doc.exists) {
+            const data = doc.data();
+            
+            // Cek apakah announcement aktif
+            if (data.active === true) {
+                // Cek apakah ada durasi (endTime)
+                if (data.endTime) {
+                    const endTime = data.endTime.toDate();
+                    const now = new Date();
+                    
+                    if (now > endTime) {
+                        // Announcement sudah expired
+                        await db.collection('settings').doc('announcement').update({
+                            active: false,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        return;
+                    }
+                }
+                
+                showAnnouncement(data.text || '');
+            }
+        }
+    } catch (error) {
+        console.log('No announcement data');
+    }
+}
+
+function showAnnouncement(text) {
+    if (!text || text.trim() === '') return;
+    
+    const announcement = document.getElementById('floatingAnnouncement');
+    const textEl = document.getElementById('announcementText');
+    
+    if (announcement && textEl) {
+        textEl.textContent = text;
+        announcement.style.display = 'block';
+        
+        // Simpan ke sessionStorage agar tidak muncul lagi di sesi yang sama
+        sessionStorage.setItem('announcementShown', 'true');
+    }
+}
+
+function setupFloatingAnnouncement() {
+    const closeBtn = document.getElementById('announcementClose');
+    const announcement = document.getElementById('floatingAnnouncement');
+    
+    closeBtn?.addEventListener('click', () => {
+        if (announcement) {
+            announcement.classList.add('hide');
+            setTimeout(() => {
+                announcement.style.display = 'none';
+                announcement.classList.remove('hide');
+            }, 500);
+        }
+    });
+}
+
+// Real-time listener untuk perubahan announcement
+function listenAnnouncementChanges() {
+    db.collection('settings').doc('announcement').onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            
+            if (data.active === true) {
+                // Cek sudah ditampilkan di sesi ini?
+                const shown = sessionStorage.getItem('announcementShown');
+                if (!shown) {
+                    showAnnouncement(data.text || '');
+                }
+            } else {
+                // Sembunyikan announcement
+                const announcement = document.getElementById('floatingAnnouncement');
+                if (announcement) {
+                    announcement.classList.add('hide');
+                    setTimeout(() => {
+                        announcement.style.display = 'none';
+                        announcement.classList.remove('hide');
+                    }, 500);
+                }
+            }
+        }
+    });
+}
 
 console.log('✅ SMAN 68 Jakarta - Website Updated Successfully');
