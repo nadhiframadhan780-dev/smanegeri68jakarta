@@ -40,7 +40,8 @@ const ptnList = [
     { name: 'UPNVJ', fullName: 'UPN Veteran Jakarta' },
     { name: 'UNAND', fullName: 'Universitas Andalas' },
     { name: 'UNHAS', fullName: 'Universitas Hasanuddin' },
-    { name: 'UPNVYK', fullName: 'UPN Veteran Yogyakarta' }
+    { name: 'UPNVYK', fullName: 'UPN Veteran Yogyakarta' },
+    { name: 'PNJ', fullName: 'Politeknik Negeri Jakarta' }
 ];
 
 // ============================================
