@@ -51,7 +51,7 @@ const defaultAlumniData = {
 
 const linkUrls = {
     loginSiswa: './login-siswa-sman-68-jakarta.html',
-    loginGuru: '68-404.html',
+    loginGuru: 'portal-guru.html',
     ppdb: './countdown-SPMB-2026-2027.html',
     virsch: './virsch-68.html'
 };
