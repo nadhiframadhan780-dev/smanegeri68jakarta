@@ -924,6 +924,33 @@ function loadSettingsPage() {
                 <button type="button" id="deactivateMaintenanceBtn" class="btn-danger" style="width:100%;margin-top:10px;"><i class="fas fa-power-off"></i> Nonaktifkan Sekarang</button>
             </form>
         </div>
+
+<div class="form-container" style="margin-bottom:30px;">
+    <h3><i class="fas fa-bullhorn"></i> Floating Announcement</h3>
+    
+    <form id="announcementForm">
+        <div class="form-group">
+            <label><i class="fas fa-toggle-on"></i> Status</label>
+            <select id="announcementActive" class="form-input">
+                <option value="false">Nonaktif</option>
+                <option value="true">Aktif</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label><i class="fas fa-align-left"></i> Teks Pengumuman</label>
+            <textarea id="announcementText" class="form-input" rows="3" placeholder="Tulis pengumuman..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label><i class="fas fa-calendar-check"></i> Selesai (Auto Nonaktif)</label>
+            <input type="datetime-local" id="announcementEnd" class="form-input">
+        </div>
+        
+        <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Simpan</button>
+        <button type="button" id="deactivateAnnouncementBtn" class="btn-danger" style="width:100%;margin-top:10px;"><i class="fas fa-power-off"></i> Nonaktifkan Sekarang</button>
+    </form>
+</div>
     `;
     
     loadCurrentHours();
@@ -1146,5 +1173,67 @@ window.showReplyModal = showReplyModal;
 window.closeModal = closeModal;
 window.submitReply = submitReply;
 window.markNotificationRead = markNotificationRead;
+
+// Load announcement settings
+async function loadAnnouncementSettings() {
+    try {
+        const doc = await db.collection('settings').doc('announcement').get();
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('announcementActive').value = data.active ? 'true' : 'false';
+            document.getElementById('announcementText').value = data.text || '';
+            if (data.endTime) {
+                document.getElementById('announcementEnd').value = data.endTime.toDate().toISOString().slice(0, 16);
+            }
+        }
+    } catch (e) {}
+}
+
+// Save announcement
+document.getElementById('announcementForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const active = document.getElementById('announcementActive').value === 'true';
+    const text = document.getElementById('announcementText').value.trim();
+    const endTime = document.getElementById('announcementEnd').value;
+    
+    if (active && !text) { showToast('Error', 'Teks wajib diisi jika aktif!', 'error'); return; }
+    
+    try {
+        const data = {
+            active,
+            text: text || '',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        if (endTime) data.endTime = firebase.firestore.Timestamp.fromDate(new Date(endTime));
+        
+        await db.collection('settings').doc('announcement').set(data);
+        showToast('Berhasil!', 'Pengumuman disimpan.', 'success');
+        
+        // Auto deactivate
+        if (endTime) {
+            const delay = new Date(endTime).getTime() - new Date().getTime();
+            if (delay > 0) {
+                setTimeout(async () => {
+                    await db.collection('settings').doc('announcement').update({
+                        active: false, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }, delay);
+            }
+        }
+    } catch (error) { showToast('Gagal', 'Terjadi kesalahan.', 'error'); }
+});
+
+// Deactivate announcement
+document.getElementById('deactivateAnnouncementBtn').addEventListener('click', async () => {
+    if (!confirm('Nonaktifkan pengumuman sekarang?')) return;
+    try {
+        await db.collection('settings').doc('announcement').update({
+            active: false, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById('announcementActive').value = 'false';
+        showToast('Berhasil!', 'Pengumuman dinonaktifkan.', 'success');
+    } catch (error) { showToast('Gagal', 'Terjadi kesalahan.', 'error'); }
+});
 
 console.log('✅ Admin Panel SMAN 68 Jakarta - ALL FEATURES LOADED');
