@@ -1,48 +1,16 @@
 {
-  "headers": [
-    {
-      "source": "/(.*).css",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        }
-      ]
-    },
-    {
-      "source": "/(.*).js",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        }
-      ]
-    }
-  ],
   "rewrites": [
+    { "source": "/:file.css", "destination": "/68-404.html" },
+    { "source": "/:file.js", "destination": "/68-404.html" }
+  ],
+  "routes": [
     {
-      "source": "/sman68.css",
-      "destination": "/sman68.html"
+      "src": "/(.*).css",
+      "dest": "/68-404.html"
     },
     {
-      "source": "/sman68.js",
-      "destination": "/sman68.html"
-    },
-    {
-      "source": "/admin.css",
-      "destination": "/admin.html"
-    },
-    {
-      "source": "/admin.js",
-      "destination": "/admin.html"
-    },
-    {
-      "source": "/app-style.css",
-      "destination": "/app-home.html"
-    },
-    {
-      "source": "/app-script.js",
-      "destination": "/app-home.html"
+      "src": "/(.*).js",
+      "dest": "/68-404.html"
     }
   ]
 }
