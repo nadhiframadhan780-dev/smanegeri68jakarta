@@ -1,0 +1,48 @@
+{
+  "headers": [
+    {
+      "source": "/(.*).css",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/(.*).js",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/sman68.css",
+      "destination": "/sman68.html"
+    },
+    {
+      "source": "/sman68.js",
+      "destination": "/sman68.html"
+    },
+    {
+      "source": "/admin.css",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/admin.js",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/app-style.css",
+      "destination": "/app-home.html"
+    },
+    {
+      "source": "/app-script.js",
+      "destination": "/app-home.html"
+    }
+  ]
+}
