@@ -2883,3 +2883,114 @@ body {
         font-size: 0.85rem;
     }
 }
+
+/* ============================================
+   PEMERINGKATAN PTN SECTION
+   ============================================ */
+.pemeringkatan-section {
+    padding: 80px 0;
+    background: linear-gradient(135deg, rgba(0, 102, 51, 0.02) 0%, rgba(0, 136, 204, 0.02) 100%);
+}
+
+.pemeringkatan-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.pemeringkatan-card {
+    background: var(--white);
+    padding: 30px 25px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    border: 1px solid rgba(0, 102, 51, 0.1);
+}
+
+.pemeringkatan-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+.pemeringkatan-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 2rem;
+    color: white;
+}
+
+.pemeringkatan-icon.uniranks {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.pemeringkatan-icon.edurank {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.pemeringkatan-icon.qs {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.pemeringkatan-card h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 10px;
+}
+
+.pemeringkatan-card p {
+    font-size: 0.9rem;
+    color: var(--dark-gray);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.pemeringkatan-badge {
+    display: inline-block;
+    padding: 5px 15px;
+    background: var(--off-white);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.pemeringkatan-cta {
+    text-align: center;
+}
+
+.btn-pemeringkatan {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 35px;
+    background: var(--gradient-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 1.05rem;
+    transition: var(--transition);
+    box-shadow: 0 8px 25px rgba(0, 102, 51, 0.3);
+}
+
+.btn-pemeringkatan:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(0, 136, 204, 0.4);
+}
+
+@media (max-width: 768px) {
+    .pemeringkatan-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 0 auto 30px;
+    }
+}
