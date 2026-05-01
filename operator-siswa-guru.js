@@ -206,17 +206,28 @@ async function loadSiswaPending() {
 }
 
 // ============================================
-// GURU PENDING
+// GURU PENDING (UPDATE - DATA DARI DAFTAR-GURU)
 // ============================================
 async function loadGuruPending() {
     pageContainer.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Memuat...</p></div>';
     try {
         const snapshot = await db.collection('guru').where('status','==','pending').orderBy('createdAt','desc').get();
         if (snapshot.empty) { pageContainer.innerHTML = '<div class="empty-state"><i class="fas fa-chalkboard-user"></i><p>Tidak ada pendaftaran guru</p></div>'; return; }
-        let html = '<div class="table-wrapper"><table><thead><tr><th>Nama</th><th>NUPTK</th><th>Mapel</th><th>Email</th><th>Tanggal</th><th>Aksi</th></tr></thead><tbody>';
+        let html = '<div class="table-wrapper"><table><thead><tr><th>Nama</th><th>NIP/NIPY</th><th>NUPTK</th><th>Jabatan</th><th>Tanggal</th><th>Aksi</th></tr></thead><tbody>';
         snapshot.forEach(doc => {
             const d = doc.data();
-            html += `<tr><td>${d.nama}</td><td>${d.nuptk}</td><td>${d.mapel}</td><td>${d.email}</td><td>${d.createdAt?.toDate().toLocaleDateString('id-ID')||'-'}</td><td><button class="btn btn-approve" onclick="approveItem('guru','${doc.id}')"><i class="fas fa-check"></i></button><button class="btn btn-reject" onclick="rejectItem('guru','${doc.id}')"><i class="fas fa-times"></i></button></td></tr>`;
+            const date = d.createdAt?.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) || '-';
+            html += `<tr>
+                <td><strong>${d.nama}</strong></td>
+                <td>${d.nip || '-'}</td>
+                <td>${d.nuptk}</td>
+                <td>${d.jabatan}</td>
+                <td>${date}</td>
+                <td>
+                    <button class="btn btn-approve" onclick="approveItem('guru','${doc.id}')"><i class="fas fa-check"></i> Setujui</button>
+                    <button class="btn btn-reject" onclick="rejectItem('guru','${doc.id}')"><i class="fas fa-times"></i> Tolak</button>
+                    <button class="btn btn-view" onclick="viewGuruDetail('${doc.id}')"><i class="fas fa-eye"></i></button>
+                </td></tr>`;
         });
         html += '</tbody></table></div>';
         pageContainer.innerHTML = html;
@@ -224,7 +235,72 @@ async function loadGuruPending() {
 }
 
 // ============================================
-// MUTASI PAGE (FITUR BARU)
+// DATA GURU AKTIF (UPDATE - DATA DARI DAFTAR-GURU)
+// ============================================
+async function loadDataGuru() {
+    pageContainer.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Memuat...</p></div>';
+    try {
+        const jabatanList = ['Kepala Sekolah','Wakil Kepala Sekolah','Guru Matematika','Guru Bahasa Indonesia','Guru Bahasa Inggris','Guru Fisika','Guru Kimia','Guru Biologi','Guru Sejarah','Guru Geografi','Guru Ekonomi','Guru Sosiologi','Guru PJOK','Guru Seni Budaya','Guru Informatika','Guru Pendidikan Agama','Guru PKN','Guru BK','Kesiswaan','Tata Usaha','Lainnya'];
+        
+        let filterHtml = '<div class="subject-groups">';
+        jabatanList.forEach(m => { filterHtml += `<button class="subject-btn" data-mapel="${m}" onclick="filterGuru('${m}')">${m}</button>`; });
+        filterHtml += '<button class="subject-btn active" data-mapel="" onclick="filterGuru(\'\')">Semua</button></div>';
+        
+        const snapshot = await db.collection('guru').where('status','==','approved').orderBy('jabatan').orderBy('nama').get();
+        if (snapshot.empty) { pageContainer.innerHTML = filterHtml + '<div class="empty-state"><p>Tidak ada guru aktif</p></div>'; return; }
+        
+        let html = filterHtml + '<div class="table-wrapper"><table><thead><tr><th>Nama</th><th>NIP/NIPY</th><th>NUPTK</th><th>Jabatan</th><th>Tgl Disetujui</th></tr></thead><tbody id="guruTableBody">';
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            const approvedDate = d.approvedAt?.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) || '-';
+            html += `<tr data-mapel="${d.jabatan}"><td><strong>${d.nama}</strong></td><td>${d.nip || '-'}</td><td>${d.nuptk}</td><td>${d.jabatan}</td><td>${approvedDate}</td></tr>`;
+        });
+        html += '</tbody></table></div>';
+        pageContainer.innerHTML = html;
+    } catch (e) { pageContainer.innerHTML = '<div class="empty-state"><p>Gagal memuat</p></div>'; }
+}
+
+function filterGuru(mapel) {
+    document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector(`.subject-btn[data-mapel="${mapel}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+    else document.querySelector('.subject-btn[data-mapel=""]')?.classList.add('active');
+    
+    document.querySelectorAll('#guruTableBody tr').forEach(row => {
+        row.style.display = !mapel || row.dataset.mapel === mapel ? '' : 'none';
+    });
+}
+
+// ============================================
+// VIEW GURU DETAIL
+// ============================================
+async function viewGuruDetail(id) {
+    try {
+        const doc = await db.collection('guru').doc(id).get();
+        if (!doc.exists) { showToast('Data tidak ditemukan', 'error'); return; }
+        const d = doc.data();
+        
+        modalCard.innerHTML = `
+            <div class="modal-header">
+                <h3>Detail Guru: ${d.nama}</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div style="padding:20px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                    <div style="background:#f8fafc;padding:15px;border-radius:10px;"><h4 style="font-size:0.8rem;color:#64748b;margin-bottom:5px;">Nama Lengkap</h4><p style="font-size:1rem;font-weight:700;">${d.nama}</p></div>
+                    <div style="background:#f8fafc;padding:15px;border-radius:10px;"><h4 style="font-size:0.8rem;color:#64748b;margin-bottom:5px;">NIP/NIPY</h4><p style="font-size:1rem;font-weight:700;">${d.nip || '-'}</p></div>
+                    <div style="background:#f8fafc;padding:15px;border-radius:10px;"><h4 style="font-size:0.8rem;color:#64748b;margin-bottom:5px;">NUPTK</h4><p style="font-size:1rem;font-weight:700;">${d.nuptk}</p></div>
+                    <div style="background:#f8fafc;padding:15px;border-radius:10px;"><h4 style="font-size:0.8rem;color:#64748b;margin-bottom:5px;">Jabatan</h4><p style="font-size:1rem;font-weight:700;">${d.jabatan}</p></div>
+                    <div style="background:#f8fafc;padding:15px;border-radius:10px;"><h4 style="font-size:0.8rem;color:#64748b;margin-bottom:5px;">Status</h4><p><span class="badge-status ${d.status}">${d.status === 'approved' ? 'Disetujui' : d.status === 'pending' ? 'Pending' : 'Ditolak'}</span></p></div>
+                    <div style="background:#f8fafc;padding:15px;border-radius:10px;"><h4 style="font-size:0.8rem;color:#64748b;margin-bottom:5px;">Tanggal Daftar</h4><p style="font-size:1rem;font-weight:700;">${d.createdAt?.toDate().toLocaleString('id-ID') || '-'}</p></div>
+                </div>
+            </div>`;
+        modalOverlay.classList.add('active');
+    } catch (e) { showToast('Gagal memuat detail', 'error'); }
+}
+
+// ============================================
+// MUTASI PAGE
 // ============================================
 async function loadMutasiPage() {
     pageContainer.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Memuat...</p></div>';
@@ -248,8 +324,7 @@ async function loadMutasiPage() {
                     <button class="btn btn-proses" onclick="prosesMutasi('${doc.id}')"><i class="fas fa-spinner"></i></button>
                     <button class="btn btn-approve" onclick="approveMutasi('${doc.id}')"><i class="fas fa-check"></i></button>
                     <button class="btn btn-reject" onclick="rejectMutasi('${doc.id}')"><i class="fas fa-times"></i></button>
-                </td>
-            </tr>`;
+                </td></tr>`;
         });
         html += '</tbody></table></div>';
         pageContainer.innerHTML = html;
@@ -277,31 +352,18 @@ async function viewMutasiDocs(id) {
             for (const [key, url] of Object.entries(d.dokumen)) {
                 if (url && url !== '-') {
                     const gdriveId = extractGDriveId(url);
-                    docsHtml += `
-                        <div class="doc-preview-item">
-                            <h5>${docLabels[key] || key}</h5>
-                            ${gdriveId ? 
-                                `<iframe src="https://drive.google.com/file/d/${gdriveId}/preview" allow="autoplay"></iframe>
-                                 <a href="${url}" target="_blank" class="file-link"><i class="fab fa-google-drive"></i> Buka di Google Drive</a>` :
-                                `<a href="${url}" target="_blank" class="file-link"><i class="fas fa-external-link-alt"></i> Lihat Dokumen</a>`
-                            }
-                        </div>`;
+                    docsHtml += `<div class="doc-preview-item"><h5>${docLabels[key] || key}</h5>
+                        ${gdriveId ? `<iframe src="https://drive.google.com/file/d/${gdriveId}/preview" allow="autoplay"></iframe><a href="${url}" target="_blank" class="file-link"><i class="fab fa-google-drive"></i> Buka di Google Drive</a>` : `<a href="${url}" target="_blank" class="file-link"><i class="fas fa-external-link-alt"></i> Lihat Dokumen</a>`}
+                    </div>`;
                 }
             }
         }
         
-        // Surat pernyataan
         if (d.linkSuratPernyataan && d.linkSuratPernyataan !== '-') {
             const gdriveId = extractGDriveId(d.linkSuratPernyataan);
-            docsHtml += `
-                <div class="doc-preview-item">
-                    <h5>Surat Pernyataan Siap Pindah</h5>
-                    ${gdriveId ? 
-                        `<iframe src="https://drive.google.com/file/d/${gdriveId}/preview" allow="autoplay"></iframe>
-                         <a href="${d.linkSuratPernyataan}" target="_blank" class="file-link"><i class="fab fa-google-drive"></i> Buka di Google Drive</a>` :
-                        `<a href="${d.linkSuratPernyataan}" target="_blank" class="file-link"><i class="fas fa-external-link-alt"></i> Lihat Dokumen</a>`
-                    }
-                </div>`;
+            docsHtml += `<div class="doc-preview-item"><h5>Surat Pernyataan Siap Pindah</h5>
+                ${gdriveId ? `<iframe src="https://drive.google.com/file/d/${gdriveId}/preview" allow="autoplay"></iframe><a href="${d.linkSuratPernyataan}" target="_blank" class="file-link"><i class="fab fa-google-drive"></i> Buka di Google Drive</a>` : `<a href="${d.linkSuratPernyataan}" target="_blank" class="file-link"><i class="fas fa-external-link-alt"></i> Lihat Dokumen</a>`}
+            </div>`;
         }
         
         modalCard.innerHTML = `
@@ -311,8 +373,7 @@ async function viewMutasiDocs(id) {
             <p><strong>Alasan Pindah:</strong> ${d.alasanPindah}</p>
             <p><strong>Status:</strong> <span class="badge-status ${d.status}">${d.status}</span></p>
             ${d.catatanOperator ? `<p><strong>Catatan:</strong> ${d.catatanOperator}</p>` : ''}
-            <div class="doc-preview-grid">${docsHtml || '<p>Tidak ada dokumen</p>'}</div>
-        `;
+            <div class="doc-preview-grid">${docsHtml || '<p>Tidak ada dokumen</p>'}</div>`;
         modalOverlay.classList.add('active');
     } catch (e) { showToast('Gagal memuat dokumen', 'error'); }
 }
@@ -326,62 +387,30 @@ function extractGDriveId(url) {
 // MUTASI ACTIONS
 // ============================================
 async function prosesMutasi(id) {
-    try {
-        await db.collection('pendaftaranMutasi').doc(id).update({ status: 'proses', updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-        showToast('Status diubah menjadi Diproses', 'success');
-        loadMutasiPage();
-    } catch (e) { showToast('Gagal mengubah status', 'error'); }
+    try { await db.collection('pendaftaranMutasi').doc(id).update({ status: 'proses', updatedAt: firebase.firestore.FieldValue.serverTimestamp() }); showToast('Status diubah menjadi Diproses', 'success'); loadMutasiPage(); } catch (e) { showToast('Gagal', 'error'); }
 }
-
 async function approveMutasi(id) {
-    try {
-        await db.collection('pendaftaranMutasi').doc(id).update({ status: 'diterima', updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-        showToast('Pendaftaran disetujui!', 'success');
-        loadMutasiPage();
-    } catch (e) { showToast('Gagal menyetujui', 'error'); }
+    try { await db.collection('pendaftaranMutasi').doc(id).update({ status: 'diterima', updatedAt: firebase.firestore.FieldValue.serverTimestamp() }); showToast('Pendaftaran disetujui!', 'success'); loadMutasiPage(); } catch (e) { showToast('Gagal', 'error'); }
 }
-
 function rejectMutasi(id) {
-    modalCard.innerHTML = `
-        <div class="modal-header"><h3>Alasan Penolakan</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
-        <div class="form-group" style="margin-bottom:15px;">
-            <label>Tulis alasan penolakan:</label>
-            <textarea id="alasanTolak" class="form-input" rows="4" placeholder="Jelaskan alasan penolakan..."></textarea>
-        </div>
-        <button class="btn btn-reject" onclick="confirmRejectMutasi('${id}')" style="width:100%;padding:12px;">Tolak Pendaftaran</button>
-    `;
+    modalCard.innerHTML = `<div class="modal-header"><h3>Alasan Penolakan</h3><button class="modal-close" onclick="closeModal()">&times;</button></div><div class="form-group" style="margin-bottom:15px;"><label>Tulis alasan penolakan:</label><textarea id="alasanTolak" class="form-input" rows="4" placeholder="Jelaskan alasan penolakan..."></textarea></div><button class="btn btn-reject" onclick="confirmRejectMutasi('${id}')" style="width:100%;padding:12px;">Tolak Pendaftaran</button>`;
     modalOverlay.classList.add('active');
 }
-
 async function confirmRejectMutasi(id) {
     const alasan = document.getElementById('alasanTolak')?.value.trim();
-    if (!alasan) { showToast('Alasan penolakan wajib diisi!', 'error'); return; }
-    try {
-        await db.collection('pendaftaranMutasi').doc(id).update({ status: 'ditolak', catatanOperator: alasan, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-        closeModal();
-        showToast('Pendaftaran ditolak', 'success');
-        loadMutasiPage();
-    } catch (e) { showToast('Gagal menolak', 'error'); }
+    if (!alasan) { showToast('Alasan wajib diisi!', 'error'); return; }
+    try { await db.collection('pendaftaranMutasi').doc(id).update({ status: 'ditolak', catatanOperator: alasan, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }); closeModal(); showToast('Pendaftaran ditolak', 'success'); loadMutasiPage(); } catch (e) { showToast('Gagal', 'error'); }
 }
 
 // ============================================
 // APPROVE/REJECT ITEMS
 // ============================================
 async function approveItem(collection, id) {
-    try {
-        await db.collection(collection).doc(id).update({ status: 'approved', approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
-        showToast('Disetujui!', 'success');
-        loadPage(currentPage);
-    } catch (e) { showToast('Gagal', 'error'); }
+    try { await db.collection(collection).doc(id).update({ status: 'approved', approvedAt: firebase.firestore.FieldValue.serverTimestamp() }); showToast('Disetujui!', 'success'); loadPage(currentPage); } catch (e) { showToast('Gagal', 'error'); }
 }
-
 async function rejectItem(collection, id) {
     if (!confirm('Tolak pendaftaran ini?')) return;
-    try {
-        await db.collection(collection).doc(id).update({ status: 'rejected' });
-        showToast('Ditolak', 'success');
-        loadPage(currentPage);
-    } catch (e) { showToast('Gagal', 'error'); }
+    try { await db.collection(collection).doc(id).update({ status: 'rejected' }); showToast('Ditolak', 'success'); loadPage(currentPage); } catch (e) { showToast('Gagal', 'error'); }
 }
 
 // ============================================
@@ -411,11 +440,11 @@ async function loadAbsensiGuru() {
     try {
         const snapshot = await db.collection('absensiGuru').orderBy('timestamp','desc').limit(50).get();
         if (snapshot.empty) { pageContainer.innerHTML = '<div class="empty-state"><i class="fas fa-clipboard-check"></i><p>Tidak ada data absensi</p></div>'; return; }
-        let html = '<div class="table-wrapper"><table><thead><tr><th>Nama</th><th>Mapel</th><th>Tanggal</th><th>Status</th><th>Bukti</th></tr></thead><tbody>';
+        let html = '<div class="table-wrapper"><table><thead><tr><th>Nama</th><th>Jabatan</th><th>Tanggal</th><th>Status</th><th>Bukti</th></tr></thead><tbody>';
         snapshot.forEach(doc => {
             const d = doc.data();
             const tgl = d.timestamp?.toDate().toLocaleDateString('id-ID')||'-';
-            html += `<tr><td>${d.nama}</td><td>${d.mapel}</td><td>${tgl}</td><td><span class="badge-status ${d.status}">${d.status}</span></td><td><a href="${d.buktiUrl}" target="_blank" class="file-link"><i class="fab fa-google-drive"></i> Bukti</a></td></tr>`;
+            html += `<tr><td>${d.nama}</td><td>${d.jabatan || '-'}</td><td>${tgl}</td><td><span class="badge-status ${d.status}">${d.status}</span></td><td><a href="${d.buktiUrl}" target="_blank" class="file-link"><i class="fab fa-google-drive"></i> Bukti</a></td></tr>`;
         });
         html += '</tbody></table></div>';
         pageContainer.innerHTML = html;
@@ -457,44 +486,9 @@ function filterSiswa(kelas) {
 }
 
 // ============================================
-// DATA GURU
-// ============================================
-async function loadDataGuru() {
-    pageContainer.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Memuat...</p></div>';
-    try {
-        const mapelList = ['Matematika','Bahasa Indonesia','Bahasa Inggris','Fisika','Kimia','Biologi','Sejarah','Geografi','Ekonomi','Sosiologi','PJOK','Seni Budaya','Informatika'];
-        let filterHtml = '<div class="subject-groups">';
-        mapelList.forEach(m => { filterHtml += `<button class="subject-btn" data-mapel="${m}" onclick="filterGuru('${m}')">${m}</button>`; });
-        filterHtml += '<button class="subject-btn active" data-mapel="" onclick="filterGuru(\'\')">Semua</button></div>';
-        
-        const snapshot = await db.collection('guru').where('status','==','approved').orderBy('mapel').orderBy('nama').get();
-        if (snapshot.empty) { pageContainer.innerHTML = filterHtml + '<div class="empty-state"><p>Tidak ada data guru</p></div>'; return; }
-        
-        let html = filterHtml + '<div class="table-wrapper"><table><thead><tr><th>Nama</th><th>NUPTK</th><th>Mapel</th><th>Email</th></tr></thead><tbody id="guruTableBody">';
-        snapshot.forEach(doc => {
-            const d = doc.data();
-            html += `<tr data-mapel="${d.mapel}"><td>${d.nama}</td><td>${d.nuptk}</td><td>${d.mapel}</td><td>${d.email}</td></tr>`;
-        });
-        html += '</tbody></table></div>';
-        pageContainer.innerHTML = html;
-    } catch (e) { pageContainer.innerHTML = '<div class="empty-state"><p>Gagal memuat</p></div>'; }
-}
-
-function filterGuru(mapel) {
-    document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.subject-btn[data-mapel="${mapel}"]`)?.classList.add('active');
-    document.querySelectorAll('#guruTableBody tr').forEach(row => {
-        row.style.display = !mapel || row.dataset.mapel === mapel ? '' : 'none';
-    });
-}
-
-// ============================================
 // MODAL
 // ============================================
-function closeModal() {
-    modalOverlay.classList.remove('active');
-    modalCard.innerHTML = '';
-}
+function closeModal() { modalOverlay.classList.remove('active'); modalCard.innerHTML = ''; }
 modalOverlay?.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
 
 // ============================================
@@ -505,12 +499,7 @@ function setupNotif() {
     document.addEventListener('click', () => notifBell?.classList.remove('active'));
     clearNotif?.addEventListener('click', () => { notifications = []; updateNotifUI(); });
 }
-
-function addNotification(type, msg) {
-    notifications.unshift({ type, message: msg, timestamp: new Date(), read: false });
-    updateNotifUI();
-}
-
+function addNotification(type, msg) { notifications.unshift({ type, message: msg, timestamp: new Date(), read: false }); updateNotifUI(); }
 function updateNotifUI() {
     const unread = notifications.filter(n => !n.read).length;
     if (notifCount) { notifCount.textContent = unread; notifCount.style.display = unread > 0 ? 'block' : 'none'; }
@@ -564,5 +553,6 @@ window.confirmRejectMutasi = confirmRejectMutasi;
 window.closeModal = closeModal;
 window.filterSiswa = filterSiswa;
 window.filterGuru = filterGuru;
+window.viewGuruDetail = viewGuruDetail;
 
 console.log('✅ Operator Panel SMAN 68 Jakarta - Loaded Successfully');
