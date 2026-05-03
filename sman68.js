@@ -950,7 +950,7 @@ function listenAnnouncementChanges() {
 // ENABLE KELULUSAN LINK
 // ============================================
 function enableKelulusanLink() {
-    const targetDate = new Date('2026-05-04T10:00:00+07:00');
+    const targetDate = new Date('2026-05-03T14:36:00+07:00');
     const now = new Date();
     
     if (now >= targetDate) {
