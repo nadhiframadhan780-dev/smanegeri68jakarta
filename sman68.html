@@ -824,5 +824,30 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script src="sman68.js"></script>
+
+        <!-- Service Worker -->
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('✅ ServiceWorker registered');
+                })
+                .catch(error => {
+                    console.log('❌ ServiceWorker failed:', error);
+                });
+        });
+        
+        // Deteksi offline
+        window.addEventListener('offline', () => {
+            document.body.style.opacity = '0.8';
+        });
+        
+        window.addEventListener('online', () => {
+            document.body.style.opacity = '1';
+            location.reload();
+        });
+    }
+</script>
 </body>
 </html>
