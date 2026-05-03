@@ -60,7 +60,8 @@ const linkUrls = {
     ppdb: './countdown-SPMB-2026-2027.html',
     virsch: './virsch-68.html',
     penmurmut: './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html',
-    pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html'
+    pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
+    kelulusan: './pengumuman-kelulusan-kelas-12-angkatan-26-sman-68-jakarta.html'
 };
 
 // ============================================
@@ -225,7 +226,9 @@ function setupLinks() {
         'footerLoginSiswa','footerLoginGuru','footerPPDB','footerVirsch',
         'topPenmurmut', 'floatPenmurmut',
         'topPemeringkatan','floatPemeringkatan','footerPemeringkatan',
-        'btnPemeringkatan'
+        'btnPemeringkatan',
+        'topKelulusan','floatKelulusan','footerKelulusan',
+        'navKelulusan'
     ];
     linkIds.forEach(id => {
         const el = document.getElementById(id);
@@ -238,6 +241,7 @@ function setupLinks() {
                 else if (id.includes('Virsch') || id.includes('virsch')) window.open(linkUrls.virsch, '_blank');
                 else if (id.includes('Penmurmut') || id.includes('penmurmut')) window.open(linkUrls.penmurmut, '_blank');
                 else if (id.includes('Pemeringkatan') || id.includes('pemeringkatan')) window.open(linkUrls.pemeringkatan, '_blank');
+                else if (id.includes('Kelulusan') || id.includes('kelulusan')) window.open(linkUrls.kelulusan, '_blank');
             });
         }
     });
