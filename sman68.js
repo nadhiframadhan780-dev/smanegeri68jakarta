@@ -950,14 +950,14 @@ function listenAnnouncementChanges() {
 // ENABLE KELULUSAN LINK
 // ============================================
 function enableKelulusanLink() {
-    const targetDate = new Date('2026-05-04T09:05:00+07:00');
+    const targetDate = new Date('2026-05-15T15:00:00+07:00');
     const now = new Date();
     
     if (now >= targetDate) {
         const kelulusanLink = document.getElementById('navKelulusan');
         if (kelulusanLink) {
             kelulusanLink.classList.remove('nav-disabled');
-            kelulusanLink.innerHTML = 'Pengumuman Kelulusan Kelas XII';
+            kelulusanLink.innerHTML = 'Top Jurusan Kuliah Terbaik 2026';
             kelulusanLink.style.pointerEvents = 'auto';
             kelulusanLink.style.opacity = '1';
             kelulusanLink.style.cursor = 'pointer';
