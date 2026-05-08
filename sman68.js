@@ -61,7 +61,7 @@ const linkUrls = {
     virsch: './virsch-68.html',
     penmurmut: './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html',
     pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
-    kelulusan: './pengumuman-kelulusan-kelas-12-angkatan-26-sman-68-jakarta.html'
+    kelulusan: './jurusan-kuliah-terbaik-2026.html'
 };
 
 // ============================================
