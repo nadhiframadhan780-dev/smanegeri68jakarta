@@ -55,7 +55,7 @@ const defaultAlumniData = {
 };
 
 const linkUrls = {
-    loginSiswa: './68-404.html',
+    loginSiswa: './portal-siswa-68.html',
     loginGuru: 'portal-guru.html',
     ppdb: './countdown-SPMB-2026-2027.html',
     virsch: './virsch-68.html',
