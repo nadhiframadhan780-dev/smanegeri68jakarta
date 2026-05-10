@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Daftar Akun - SMAN 68 Jakarta</title>
+    <title>Daftar Akun Siswa - SMAN 68 Jakarta</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -20,12 +23,12 @@
             --gradient: linear-gradient(135deg, #006633 0%, #0088cc 100%);
             --white: #ffffff;
             --bg: #f1f5f9;
-            --card: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.98);
             --text: #1e293b;
             --text-light: #64748b;
             --border: #e2e8f0;
-            --shadow: 0 2px 10px rgba(0,0,0,0.06);
-            --shadow-lg: 0 20px 60px rgba(0,0,0,0.15);
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-lg: 0 25px 80px rgba(0,0,0,0.2);
             --radius-sm: 12px;
             --radius: 20px;
             --radius-full: 50px;
@@ -40,7 +43,6 @@
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #0a1628;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -50,42 +52,34 @@
             overflow-x: hidden;
         }
 
-        /* Background dengan overlay */
-        .bg-container {
+        /* Background JERNIH */
+        .bg-image {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0;
-        }
-
-        .bg-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             background: url('https://media.indozone.id/crop/0x0:0x0/images/2026/01/14/1768352620_6966eb6c54bf6_maxresdefault.jpg') center/cover no-repeat;
-            filter: brightness(0.25) saturate(0.8);
+            z-index: -1;
         }
 
         .bg-overlay {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(180deg, rgba(0,102,51,0.3) 0%, rgba(0,0,0,0.7) 100%);
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
         }
 
-        /* Container utama */
+        /* Container Utama */
         .register-wrapper {
+            width: 100%;
+            max-width: 540px;
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             z-index: 1;
-            width: 100%;
-            max-width: 520px;
-            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes fadeInUp {
@@ -99,10 +93,10 @@
             }
         }
 
-        /* Logo di tengah atas */
+        /* Logo di Tengah Atas */
         .logo-container {
             text-align: center;
-            margin-bottom: -30px;
+            margin-bottom: -25px;
             position: relative;
             z-index: 2;
         }
@@ -114,25 +108,25 @@
 
         .logo-ring {
             position: absolute;
-            inset: -15px;
+            inset: -12px;
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
             animation: ringRotate 10s linear infinite;
         }
 
         .logo-ring:nth-child(2) {
-            inset: -28px;
+            inset: -24px;
             border-style: dashed;
             animation-duration: 15s;
             animation-direction: reverse;
-            border-color: rgba(0, 136, 204, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
         .logo-ring:nth-child(3) {
-            inset: -40px;
+            inset: -36px;
             border-style: dotted;
             animation-duration: 20s;
-            border-color: rgba(0, 102, 51, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         @keyframes ringRotate {
@@ -148,23 +142,20 @@
             padding: 8px;
             position: relative;
             z-index: 1;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             transition: var(--transition);
         }
 
-        .logo-img:hover {
-            transform: scale(1.05);
-        }
-
-        /* Card form */
+        /* Card Form */
         .register-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
             border-radius: var(--radius);
             padding: 40px 35px;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255,255,255,0.3);
             position: relative;
+            overflow: hidden;
         }
 
         .register-card::before {
@@ -180,82 +171,84 @@
 
         .register-header {
             text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .register-header h2 {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--text);
-            margin-bottom: 5px;
-            letter-spacing: -0.5px;
-        }
-
-        .register-header p {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            font-weight: 500;
+            margin-bottom: 25px;
         }
 
         .badge-sekolah {
             display: inline-block;
             background: var(--gradient);
             color: white;
-            padding: 6px 16px;
+            padding: 6px 18px;
             border-radius: var(--radius-full);
             font-size: 0.75rem;
             font-weight: 700;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
+            margin-bottom: 12px;
+            letter-spacing: 1.5px;
         }
 
-        /* Progress bar */
+        .register-header h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 4px;
+            letter-spacing: -0.3px;
+        }
+
+        .register-header p {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Progress Bar */
         .progress-container {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
             position: relative;
+            padding: 0 10px;
         }
 
         .progress-line {
             position: absolute;
-            top: 15px;
-            left: 30px;
-            right: 30px;
+            top: 16px;
+            left: 40px;
+            right: 40px;
             height: 3px;
-            background: var(--border);
-            z-index: 1;
-            transition: var(--transition);
+            background: #e5e7eb;
+            z-index: 0;
+            border-radius: 3px;
         }
 
         .progress-line-fill {
             height: 100%;
             background: var(--gradient);
             border-radius: 3px;
-            transition: width 0.4s ease;
+            transition: width 0.5s ease;
             width: 0%;
         }
 
         .progress-step {
             position: relative;
-            z-index: 2;
+            z-index: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .step-circle {
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             background: white;
-            border: 3px solid var(--border);
+            border: 3px solid #d1d5db;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             font-size: 0.8rem;
+            color: #9ca3af;
             transition: var(--transition);
         }
 
@@ -263,7 +256,7 @@
             background: var(--gradient);
             border-color: transparent;
             color: white;
-            box-shadow: 0 5px 20px rgba(0, 102, 51, 0.3);
+            box-shadow: 0 4px 15px rgba(0,102,51,0.4);
         }
 
         .step-circle.done {
@@ -275,8 +268,10 @@
         .step-label {
             font-size: 0.7rem;
             font-weight: 600;
-            color: var(--text-light);
+            color: #9ca3af;
             text-align: center;
+            white-space: nowrap;
+            transition: var(--transition);
         }
 
         .step-label.active {
@@ -284,7 +279,7 @@
             font-weight: 700;
         }
 
-        /* Form steps */
+        /* Form Steps */
         .form-step {
             display: none;
             animation: fadeSlide 0.4s ease;
@@ -297,7 +292,7 @@
         @keyframes fadeSlide {
             from {
                 opacity: 0;
-                transform: translateX(20px);
+                transform: translateX(15px);
             }
             to {
                 opacity: 1;
@@ -306,19 +301,20 @@
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .form-group label {
             display: block;
             font-weight: 600;
             margin-bottom: 6px;
-            font-size: 0.85rem;
+            font-size: 0.83rem;
             color: var(--text);
         }
 
         .form-group label .required {
             color: #ef4444;
+            margin-left: 2px;
         }
 
         .input-wrapper {
@@ -330,21 +326,33 @@
             left: 14px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-light);
+            color: #9ca3af;
             font-size: 0.9rem;
             transition: var(--transition);
+            pointer-events: none;
+            z-index: 1;
         }
 
         .input-wrapper input,
         .input-wrapper select {
             width: 100%;
-            padding: 14px 14px 14px 42px;
-            border: 2px solid var(--border);
+            padding: 13px 14px 13px 40px;
+            border: 2px solid #e5e7eb;
             border-radius: var(--radius-sm);
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             transition: var(--transition);
-            background: #fafafa;
+            background: #fafbfc;
+            color: var(--text);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .input-wrapper select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 35px;
         }
 
         .input-wrapper input:focus,
@@ -352,30 +360,30 @@
             outline: none;
             border-color: var(--primary);
             background: white;
-            box-shadow: 0 0 0 4px rgba(0, 102, 51, 0.05);
+            box-shadow: 0 0 0 4px rgba(0,102,51,0.06);
         }
 
-        .input-wrapper input:focus + i,
-        .input-wrapper input:focus ~ i {
+        .input-wrapper input:focus ~ i,
+        .input-wrapper select:focus ~ i {
             color: var(--primary);
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 14px;
         }
 
         /* Buttons */
         .btn-container {
             display: flex;
             gap: 12px;
-            margin-top: 25px;
+            margin-top: 24px;
         }
 
         .btn {
             flex: 1;
-            padding: 14px 24px;
+            padding: 14px 20px;
             border: none;
             border-radius: var(--radius-sm);
             font-weight: 700;
@@ -390,38 +398,37 @@
         }
 
         .btn-back {
-            background: #f1f5f9;
+            background: #f3f4f6;
             color: var(--text);
-            border: 2px solid var(--border);
+            border: 2px solid #e5e7eb;
         }
 
         .btn-back:hover {
-            background: #e2e8f0;
+            background: #e5e7eb;
         }
 
         .btn-next {
             background: var(--gradient);
             color: white;
-            box-shadow: 0 8px 25px rgba(0, 102, 51, 0.3);
+            box-shadow: 0 6px 20px rgba(0,102,51,0.25);
         }
 
         .btn-next:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(0, 102, 51, 0.4);
+            box-shadow: 0 10px 30px rgba(0,102,51,0.35);
         }
 
         .btn-submit {
             background: var(--gradient);
             color: white;
-            width: 100%;
-            box-shadow: 0 8px 25px rgba(0, 102, 51, 0.3);
-            font-size: 1rem;
-            letter-spacing: 1px;
+            box-shadow: 0 6px 20px rgba(0,102,51,0.25);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
         }
 
         .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(0, 102, 51, 0.4);
+            box-shadow: 0 10px 30px rgba(0,102,51,0.35);
         }
 
         .btn-submit:disabled {
@@ -430,55 +437,67 @@
             transform: none;
         }
 
-        /* Toast custom */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        /* Ringkasan Data */
+        .ringkasan-box {
+            background: #f9fafb;
+            padding: 18px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 14px;
+            border: 1px solid #e5e7eb;
         }
 
-        .toast {
-            background: white;
-            padding: 16px 22px;
-            border-radius: var(--radius-sm);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+        .ringkasan-box h4 {
+            margin-bottom: 12px;
+            color: var(--primary);
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 12px;
-            transform: translateX(120%);
-            animation: toastIn 0.4s ease forwards;
-            border-left: 5px solid var(--primary);
-            max-width: 400px;
-            pointer-events: auto;
+            gap: 8px;
         }
 
-        @keyframes toastIn {
-            to { transform: translateX(0); }
+        .ringkasan-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #e5e7eb;
+            font-size: 0.82rem;
         }
 
-        .toast.success { border-left-color: #10b981; }
-        .toast.error { border-left-color: #ef4444; }
-        .toast.warning { border-left-color: #f59e0b; }
+        .ringkasan-item:last-child {
+            border-bottom: none;
+        }
 
-        .toast i { font-size: 1.3rem; }
-        .toast.success i { color: #10b981; }
-        .toast.error i { color: #ef4444; }
-        .toast.warning i { color: #f59e0b; }
+        .ringkasan-item .label {
+            color: var(--text-light);
+            font-weight: 500;
+        }
 
-        .toast-content { flex: 1; }
-        .toast-title { font-weight: 700; font-size: 0.9rem; }
-        .toast-message { font-size: 0.8rem; color: var(--text-light); }
+        .ringkasan-item .value {
+            font-weight: 600;
+            color: var(--text);
+            text-align: right;
+        }
 
-        /* Footer link */
+        .catatan-box {
+            background: #fffbeb;
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid #fde68a;
+            font-size: 0.78rem;
+            color: #92400e;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.6;
+        }
+
+        /* Footer */
         .register-footer {
             text-align: center;
-            margin-top: 25px;
+            margin-top: 20px;
             color: white;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
         }
 
         .register-footer a {
@@ -493,18 +512,70 @@
             opacity: 0.9;
         }
 
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 380px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: white;
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(120%);
+            animation: toastIn 0.4s ease forwards;
+            border-left: 5px solid var(--primary);
+            pointer-events: auto;
+        }
+
+        @keyframes toastIn {
+            to { transform: translateX(0); }
+        }
+
+        .toast.success { border-left-color: #10b981; }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.warning { border-left-color: #f59e0b; }
+
+        .toast i { font-size: 1.3rem; flex-shrink: 0; }
+        .toast.success i { color: #10b981; }
+        .toast.error i { color: #ef4444; }
+        .toast.warning i { color: #f59e0b; }
+
+        .toast-content { flex: 1; }
+        .toast-title { font-weight: 700; font-size: 0.85rem; }
+        .toast-message { font-size: 0.78rem; color: var(--text-light); }
+
         /* Responsive */
-        @media (max-width: 600px) {
+        @media (max-width: 640px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+                padding-top: 20px;
+            }
+
             .register-card {
                 padding: 30px 20px;
+                border-radius: var(--radius-sm);
             }
 
             .form-row {
                 grid-template-columns: 1fr;
+                gap: 0;
             }
 
             .register-header h2 {
-                font-size: 1.5rem;
+                font-size: 1.4rem;
             }
 
             .logo-img {
@@ -512,8 +583,23 @@
                 height: 70px;
             }
 
+            .logo-container {
+                margin-bottom: -20px;
+            }
+
+            .logo-ring {
+                inset: -10px;
+            }
+            .logo-ring:nth-child(2) {
+                inset: -20px;
+            }
+            .logo-ring:nth-child(3) {
+                inset: -30px;
+            }
+
             .btn-container {
                 flex-direction: column;
+                gap: 8px;
             }
 
             .btn-back {
@@ -523,20 +609,74 @@
             .btn-next {
                 order: 1;
             }
+
+            .btn {
+                padding: 12px 20px;
+                font-size: 0.85rem;
+            }
+
+            .progress-line {
+                left: 30px;
+                right: 30px;
+            }
+
+            .step-label {
+                font-size: 0.65rem;
+            }
+
+            .step-circle {
+                width: 30px;
+                height: 30px;
+                font-size: 0.7rem;
+            }
+
+            .toast-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+
+            .toast {
+                padding: 12px 14px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .register-card {
+                padding: 25px 15px;
+            }
+
+            .progress-container {
+                padding: 0 5px;
+            }
+
+            .step-label {
+                font-size: 0.6rem;
+            }
+
+            .input-wrapper input,
+            .input-wrapper select {
+                font-size: 0.8rem;
+                padding: 11px 11px 11px 36px;
+            }
+
+            .form-group label {
+                font-size: 0.78rem;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Background -->
-    <div class="bg-container">
-        <div class="bg-image"></div>
-        <div class="bg-overlay"></div>
-    </div>
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
 
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Register Wrapper -->
+    <!-- Wrapper -->
     <div class="register-wrapper">
         <!-- Logo -->
         <div class="logo-container">
@@ -590,17 +730,17 @@
                         <label>NISN <span class="required">*</span></label>
                         <div class="input-wrapper">
                             <i class="fas fa-id-card"></i>
-                            <input type="text" id="nisn" placeholder="Nomor Induk Siswa Nasional" maxlength="10" required>
+                            <input type="text" id="nisn" placeholder="10 digit NISN" maxlength="10" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tempat Lahir <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" id="tempatLahir" placeholder="Kota kelahiran" required>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>Tempat Lahir <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <input type="text" id="tempatLahir" placeholder="Kota kelahiran" required>
-                            </div>
-                        </div>
                         <div class="form-group">
                             <label>Tanggal Lahir <span class="required">*</span></label>
                             <div class="input-wrapper">
@@ -608,21 +748,21 @@
                                 <input type="date" id="tanggalLahir" required>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Jenis Kelamin <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-venus-mars"></i>
-                            <select id="jenisKelamin" required>
-                                <option value="">Pilih jenis kelamin</option>
-                                <option value="L">Laki-laki</option>
-                                <option value="P">Perempuan</option>
-                            </select>
+                        <div class="form-group">
+                            <label>Jenis Kelamin <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-venus-mars"></i>
+                                <select id="jenisKelamin" required>
+                                    <option value="">Pilih</option>
+                                    <option value="L">Laki-laki</option>
+                                    <option value="P">Perempuan</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 2: Data Akun -->
+                <!-- Step 2: Data Akun & Sekolah -->
                 <div class="form-step" id="step2">
                     <div class="form-group">
                         <label>NIS (Nomor Induk Sekolah) <span class="required">*</span></label>
@@ -631,27 +771,36 @@
                             <input type="text" id="nis" placeholder="NIS untuk login" required>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Kelas <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-graduation-cap"></i>
-                            <select id="kelas" required>
-                                <option value="">Pilih kelas</option>
-                                <option value="X">X</option>
-                                <option value="XI">XI</option>
-                                <option value="XII">XII</option>
-                            </select>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Kelas <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-graduation-cap"></i>
+                                <select id="kelas" required>
+                                    <option value="">Pilih kelas</option>
+                                    <option value="X">X</option>
+                                    <option value="XI">XI</option>
+                                    <option value="XII">XII</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Jurusan <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-book"></i>
+                                <select id="jurusan" required>
+                                    <option value="">Pilih jurusan</option>
+                                    <option value="IPA">IPA</option>
+                                    <option value="IPS">IPS</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Jurusan <span class="required">*</span></label>
+                        <label>Tanggal Masuk <span class="required">*</span></label>
                         <div class="input-wrapper">
-                            <i class="fas fa-book"></i>
-                            <select id="jurusan" required>
-                                <option value="">Pilih jurusan</option>
-                                <option value="IPA">IPA</option>
-                                <option value="IPS">IPS</option>
-                            </select>
+                            <i class="fas fa-calendar-check"></i>
+                            <input type="date" id="tanggalMasuk" required>
                         </div>
                     </div>
                     <div class="form-group">
@@ -672,17 +821,18 @@
 
                 <!-- Step 3: Konfirmasi -->
                 <div class="form-step" id="step3">
-                    <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #bbf7d0;">
-                        <h4 style="margin-bottom: 15px; color: #006633;"><i class="fas fa-clipboard-check"></i> Ringkasan Data</h4>
-                        <div id="ringkasanData" style="font-size: 0.85rem; line-height: 2;"></div>
+                    <div class="ringkasan-box">
+                        <h4><i class="fas fa-clipboard-check"></i> Ringkasan Data Pendaftaran</h4>
+                        <div id="ringkasanData"></div>
                     </div>
-                    <div style="background: #fff7ed; padding: 15px; border-radius: 12px; border: 1px solid #fed7aa; font-size: 0.8rem; color: #c2410c;">
-                        <i class="fas fa-info-circle"></i> <strong>Catatan:</strong> Akun akan diverifikasi operator dalam 1x24 jam. Pastikan semua data sudah benar.
+                    <div class="catatan-box">
+                        <i class="fas fa-info-circle" style="flex-shrink: 0; margin-top: 2px;"></i>
+                        <span><strong>Catatan:</strong> Akun Anda akan diverifikasi oleh operator dalam 1x24 jam. Pastikan semua data sudah benar sebelum mengirim.</span>
                     </div>
                 </div>
 
                 <!-- Buttons -->
-                <div class="btn-container" id="btnContainer">
+                <div class="btn-container">
                     <button type="button" class="btn btn-back" id="btnBack" style="display:none;" onclick="prevStep()">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </button>
@@ -690,19 +840,20 @@
                         Selanjutnya <i class="fas fa-arrow-right"></i>
                     </button>
                     <button type="submit" class="btn btn-submit" id="btnSubmit" style="display:none;">
-                        <i class="fas fa-paper-plane"></i> Daftar Sekarang
+                        <i class="fas fa-paper-plane"></i> Daftarkan Akun
                     </button>
                 </div>
             </form>
         </div>
 
+        <!-- Footer -->
         <div class="register-footer">
             Sudah punya akun? <a href="portal-siswa-68.html">Masuk di sini</a>
         </div>
     </div>
 
     <script>
-        // Firebase Config (SAMA SEPERTI portal-siswa-68.js)
+        // Firebase Config (SAMA PERSIS)
         const firebaseConfig = {
             apiKey: "AIzaSyDAcKcg3alPOTH3FFGelYmsW7jcMMe2PLI",
             authDomain: "upnvjdatsystem.firebaseapp.com",
@@ -715,18 +866,13 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Global state
         let currentStep = 1;
         const totalSteps = 3;
 
-        // Toast function
+        // Toast
         function showToast(type, title, message) {
             const container = document.getElementById('toastContainer');
-            const icons = {
-                success: 'check-circle',
-                error: 'exclamation-circle',
-                warning: 'exclamation-triangle'
-            };
+            const icons = { success: 'check-circle', error: 'exclamation-circle', warning: 'exclamation-triangle' };
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
@@ -743,11 +889,10 @@
             }, 5000);
         }
 
-        // Update progress UI
+        // Update Progress
         function updateProgress(step) {
             currentStep = step;
             
-            // Update circles
             for (let i = 1; i <= totalSteps; i++) {
                 const circle = document.getElementById(`step${i}Circle`);
                 const label = document.getElementById(`step${i}Label`);
@@ -766,28 +911,20 @@
                 }
             }
 
-            // Update progress line
             const fillPercent = ((step - 1) / (totalSteps - 1)) * 100;
             document.getElementById('progressFill').style.width = fillPercent + '%';
 
-            // Update form steps
             document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
             document.getElementById(`step${step}`).classList.add('active');
 
-            // Update buttons
-            const btnBack = document.getElementById('btnBack');
-            const btnNext = document.getElementById('btnNext');
-            const btnSubmit = document.getElementById('btnSubmit');
-
-            btnBack.style.display = step === 1 ? 'none' : 'inline-flex';
-            btnNext.style.display = step === totalSteps ? 'none' : 'inline-flex';
-            btnSubmit.style.display = step === totalSteps ? 'inline-flex' : 'none';
+            document.getElementById('btnBack').style.display = step === 1 ? 'none' : 'flex';
+            document.getElementById('btnNext').style.display = step === totalSteps ? 'none' : 'flex';
+            document.getElementById('btnSubmit').style.display = step === totalSteps ? 'flex' : 'none';
         }
 
-        // Navigasi step
+        // Next
         function nextStep() {
             if (currentStep === 1) {
-                // Validasi step 1
                 const nama = document.getElementById('nama').value.trim();
                 const nisn = document.getElementById('nisn').value.trim();
                 const tempatLahir = document.getElementById('tempatLahir').value.trim();
@@ -795,61 +932,59 @@
                 const jenisKelamin = document.getElementById('jenisKelamin').value;
 
                 if (!nama || !nisn || !tempatLahir || !tanggalLahir || !jenisKelamin) {
-                    showToast('error', 'Data Belum Lengkap', 'Harap isi semua data diri yang wajib!');
+                    showToast('error', 'Data Belum Lengkap', 'Harap isi semua data diri!');
                     return;
                 }
-
                 if (nisn.length < 10) {
-                    showToast('error', 'NISN Tidak Valid', 'NISN harus 10 digit angka!');
+                    showToast('error', 'NISN Tidak Valid', 'NISN harus 10 digit!');
                     return;
                 }
-
                 updateProgress(2);
             } else if (currentStep === 2) {
-                // Validasi step 2
                 const nis = document.getElementById('nis').value.trim();
                 const kelas = document.getElementById('kelas').value;
                 const jurusan = document.getElementById('jurusan').value;
+                const tanggalMasuk = document.getElementById('tanggalMasuk').value;
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
 
-                if (!nis || !kelas || !jurusan || !password || !confirmPassword) {
-                    showToast('error', 'Data Belum Lengkap', 'Harap isi semua data akun yang wajib!');
+                if (!nis || !kelas || !jurusan || !tanggalMasuk || !password || !confirmPassword) {
+                    showToast('error', 'Data Belum Lengkap', 'Harap isi semua data akun!');
                     return;
                 }
-
                 if (password.length < 6) {
-                    showToast('error', 'Password Terlalu Pendek', 'Password minimal 6 karakter!');
+                    showToast('error', 'Password Pendek', 'Password minimal 6 karakter!');
                     return;
                 }
-
                 if (password !== confirmPassword) {
                     showToast('error', 'Password Tidak Cocok', 'Konfirmasi password tidak sesuai!');
                     return;
                 }
 
-                // Tampilkan ringkasan di step 3
+                // Tampilkan ringkasan
                 document.getElementById('ringkasanData').innerHTML = `
-                    <div><strong>Nama:</strong> ${document.getElementById('nama').value}</div>
-                    <div><strong>NISN:</strong> ${document.getElementById('nisn').value}</div>
-                    <div><strong>Tempat/Tgl Lahir:</strong> ${document.getElementById('tempatLahir').value}, ${document.getElementById('tanggalLahir').value}</div>
-                    <div><strong>Jenis Kelamin:</strong> ${document.getElementById('jenisKelamin').value === 'L' ? 'Laki-laki' : 'Perempuan'}</div>
-                    <div><strong>NIS:</strong> ${nis}</div>
-                    <div><strong>Kelas:</strong> ${kelas}</div>
-                    <div><strong>Jurusan:</strong> ${jurusan}</div>
+                    <div class="ringkasan-item"><span class="label">Nama</span><span class="value">${document.getElementById('nama').value}</span></div>
+                    <div class="ringkasan-item"><span class="label">NISN</span><span class="value">${document.getElementById('nisn').value}</span></div>
+                    <div class="ringkasan-item"><span class="label">Tempat, Tgl Lahir</span><span class="value">${document.getElementById('tempatLahir').value}, ${document.getElementById('tanggalLahir').value}</span></div>
+                    <div class="ringkasan-item"><span class="label">Jenis Kelamin</span><span class="value">${document.getElementById('jenisKelamin').value === 'L' ? 'Laki-laki' : 'Perempuan'}</span></div>
+                    <div class="ringkasan-item"><span class="label">NIS</span><span class="value">${nis}</span></div>
+                    <div class="ringkasan-item"><span class="label">Kelas</span><span class="value">${kelas}</span></div>
+                    <div class="ringkasan-item"><span class="label">Jurusan</span><span class="value">${jurusan}</span></div>
+                    <div class="ringkasan-item"><span class="label">Tanggal Masuk</span><span class="value">${tanggalMasuk}</span></div>
                 `;
 
                 updateProgress(3);
             }
         }
 
+        // Previous
         function prevStep() {
             if (currentStep > 1) {
                 updateProgress(currentStep - 1);
             }
         }
 
-        // Submit form
+        // Submit
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -858,18 +993,24 @@
             btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mendaftarkan...';
 
             try {
-                // Cek apakah NIS sudah terdaftar
                 const nis = document.getElementById('nis').value.trim();
+                
+                // Cek duplikat NIS
                 const existingSnapshot = await db.collection('siswa').where('nis', '==', nis).get();
-
                 if (!existingSnapshot.empty) {
-                    showToast('error', 'NIS Sudah Terdaftar', 'Nomor Induk Sekolah ini sudah digunakan. Silakan login atau hubungi operator.');
+                    showToast('error', 'NIS Terdaftar', 'NIS ini sudah digunakan. Hubungi operator jika lupa password.');
                     btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Daftar Sekarang';
+                    btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Daftarkan Akun';
                     return;
                 }
 
-                // Data untuk Firestore
+                const tanggalMasuk = document.getElementById('tanggalMasuk').value;
+                // Hitung estimasi tanggal lulus (3 tahun setelah masuk)
+                const tglMasukDate = new Date(tanggalMasuk);
+                const tglLulusDate = new Date(tglMasukDate);
+                tglLulusDate.setFullYear(tglLulusDate.getFullYear() + 3);
+                const tanggalLulus = tglLulusDate.toISOString().split('T')[0];
+
                 const dataSiswa = {
                     nama: document.getElementById('nama').value.trim(),
                     nisn: document.getElementById('nisn').value.trim(),
@@ -879,32 +1020,30 @@
                     nis: nis,
                     kelas: document.getElementById('kelas').value,
                     jurusan: document.getElementById('jurusan').value,
+                    tanggalMasuk: tanggalMasuk,
+                    tanggalLulus: tanggalLulus,
                     password: document.getElementById('password').value,
                     status: 'pending',
-                    tanggalDaftar: firebase.firestore.FieldValue.serverTimestamp(),
-                    tanggalMasuk: 'Juli 2024',
-                    tanggalLulus: 'Mei 2027'
+                    tanggalDaftar: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
-                // Simpan ke Firestore
                 await db.collection('siswa').add(dataSiswa);
 
-                showToast('success', 'Pendaftaran Berhasil!', 'Akun Anda dalam proses verifikasi operator. Tunggu 1x24 jam.');
-
-                // Redirect setelah 2 detik
+                showToast('success', 'Pendaftaran Berhasil!', 'Akun akan diverifikasi operator dalam 1x24 jam.');
+                
                 setTimeout(() => {
                     window.location.href = 'portal-siswa-68.html';
                 }, 2000);
 
             } catch (error) {
-                console.error('Error pendaftaran:', error);
-                showToast('error', 'Gagal Mendaftar', 'Terjadi kesalahan. Silakan coba lagi nanti.');
+                console.error('Error:', error);
+                showToast('error', 'Gagal Mendaftar', 'Terjadi kesalahan server. Coba lagi nanti.');
                 btnSubmit.disabled = false;
-                btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Daftar Sekarang';
+                btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Daftarkan Akun';
             }
         });
 
-        // Inisialisasi
+        // Init
         updateProgress(1);
     </script>
 </body>
