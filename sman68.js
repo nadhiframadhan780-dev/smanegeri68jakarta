@@ -60,7 +60,7 @@ const linkUrls = {
     ppdb: './countdown-SPMB-2026-2027.html',
     virsch: './virsch-68.html',
     penmurmut: './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html',
-    pemeringkatan: './halaman-sedang-diperbarui.html',
+    pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
     kelulusan: './jurusan-kuliah-terbaik-2026.html',
     hukum: './hukum.html' 
 };
