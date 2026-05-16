@@ -57,7 +57,7 @@ const defaultAlumniData = {
 const linkUrls = {
     loginSiswa: './portal-siswa-68.html',
     loginGuru: 'portal-guru.html',
-    ppdb: './countdown-SPMB-2026-2027.html',
+    ppdb: 'https://spmb.jakarta.go.id/',
     virsch: './virsch-68.html',
     penmurmut: './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html',
     pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
