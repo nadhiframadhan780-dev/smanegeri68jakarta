@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Operator Mutasi – SMAN 68 Jakarta</title>
+  <link rel="stylesheet" href="operator-siswa-mutasi.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+</head>
+<body>
+
+<!-- ── Toast ── -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ── Loading Overlay ── -->
+<div id="loadingOverlay" class="loading-overlay hidden">
+  <div class="loader-card">
+    <div class="spinner"></div>
+    <p id="loadingText">Memuat data...</p>
+  </div>
+</div>
+
+<!-- ── Confirm Dialog ── -->
+<div id="confirmDialog" class="modal-overlay hidden">
+  <div class="confirm-box glass-card">
+    <div class="confirm-icon"><i id="confirmIcon" class="fa-solid fa-circle-question"></i></div>
+    <h3 id="confirmTitle">Konfirmasi</h3>
+    <p id="confirmMsg">Apakah Anda yakin?</p>
+    <div class="confirm-actions">
+      <button class="btn-confirm-cancel" onclick="closeConfirm()">Batal</button>
+      <button id="btnConfirmOk" class="btn-confirm-ok">Ya, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ LOGIN PAGE ══════════════════════════ -->
+<div id="loginPage" class="page active">
+  <div class="login-bg">
+    <div class="bg-blob blob1"></div>
+    <div class="bg-blob blob2"></div>
+    <div class="bg-blob blob3"></div>
+  </div>
+  <div class="login-container">
+    <div class="login-card glass-card">
+      <div class="login-header">
+        <div class="school-logo-wrap">
+          <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo SMAN 68" class="school-logo"/>
+        </div>
+        <div class="school-info">
+          <h1 class="school-name">SMAN 68 Jakarta</h1>
+          <p class="school-sub">Portal Operator Mutasi</p>
+        </div>
+      </div>
+      <div class="login-divider"></div>
+      <h2 class="login-title">Login Operator</h2>
+      <p class="login-desc">Masukkan kredensial operator untuk mengakses dashboard pengelolaan mutasi.</p>
+      <div class="login-form">
+        <div class="form-group">
+          <label class="form-label"><i class="fa-solid fa-user-shield"></i> Username</label>
+          <input type="text" id="inputUser" class="form-input" placeholder="Username operator" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><i class="fa-solid fa-lock"></i> Password</label>
+          <div class="input-pass-wrap">
+            <input type="password" id="inputPass" class="form-input" placeholder="Password"/>
+            <button class="btn-toggle-pass" onclick="togglePass()"><i id="passEyeIcon" class="fa-solid fa-eye"></i></button>
+          </div>
+        </div>
+        <button id="btnLogin" class="btn-login" onclick="handleLogin()">
+          <span id="btnLoginText"><i class="fa-solid fa-right-to-bracket"></i> Masuk ke Dashboard</span>
+          <span id="btnLoginLoader" class="btn-loader hidden"><i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi...</span>
+        </button>
+      </div>
+      <div class="login-footer">
+        <p><i class="fa-solid fa-shield-check"></i> Akses Terbatas – Operator SMAN 68 Jakarta</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ DASHBOARD PAGE ══════════════════════════ -->
+<div id="dashboardPage" class="page hidden">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-brand">
+      <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo" class="sidebar-logo"/>
+      <div>
+        <span class="sidebar-school">SMAN 68</span>
+        <span class="sidebar-sub">Operator Mutasi</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-section="secDashboard" onclick="switchSection(this,'secDashboard')">
+        <i class="fa-solid fa-gauge-high"></i><span>Dashboard</span>
+      </a>
+      <a class="nav-item" data-section="secPendaftar" onclick="switchSection(this,'secPendaftar')">
+        <i class="fa-solid fa-users"></i><span>Data Pendaftar</span>
+      </a>
+      <a class="nav-item" data-section="secVerifikasi" onclick="switchSection(this,'secVerifikasi')">
+        <i class="fa-solid fa-folder-open"></i><span>Verifikasi Berkas</span>
+      </a>
+      <a class="nav-item" data-section="secJadwal" onclick="switchSection(this,'secJadwal')">
+        <i class="fa-solid fa-calendar-days"></i><span>Jadwal Seleksi</span>
+      </a>
+      <a class="nav-item" data-section="secStatistik" onclick="switchSection(this,'secStatistik')">
+        <i class="fa-solid fa-chart-bar"></i><span>Statistik</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-sidebar-logout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+    </div>
+  </aside>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Main -->
+  <div class="main-wrap">
+
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <button class="btn-hamburger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+        <h2 id="headerTitle" class="header-title">Dashboard</h2>
+      </div>
+      <div class="header-right">
+        <div class="header-time" id="headerTime"></div>
+        <div class="header-operator">
+          <div class="operator-avatar"><i class="fa-solid fa-user-tie"></i></div>
+          <span>Operator</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="main-content">
+
+      <!-- ── SECTION: DASHBOARD ── -->
+      <section id="secDashboard" class="content-section active">
+        <div class="section-heading">
+          <h3>Ringkasan Data Pendaftaran</h3>
+          <p>Data realtime dari Firestore</p>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+          <div class="stat-card total">
+            <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-info">
+              <span class="stat-num" id="statTotal">0</span>
+              <span class="stat-label">Total Pendaftar</span>
+            </div>
+          </div>
+          <div class="stat-card pending">
+            <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+            <div class="stat-info">
+              <span class="stat-num" id="statPending">0</span>
+              <span class="stat-label">Pending</span>
+            </div>
+          </div>
+          <div class="stat-card proses">
+            <div class="stat-icon"><i class="fa-solid fa-spinner"></i></div>
+            <div class="stat-info">
+              <span class="stat-num" id="statProses">0</span>
+              <span class="stat-label">Diproses</span>
+            </div>
+          </div>
+          <div class="stat-card diterima">
+            <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="stat-info">
+              <span class="stat-num" id="statDiterima">0</span>
+              <span class="stat-label">Diterima</span>
+            </div>
+          </div>
+          <div class="stat-card ditolak">
+            <div class="stat-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+            <div class="stat-info">
+              <span class="stat-num" id="statDitolak">0</span>
+              <span class="stat-label">Ditolak</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Table -->
+        <div class="card-box mt-24">
+          <div class="card-box-header">
+            <h4><i class="fa-solid fa-clock-rotate-left"></i> Pendaftar Terbaru</h4>
+            <button class="btn-link" onclick="switchSection(document.querySelector('[data-section=secPendaftar]'),'secPendaftar')">Lihat Semua <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="recentTable">
+              <thead><tr><th>No. Daftar</th><th>Nama</th><th>Sekolah Asal</th><th>Tgl Daftar</th><th>Status</th><th>Aksi</th></tr></thead>
+              <tbody id="recentTbody"><tr><td colspan="6" class="tbl-empty"><div class="skeleton-row"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: DATA PENDAFTAR ── -->
+      <section id="secPendaftar" class="content-section hidden">
+        <div class="section-heading">
+          <h3>Data Seluruh Pendaftar</h3>
+          <p>Kelola dan verifikasi pendaftaran mutasi</p>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar glass-card">
+          <div class="toolbar-left">
+            <div class="search-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="searchInput" class="search-input" placeholder="Cari nama / nomor pendaftaran..." oninput="filterTable()"/>
+            </div>
+            <select id="filterStatus" class="filter-select" onchange="filterTable()">
+              <option value="">Semua Status</option>
+              <option value="pending">Pending</option>
+              <option value="proses">Proses</option>
+              <option value="diterima">Diterima</option>
+              <option value="ditolak">Ditolak</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn-export" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Excel</button>
+            <button class="btn-export pdf" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+          </div>
+        </div>
+
+        <div class="card-box mt-16">
+          <div class="table-wrap">
+            <table class="data-table" id="mainTable">
+              <thead>
+                <tr>
+                  <th onclick="sortTable('noDaftar')">No. Daftar <i class="fa-solid fa-sort"></i></th>
+                  <th onclick="sortTable('nama')">Nama <i class="fa-solid fa-sort"></i></th>
+                  <th>Sekolah Asal</th>
+                  <th onclick="sortTable('createdAt')">Tgl Daftar <i class="fa-solid fa-sort"></i></th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="mainTbody">
+                <tr><td colspan="6" class="tbl-empty"><div class="skeleton-row"></div></td></tr>
+                <tr><td colspan="6" class="tbl-empty"><div class="skeleton-row"></div></td></tr>
+                <tr><td colspan="6" class="tbl-empty"><div class="skeleton-row"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: VERIFIKASI ── -->
+      <section id="secVerifikasi" class="content-section hidden">
+        <div class="section-heading">
+          <h3>Verifikasi Berkas Peserta</h3>
+          <p>Periksa dan ubah status pendaftaran siswa</p>
+        </div>
+        <div class="card-box">
+          <div class="toolbar glass-card" style="margin-bottom:0">
+            <div class="search-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="searchVerif" class="search-input" placeholder="Cari peserta..." oninput="filterVerif()"/>
+            </div>
+            <select id="filterVerifStatus" class="filter-select" onchange="filterVerif()">
+              <option value="">Semua Status</option>
+              <option value="pending">Pending</option>
+              <option value="proses">Proses</option>
+              <option value="diterima">Diterima</option>
+              <option value="ditolak">Ditolak</option>
+            </select>
+          </div>
+          <div class="verif-grid" id="verifGrid">
+            <div class="skeleton-verif"></div>
+            <div class="skeleton-verif"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: JADWAL ── -->
+      <section id="secJadwal" class="content-section hidden">
+        <div class="section-heading">
+          <h3>Pengaturan Jadwal Seleksi</h3>
+          <p>Jadwal otomatis tampil di portal peserta</p>
+        </div>
+        <div class="jadwal-layout">
+          <!-- Form Jadwal Global -->
+          <div class="card-box jadwal-form-box">
+            <div class="card-box-header">
+              <h4><i class="fa-solid fa-calendar-plus"></i> Jadwal Global (Semua Peserta)</h4>
+            </div>
+            <div class="jadwal-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Jadwal Tes</label>
+                  <input type="date" id="jTanggalTes" class="form-input"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Jam Tes</label>
+                  <input type="time" id="jJamTes" class="form-input"/>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Jadwal Wawancara</label>
+                  <input type="date" id="jWawancara" class="form-input"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Lokasi Tes</label>
+                  <input type="text" id="jLokasi" class="form-input" placeholder="Contoh: Aula SMAN 68"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Catatan Peserta</label>
+                <textarea id="jCatatan" class="form-textarea" placeholder="Informasi tambahan untuk peserta..."></textarea>
+              </div>
+              <button class="btn-save-jadwal" onclick="saveJadwalGlobal()">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Jadwal Global
+              </button>
+            </div>
+          </div>
+
+          <!-- Jadwal Per Peserta -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <h4><i class="fa-solid fa-user-clock"></i> Jadwal Per Peserta</h4>
+            </div>
+            <div class="search-wrap" style="margin-bottom:16px">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="searchJadwal" class="search-input" placeholder="Cari peserta diterima..." oninput="filterJadwalPeserta()"/>
+            </div>
+            <div id="jadwalPesertaList" class="jadwal-peserta-list">
+              <div class="skeleton-row"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SECTION: STATISTIK ── -->
+      <section id="secStatistik" class="content-section hidden">
+        <div class="section-heading">
+          <h3>Statistik Pendaftaran</h3>
+          <p>Analisis data seluruh pendaftar mutasi</p>
+        </div>
+        <div class="statistik-grid">
+          <div class="card-box">
+            <div class="card-box-header"><h4><i class="fa-solid fa-chart-pie"></i> Distribusi Status</h4></div>
+            <div id="chartStatus" class="chart-bars"></div>
+          </div>
+          <div class="card-box">
+            <div class="card-box-header"><h4><i class="fa-solid fa-venus-mars"></i> Jenis Kelamin</h4></div>
+            <div id="chartJK" class="chart-bars"></div>
+          </div>
+          <div class="card-box full-width">
+            <div class="card-box-header"><h4><i class="fa-solid fa-school"></i> Top Sekolah Asal</h4></div>
+            <div id="chartSekolah" class="chart-bars"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div><!-- /main-wrap -->
+</div><!-- /dashboardPage -->
+
+<!-- ══════════════════════════ MODAL DETAIL SISWA ══════════════════════════ -->
+<div id="modalDetail" class="modal-overlay hidden">
+  <div class="modal-box glass-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-user-graduate"></i> Detail Peserta</h3>
+      <button class="btn-modal-close" onclick="closeModal('modalDetail')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="modalDetailBody">
+      <!-- injected by JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modalDetail')">Tutup</button>
+      <button class="btn-primary" onclick="openVerifFromDetail()"><i class="fa-solid fa-pen-to-square"></i> Ubah Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ MODAL VERIFIKASI STATUS ══════════════════════════ -->
+<div id="modalVerif" class="modal-overlay hidden">
+  <div class="modal-box glass-card" style="max-width:500px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-pen-to-square"></i> Ubah Status Peserta</h3>
+      <button class="btn-modal-close" onclick="closeModal('modalVerif')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p id="verifNama" class="verif-nama-label"></p>
+      <div class="status-btn-group">
+        <button class="btn-status pending"  onclick="setStatusBtn('pending')">  <i class="fa-solid fa-clock"></i>        Pending  </button>
+        <button class="btn-status proses"   onclick="setStatusBtn('proses')">   <i class="fa-solid fa-spinner"></i>      Proses   </button>
+        <button class="btn-status diterima" onclick="setStatusBtn('diterima')"> <i class="fa-solid fa-circle-check"></i> Diterima </button>
+        <button class="btn-status ditolak"  onclick="setStatusBtn('ditolak')">  <i class="fa-solid fa-circle-xmark"></i> Ditolak  </button>
+      </div>
+      <div id="catatanWrap" class="catatan-wrap hidden">
+        <label class="form-label">Catatan Operator / Alasan Penolakan</label>
+        <textarea id="inputCatatan" class="form-textarea" placeholder="Tulis alasan atau catatan untuk peserta..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modalVerif')">Batal</button>
+      <button class="btn-primary" onclick="saveStatus()"><i class="fa-solid fa-floppy-disk"></i> Simpan Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ MODAL JADWAL PER PESERTA ══════════════════════════ -->
+<div id="modalJadwalPeserta" class="modal-overlay hidden">
+  <div class="modal-box glass-card" style="max-width:500px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-calendar-pen"></i> Jadwal Peserta</h3>
+      <button class="btn-modal-close" onclick="closeModal('modalJadwalPeserta')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p id="jadwalPesertaNama" class="verif-nama-label"></p>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Jadwal Tes</label>
+          <input type="date" id="jpTes" class="form-input"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Jam Tes</label>
+          <input type="time" id="jpJam" class="form-input"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jadwal Wawancara</label>
+        <input type="date" id="jpWawancara" class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lokasi</label>
+        <input type="text" id="jpLokasi" class="form-input" placeholder="Lokasi tes / wawancara"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Catatan Peserta</label>
+        <textarea id="jpCatatan" class="form-textarea" placeholder="Informasi tambahan..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modalJadwalPeserta')">Batal</button>
+      <button class="btn-primary" onclick="saveJadwalPeserta()"><i class="fa-solid fa-floppy-disk"></i> Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<!-- SheetJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- html2canvas + jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="operator-siswa-mutasi.js"></script>
+</body>
+</html>
