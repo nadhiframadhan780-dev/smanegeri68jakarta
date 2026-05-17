@@ -61,7 +61,7 @@ const linkUrls = {
     virsch: './virsch-68.html',
     penmurmut: './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html',
     pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
-    kelulusan: './jurusan-kuliah-terbaik-2026.html',
+    kelulusan: './unduh-kartu-peserta.html',
     hukum: './hukum.html' 
 };
 
@@ -952,14 +952,14 @@ function listenAnnouncementChanges() {
 // ENABLE KELULUSAN LINK
 // ============================================
 function enableKelulusanLink() {
-    const targetDate = new Date('2026-05-15T15:00:00+07:00');
+    const targetDate = new Date('2026-05-18T08:00:00+07:00');
     const now = new Date();
     
     if (now >= targetDate) {
         const kelulusanLink = document.getElementById('navKelulusan');
         if (kelulusanLink) {
             kelulusanLink.classList.remove('nav-disabled');
-            kelulusanLink.innerHTML = 'Top Jurusan Kuliah Terbaik 2026';
+            kelulusanLink.innerHTML = 'Unduh Kartu Peserta Mutasi';
             kelulusanLink.style.pointerEvents = 'auto';
             kelulusanLink.style.opacity = '1';
             kelulusanLink.style.cursor = 'pointer';
