@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unduh Kartu Peserta – Mutasi SMAN 68 Jakarta</title>
+  <link rel="stylesheet" href="unduh-kartu-peserta.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loader-card">
+      <div class="spinner"></div>
+      <p id="loadingText">Memuat data...</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ LOGIN PAGE ═══════════════════════════════════ -->
+  <div id="loginPage" class="page active">
+    <div class="login-bg">
+      <div class="bg-blob blob1"></div>
+      <div class="bg-blob blob2"></div>
+      <div class="bg-blob blob3"></div>
+    </div>
+
+    <div class="login-container">
+      <div class="login-card glass-card">
+        <!-- Header -->
+        <div class="login-header">
+          <div class="school-logo-wrap">
+            <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo SMAN 68" class="school-logo" />
+          </div>
+          <div class="school-info">
+            <h1 class="school-name">SMAN 68 Jakarta</h1>
+            <p class="school-sub">Sistem Penerimaan Murid Mutasi</p>
+          </div>
+        </div>
+
+        <div class="login-divider"></div>
+
+        <h2 class="login-title">Unduh Kartu Peserta</h2>
+        <p class="login-desc">Masukkan nomor pendaftaran dan tanggal lahir Anda untuk mengakses kartu peserta.</p>
+
+        <!-- Status Info Card (hidden by default) -->
+        <div id="statusCard" class="status-card hidden"></div>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="login-form">
+          <div class="form-group">
+            <label class="form-label"><i class="fa-solid fa-id-card"></i> Nomor Pendaftaran</label>
+            <input type="text" id="inputNoDaftar" class="form-input" placeholder="Contoh: MUT-2024-001" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label class="form-label"><i class="fa-solid fa-calendar"></i> Tanggal Lahir</label>
+            <input type="date" id="inputTglLahir" class="form-input" />
+          </div>
+          <button id="btnLogin" class="btn-login" onclick="handleLogin()">
+            <span id="btnLoginText"><i class="fa-solid fa-right-to-bracket"></i> Masuk</span>
+            <span id="btnLoginLoader" class="btn-loader hidden"><i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi...</span>
+          </button>
+        </div>
+
+        <div class="login-footer">
+          <p>Hubungi operator jika mengalami kendala akses</p>
+          <p class="school-tagline"><i class="fa-solid fa-shield-check"></i> Portal Resmi – SMAN 68 Jakarta</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ DASHBOARD PAGE ═══════════════════════════════════ -->
+  <div id="dashboardPage" class="page hidden">
+
+    <!-- Top Navigation -->
+    <nav class="top-nav glass-nav">
+      <div class="nav-left">
+        <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo" class="nav-logo" />
+        <div>
+          <span class="nav-school">SMAN 68 Jakarta</span>
+          <span class="nav-sub">Portal Mutasi</span>
+        </div>
+      </div>
+      <div class="nav-right">
+        <span id="navNama" class="nav-nama"></span>
+        <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+      </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-wrapper">
+
+      <!-- Welcome Banner -->
+      <div class="welcome-banner glass-card">
+        <div class="welcome-text">
+          <h2 id="welcomeName">Selamat datang!</h2>
+          <p>Status pendaftaran Anda: <span class="badge-diterima"><i class="fa-solid fa-circle-check"></i> DITERIMA</span></p>
+        </div>
+        <div class="welcome-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+      </div>
+
+      <!-- Grid Layout -->
+      <div class="dashboard-grid">
+
+        <!-- === DATA SISWA === -->
+        <div class="dash-section glass-card full-width">
+          <div class="section-header">
+            <div class="section-icon green"><i class="fa-solid fa-user-graduate"></i></div>
+            <h3>Data Siswa</h3>
+          </div>
+          <div id="dataSiswaGrid" class="data-grid">
+            <!-- Skeleton -->
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+          </div>
+        </div>
+
+        <!-- === STATUS BERKAS === -->
+        <div class="dash-section glass-card">
+          <div class="section-header">
+            <div class="section-icon blue"><i class="fa-solid fa-folder-open"></i></div>
+            <h3>Status Berkas</h3>
+          </div>
+          <div id="statusBerkasGrid" class="berkas-grid">
+            <div class="skeleton-item tall"></div>
+            <div class="skeleton-item tall"></div>
+            <div class="skeleton-item tall"></div>
+          </div>
+        </div>
+
+        <!-- === JADWAL === -->
+        <div class="dash-section glass-card">
+          <div class="section-header">
+            <div class="section-icon purple"><i class="fa-solid fa-calendar-days"></i></div>
+            <h3>Jadwal Seleksi</h3>
+          </div>
+          <div id="jadwalContainer">
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+          </div>
+        </div>
+
+      </div><!-- /dashboard-grid -->
+
+      <!-- === UNDUH KARTU === -->
+      <div class="kartu-section glass-card">
+        <div class="kartu-info">
+          <div class="kartu-icon"><i class="fa-solid fa-id-badge"></i></div>
+          <div>
+            <h3>Kartu Peserta Seleksi</h3>
+            <p>Unduh dan cetak kartu peserta Anda. Wajib dibawa saat pelaksanaan seleksi.</p>
+          </div>
+        </div>
+        <div class="kartu-buttons">
+          <button class="btn-download" onclick="generateKartu('download')">
+            <i class="fa-solid fa-download"></i> Unduh PDF
+          </button>
+          <button class="btn-print" onclick="generateKartu('print')">
+            <i class="fa-solid fa-print"></i> Cetak
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /dashboard-wrapper -->
+  </div>
+
+  <!-- ═══════════════════════════════════ KARTU MODAL ═══════════════════════════════════ -->
+  <div id="kartuModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-actions">
+        <button class="btn-modal-download" onclick="downloadKartuPDF()"><i class="fa-solid fa-download"></i> Unduh PDF</button>
+        <button class="btn-modal-print" onclick="printKartu()"><i class="fa-solid fa-print"></i> Cetak</button>
+        <button class="btn-modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- KARTU PESERTA — printable area -->
+      <div id="kartuPrint" class="kartu-printable">
+        <div class="kartu-inner">
+          <!-- Watermark -->
+          <div class="kartu-watermark">SMAN 68 JAKARTA</div>
+
+          <!-- Header Kartu -->
+          <div class="kartu-header">
+            <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo" class="kartu-logo" />
+            <div class="kartu-header-text">
+              <p class="kartu-negara">PEMERINTAH PROVINSI DKI JAKARTA</p>
+              <p class="kartu-dinas">DINAS PENDIDIKAN</p>
+              <h2 class="kartu-sekolah-nama">SMA NEGERI 68 JAKARTA</h2>
+              <p class="kartu-alamat">Jl. Salemba Raya No.18, Paseban, Jakarta Pusat 10440</p>
+            </div>
+            <div class="kartu-stempel-area">
+              <div class="stempel-circle">STEMPEL<br/>SEKOLAH</div>
+            </div>
+          </div>
+
+          <div class="kartu-title-bar">
+            <h3>KARTU PESERTA SELEKSI MURID MUTASI</h3>
+            <p id="kartuTahunAjaran" class="kartu-tahun">TAHUN AJARAN 2024/2025</p>
+          </div>
+
+          <!-- Body -->
+          <div class="kartu-body">
+            <div class="kartu-foto-section">
+              <div class="kartu-foto-wrap">
+                <img id="kartuFoto" src="" alt="Foto" class="kartu-foto" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
+                <div class="kartu-foto-placeholder"><i class="fa-solid fa-user"></i></div>
+              </div>
+              <div id="kartuQR" class="kartu-qr"></div>
+              <p class="kartu-qr-label">Scan QR untuk verifikasi</p>
+            </div>
+
+            <div class="kartu-data-section">
+              <table class="kartu-table">
+                <tr><td class="kt-label">No. Pendaftaran</td><td class="kt-sep">:</td><td id="kNoDaftar" class="kt-val bold"></td></tr>
+                <tr><td class="kt-label">Nama Lengkap</td><td class="kt-sep">:</td><td id="kNama" class="kt-val bold"></td></tr>
+                <tr><td class="kt-label">Tanggal Lahir</td><td class="kt-sep">:</td><td id="kTglLahir" class="kt-val"></td></tr>
+                <tr><td class="kt-label">Jenis Kelamin</td><td class="kt-sep">:</td><td id="kJK" class="kt-val"></td></tr>
+                <tr><td class="kt-label">Asal Sekolah</td><td class="kt-sep">:</td><td id="kSekolahAsal" class="kt-val"></td></tr>
+                <tr><td class="kt-label">NISN</td><td class="kt-sep">:</td><td id="kNISN" class="kt-val">-</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Footer Kartu -->
+          <div class="kartu-footer">
+            <div class="kartu-note">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              Kartu peserta ini wajib dibawa saat pelaksanaan tes seleksi murid mutasi SMAN 68 Jakarta.
+            </div>
+            <div class="kartu-ttd-row">
+              <div class="kartu-ttd-block">
+                <p class="ttd-label">Tanda Tangan Peserta</p>
+                <div class="ttd-line"></div>
+                <p id="kNamaTTD" class="ttd-nama"></p>
+              </div>
+              <div class="kartu-ttd-block">
+                <p class="ttd-label">Kepala Sekolah</p>
+                <div class="ttd-line"></div>
+                <p class="ttd-nama">Kepala SMAN 68 Jakarta</p>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /kartu-inner -->
+      </div><!-- /kartu-printable -->
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- html2canvas + jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script src="unduh-kartu-peserta.js"></script>
+</body>
+</html>
