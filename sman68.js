@@ -1,8 +1,11 @@
 // ============================================
-// SMAN 68 JAKARTA - MAIN WEBSITE JAVASCRIPT
+// SMAN 68 JAKARTA — PREMIUM JS v4.0
+// Luxury Modern Education Website 2026
 // ============================================
 
-// Firebase Configuration
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
 const firebaseConfig = {
     apiKey: "AIzaSyDAcKcg3alPOTH3FFGelYmsW7jcMMe2PLI",
     authDomain: "upnvjdatsystem.firebaseapp.com",
@@ -17,7 +20,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // ============================================
-// GLOBAL VARIABLES
+// GLOBAL STATE
 // ============================================
 let player;
 let isMuted = true;
@@ -25,485 +28,1049 @@ let chatSession = null;
 let currentUser = null;
 let chatEnded = false;
 let isChatOnline = true;
+let lastScrollY = 0;
+let ticking = false;
+let countersDone = false;
 
-// PTN Data (NO PLACEHOLDER)
+// ============================================
+// PTN DATA
+// ============================================
 const ptnList = [
-    { name: 'UI', fullName: 'Universitas Indonesia', logo: 'https://fia.ui.ac.id/wp-content/uploads/182/2018/01/logo-UI.png' },
-    { name: 'UGM', fullName: 'Universitas Gadjah Mada', logo: 'https://upload.wikimedia.org/wikipedia/id/thumb/9/9f/Emblem_of_Universitas_Gadjah_Mada.svg/1280px-Emblem_of_Universitas_Gadjah_Mada.svg.png' },
-    { name: 'ITB', fullName: 'Institut Teknologi Bandung', logo: 'https://upload.wikimedia.org/wikipedia/id/9/95/Logo_Institut_Teknologi_Bandung.png' },
-    { name: 'UNAIR', fullName: 'Universitas Airlangga', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Logo-Branding-UNAIR-biru.png/500px-Logo-Branding-UNAIR-biru.png' },
-    { name: 'IPB', fullName: 'Institut Pertanian Bogor', logo: 'https://www.ipb.ac.id/wp-content/uploads/2023/12/Logo-IPB-University_Vertical.png' },
-    { name: 'UNDIP', fullName: 'Universitas Diponegoro', logo: 'https://upload.wikimedia.org/wikipedia/id/2/20/Logo_Universitas_Diponegoro.png' },
-    { name: 'UNPAD', fullName: 'Universitas Padjadjaran', logo: 'https://www.unpad.ac.id/wp-content/uploads/2018/04/logo-unpad1.png' },
-    { name: 'UB', fullName: 'Universitas Brawijaya', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Logo_Universitas_Brawijaya.svg/960px-Logo_Universitas_Brawijaya.svg.png' },
-    { name: 'ITS', fullName: 'Institut Teknologi Sepuluh Nopember', logo: 'https://upload.wikimedia.org/wikipedia/id/c/c4/Badge_ITS.png' },
-    { name: 'UNJ', fullName: 'Universitas Negeri Jakarta', logo: 'https://unj.ac.id/wp-content/uploads/2025/02/UNJ-LOGO-512-PX-1.png' },
-    { name: 'UPNVJ', fullName: 'UPN Veteran Jakarta', logo: 'https://www.upnvj.ac.id/id/files/large/89f8a80e388ced3704b091e21f510755' },
-    { name: 'UNAND', fullName: 'Universitas Andalas', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Logo_Unand.svg/1280px-Logo_Unand.svg.png' },
-    { name: 'UNHAS', fullName: 'Universitas Hasanuddin', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Logo-Resmi-Unhas-1.png' },
-    { name: 'UPNVYK', fullName: 'UPN Veteran Yogyakarta', logo: 'https://kompaspedia.kompas.id/wp-content/uploads/2020/08/logo_Universitas-Pembangunan-Nasional-Veteran-Yogyakarta.png' },
-    { name: 'PNJ', fullName: 'Politeknik Negeri Jakarta', logo: 'https://upload.wikimedia.org/wikipedia/id/1/16/Logo_Politeknik_Negeri_Jakarta.jpg' },
-    { name: 'MONASH', fullName: 'Monash University', logo: 'https://brandlogos.net/wp-content/uploads/2024/06/monash_university-logo_brandlogos.net_bzf0m.png' },
-    { name: 'UT', fullName: 'University of Toronto', logo: 'https://download.logo.wine/logo/University_of_Toronto/University_of_Toronto-Logo.wine.png' },
-    { name: 'UWA', fullName: 'The University of Western Australia', logo: 'https://www.freelogovectors.net/wp-content/uploads/2021/04/university-of-western-australia-logo-freelogovectors.net_.png' }
+    { name: 'UI',      fullName: 'Universitas Indonesia',             logo: 'https://fia.ui.ac.id/wp-content/uploads/182/2018/01/logo-UI.png' },
+    { name: 'UGM',     fullName: 'Universitas Gadjah Mada',           logo: 'https://upload.wikimedia.org/wikipedia/id/thumb/9/9f/Emblem_of_Universitas_Gadjah_Mada.svg/1280px-Emblem_of_Universitas_Gadjah_Mada.svg.png' },
+    { name: 'ITB',     fullName: 'Institut Teknologi Bandung',        logo: 'https://upload.wikimedia.org/wikipedia/id/9/95/Logo_Institut_Teknologi_Bandung.png' },
+    { name: 'UNAIR',   fullName: 'Universitas Airlangga',             logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Logo-Branding-UNAIR-biru.png/500px-Logo-Branding-UNAIR-biru.png' },
+    { name: 'IPB',     fullName: 'Institut Pertanian Bogor',          logo: 'https://www.ipb.ac.id/wp-content/uploads/2023/12/Logo-IPB-University_Vertical.png' },
+    { name: 'UNDIP',   fullName: 'Universitas Diponegoro',            logo: 'https://upload.wikimedia.org/wikipedia/id/2/20/Logo_Universitas_Diponegoro.png' },
+    { name: 'UNPAD',   fullName: 'Universitas Padjadjaran',           logo: 'https://www.unpad.ac.id/wp-content/uploads/2018/04/logo-unpad1.png' },
+    { name: 'UB',      fullName: 'Universitas Brawijaya',             logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Logo_Universitas_Brawijaya.svg/960px-Logo_Universitas_Brawijaya.svg.png' },
+    { name: 'ITS',     fullName: 'Institut Teknologi Sepuluh Nopember', logo: 'https://upload.wikimedia.org/wikipedia/id/c/c4/Badge_ITS.png' },
+    { name: 'UNJ',     fullName: 'Universitas Negeri Jakarta',        logo: 'https://unj.ac.id/wp-content/uploads/2025/02/UNJ-LOGO-512-PX-1.png' },
+    { name: 'UPNVJ',   fullName: 'UPN Veteran Jakarta',               logo: 'https://www.upnvj.ac.id/id/files/large/89f8a80e388ced3704b091e21f510755' },
+    { name: 'UNAND',   fullName: 'Universitas Andalas',               logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Logo_Unand.svg/1280px-Logo_Unand.svg.png' },
+    { name: 'UNHAS',   fullName: 'Universitas Hasanuddin',            logo: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Logo-Resmi-Unhas-1.png' },
+    { name: 'UPNVYK',  fullName: 'UPN Veteran Yogyakarta',            logo: 'https://kompaspedia.kompas.id/wp-content/uploads/2020/08/logo_Universitas-Pembangunan-Nasional-Veteran-Yogyakarta.png' },
+    { name: 'PNJ',     fullName: 'Politeknik Negeri Jakarta',         logo: 'https://upload.wikimedia.org/wikipedia/id/1/16/Logo_Politeknik_Negeri_Jakarta.jpg' },
+    { name: 'MONASH',  fullName: 'Monash University',                 logo: 'https://brandlogos.net/wp-content/uploads/2024/06/monash_university-logo_brandlogos.net_bzf0m.png' },
+    { name: 'UT',      fullName: 'University of Toronto',             logo: 'https://download.logo.wine/logo/University_of_Toronto/University_of_Toronto-Logo.wine.png' },
+    { name: 'UWA',     fullName: 'The University of Western Australia', logo: 'https://www.freelogovectors.net/wp-content/uploads/2021/04/university-of-western-australia-logo-freelogovectors.net_.png' }
 ];
 
 const defaultAlumniData = {
     'UI': 2450, 'UGM': 1850, 'ITB': 1650, 'UNAIR': 1420, 'IPB': 1350,
-    'UNDIP': 1280, 'UNPAD': 1150, 'UB': 980, 'ITS': 890, 'UNJ': 750, 'UPNVJ': 520,
+    'UNDIP': 1280, 'UNPAD': 1150, 'UB': 980, 'ITS': 890, 'UNJ': 750,
+    'UPNVJ': 520, 'UNAND': 310, 'UNHAS': 280, 'UPNVYK': 220, 'PNJ': 190,
     'MONASH': 1, 'UT': 2, 'UWA': 1
 };
 
+// ============================================
+// LINK URLS
+// ============================================
 const linkUrls = {
-    loginSiswa: './portal-siswa-68.html',
-    loginGuru: 'portal-guru.html',
-    ppdb: 'https://spmb.jakarta.go.id/',
-    virsch: './virsch-68.html',
-    penmurmut: './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html',
+    loginSiswa:    './portal-siswa-68.html',
+    loginGuru:     'portal-guru.html',
+    ppdb:          'https://spmb.jakarta.go.id/',
+    virsch:        './virsch-68.html',
+    penmurmut:     './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html',
     pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
-    kelulusan: './unduh-kartu-peserta.html',
-    hukum: './hukum.html' 
+    topJurusan:    './top-jurusan-kuliah-2026.html',
+    kelulusan:     './unduh-kartu-peserta.html',
+    hukum:         './hukum.html'
 };
 
 // ============================================
-// DOM ELEMENTS
+// DOM CACHE
 // ============================================
-const DOM = {
-    preloader: document.getElementById('preloader'),
-    navToggle: document.getElementById('navToggle'),
-    navMenu: document.getElementById('navMenu'),
-    navLinks: document.querySelectorAll('.nav-link'),
-    yearSelect: document.getElementById('yearSelect'),
-    ptnGrid: document.getElementById('ptnGrid'),
-    newsGrid: document.getElementById('newsGrid'),
-    agendaGrid: document.getElementById('agendaGrid'),
-    galleryGrid: document.getElementById('galleryGrid'),
-    testimonialGrid: document.getElementById('testimonialGrid'),
-    facilityGrid: document.getElementById('facilityGrid'),
-    operationalHours: document.getElementById('operationalHours'),
-    newsModal: document.getElementById('newsModal'),
-    newsModalBody: document.getElementById('newsModalBody'),
-    historyModal: document.getElementById('historyModal'),
-    historyList: document.getElementById('historyList'),
-    tutorialModal: document.getElementById('tutorialModal'),
-    privacyModal: document.getElementById('privacyModal'),
-    toastContainer: document.getElementById('toastContainer'),
-    floatingMenu: document.querySelector('.floating-menu'),
-    floatingToggle: document.getElementById('floatingToggle'),
-    floatingItems: document.getElementById('floatingItems')
-};
+const $ = id => document.getElementById(id);
+const $$ = sel => document.querySelectorAll(sel);
 
 // ============================================
-// YOUTUBE PLAYER - PUTAR BERURUTAN
+// PRELOADER CINEMATIC
+// ============================================
+function initPreloader() {
+    const preloader  = $('preloader');
+    const bar        = $('preloaderProgress');
+    const percent    = $('preloaderPercent');
+    const particles  = $('preloaderParticles');
+
+    // Spawn particles
+    if (particles) {
+        for (let i = 0; i < 20; i++) {
+            const p = document.createElement('div');
+            p.style.cssText = `
+                position:absolute;
+                width:${2 + Math.random()*4}px;
+                height:${2 + Math.random()*4}px;
+                border-radius:50%;
+                background:rgba(52,211,153,${0.2 + Math.random()*0.4});
+                left:${Math.random()*100}%;
+                animation: float ${4 + Math.random()*6}s linear ${Math.random()*4}s infinite;
+            `;
+            particles.appendChild(p);
+        }
+    }
+
+    // Animate progress bar
+    let prog = 0;
+    const interval = setInterval(() => {
+        prog += Math.random() * 18;
+        if (prog > 100) prog = 100;
+        if (bar)     bar.style.width = prog + '%';
+        if (percent) percent.textContent = Math.round(prog) + '%';
+        if (prog >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                preloader?.classList.add('hide');
+                setTimeout(() => {
+                    if (preloader) preloader.style.display = 'none';
+                }, 700);
+            }, 300);
+        }
+    }, 80);
+}
+
+// ============================================
+// CUSTOM CURSOR
+// ============================================
+function initCursor() {
+    const dot  = $('cursorDot');
+    const ring = $('cursorRing');
+    if (!dot || !ring || window.matchMedia('(max-width:768px)').matches) return;
+
+    let mouseX = 0, mouseY = 0;
+    let ringX = 0, ringY = 0;
+
+    document.addEventListener('mousemove', e => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        dot.style.left  = mouseX + 'px';
+        dot.style.top   = mouseY + 'px';
+    });
+
+    // Smooth ring follow
+    (function animateRing() {
+        ringX += (mouseX - ringX) * 0.12;
+        ringY += (mouseY - ringY) * 0.12;
+        ring.style.left = ringX + 'px';
+        ring.style.top  = ringY + 'px';
+        requestAnimationFrame(animateRing);
+    })();
+
+    // Hover effects
+    document.addEventListener('mouseover', e => {
+        const target = e.target.closest('a, button, .ptn-card, .news-card, .gallery-item, .bento-card');
+        if (target) {
+            dot.style.transform  = 'translate(-50%,-50%) scale(2)';
+            ring.style.width     = '56px';
+            ring.style.height    = '56px';
+            ring.style.opacity   = '0.3';
+        }
+    });
+    document.addEventListener('mouseout', () => {
+        dot.style.transform  = 'translate(-50%,-50%) scale(1)';
+        ring.style.width     = '36px';
+        ring.style.height    = '36px';
+        ring.style.opacity   = '0.5';
+    });
+}
+
+// ============================================
+// SCROLL PROGRESS BAR
+// ============================================
+function initScrollProgress() {
+    const bar = $('scrollProgress');
+    if (!bar) return;
+
+    window.addEventListener('scroll', () => {
+        const scrollTop  = window.scrollY;
+        const docHeight  = document.documentElement.scrollHeight - window.innerHeight;
+        const pct        = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        bar.style.width  = pct + '%';
+    }, { passive: true });
+}
+
+// ============================================
+// DIGITAL CLOCK (TOP BAR)
+// ============================================
+function initClock() {
+    const el = $('clockDisplay');
+    if (!el) return;
+
+    function update() {
+        const now  = new Date();
+        const pad  = n => String(n).padStart(2, '0');
+        el.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} WIB`;
+    }
+    update();
+    setInterval(update, 1000);
+}
+
+// ============================================
+// THEME TOGGLE (DARK / LIGHT)
+// ============================================
+function initThemeToggle() {
+    const btn  = $('themeToggle');
+    const icon = $('themeIcon');
+    const html = document.documentElement;
+
+    // Restore saved preference
+    const saved = localStorage.getItem('sman68-theme') || 'light';
+    html.setAttribute('data-theme', saved);
+    if (icon) icon.className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+
+    btn?.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next    = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('sman68-theme', next);
+        if (icon) icon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    });
+}
+
+// ============================================
+// NAVBAR — SMART HIDE / SHOW + ACTIVE LINK
+// ============================================
+function initNavbar() {
+    const navbar  = $('navbar');
+    const toggle  = $('navToggle');
+    const menu    = $('navMenu');
+    const links   = $$('.nav-link');
+
+    // Mobile toggle
+    toggle?.addEventListener('click', () => {
+        toggle.classList.toggle('active');
+        menu?.classList.toggle('active');
+    });
+
+    // Close on link click
+    links.forEach(link => {
+        link.addEventListener('click', () => {
+            toggle?.classList.remove('active');
+            menu?.classList.remove('active');
+        });
+    });
+
+    // Smart hide/show on scroll
+    window.addEventListener('scroll', () => {
+        const current = window.scrollY;
+
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                if (navbar) {
+                    if (current > 100) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                    // Hide on scroll down, show on scroll up
+                    if (current > lastScrollY && current > 300) {
+                        navbar.classList.add('hide-nav');
+                    } else {
+                        navbar.classList.remove('hide-nav');
+                    }
+                }
+                lastScrollY = current;
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+
+    // Active nav on scroll via IntersectionObserver
+    const sections = $$('section[id]');
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                links.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                });
+                // Update mobile bottom nav
+                $$('.mob-nav-item').forEach(item => {
+                    item.classList.toggle('active', item.getAttribute('data-section') === id);
+                });
+            }
+        });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+}
+
+// ============================================
+// SMOOTH SCROLL
+// ============================================
+function initSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', e => {
+            const href = anchor.getAttribute('href');
+            if (href === '#') return;
+            const target = document.querySelector(href);
+            if (!target) return;
+            e.preventDefault();
+            const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-h')) || 72;
+            const y    = target.getBoundingClientRect().top + window.scrollY - navH - 16;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        });
+    });
+}
+
+// ============================================
+// HERO PARTICLES
+// ============================================
+function initHeroParticles() {
+    const container = $('heroParticles');
+    if (!container) return;
+
+    const count = window.innerWidth < 768 ? 12 : 28;
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'hero-particle';
+        const size  = 2 + Math.random() * 5;
+        const dur   = 8 + Math.random() * 14;
+        const delay = Math.random() * 10;
+        const left  = Math.random() * 100;
+        p.style.cssText = `
+            width:${size}px; height:${size}px;
+            left:${left}%;
+            animation-duration:${dur}s;
+            animation-delay:${delay}s;
+            background:rgba(255,255,255,${0.15 + Math.random()*0.35});
+        `;
+        container.appendChild(p);
+    }
+}
+
+// ============================================
+// YOUTUBE PLAYER (BG VIDEO SLIDER)
 // ============================================
 const videoList = [
-    'hDZ3-jZ4Rnw',  // ID Video 1
-    'cBbahZk3mMc',    // ID Video 2 (GANTI dengan ID video kedua)
-    '9D_JcXY4Sr8'    // ID Video 3 (GANTI dengan ID video ketiga)
+    'hDZ3-jZ4Rnw',
+    'cBbahZk3mMc',
+    '9D_JcXY4Sr8'
 ];
-
 let currentVideoIndex = 0;
 
 function onYouTubeIframeAPIReady() {
-    player = new YT.Player('youtubePlayer', {
-        videoId: videoList[currentVideoIndex],
-        playerVars: {
-            autoplay: 1,
-            mute: 1,
-            controls: 0,
-            loop: 1,
-            playlist: videoList.join(','), // Playlist kedua video
-            modestbranding: 1,
-            rel: 0,
-            showinfo: 0,
-            iv_load_policy: 3
-        },
+    const wrapper = document.getElementById('youtubePlayer');
+    if (!wrapper) return;
+
+    // Build iframe inside the wrapper
+    wrapper.innerHTML = `<iframe
+        id="ytIframe"
+        src="https://www.youtube.com/embed/${videoList[0]}?autoplay=1&mute=1&controls=0&loop=0&playlist=${videoList.join(',')}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&enablejsapi=1"
+        allow="autoplay; encrypted-media"
+        allowfullscreen
+        style="position:absolute;top:50%;left:50%;width:177.78vh;height:56.25vw;min-width:100vw;min-height:100vh;transform:translate(-50%,-50%);pointer-events:none;border:none;">
+    </iframe>`;
+
+    player = new YT.Player('ytIframe', {
         events: {
-            onReady: () => player.playVideo(),
-            onStateChange: (event) => {
-                // Saat video selesai, putar video berikutnya
-                if (event.data === 0) {
+            onReady: e => e.target.playVideo(),
+            onStateChange: e => {
+                if (e.data === YT.PlayerState.ENDED) {
                     currentVideoIndex = (currentVideoIndex + 1) % videoList.length;
-                    player.loadVideoById(videoList[currentVideoIndex]);
+                    e.target.loadVideoById(videoList[currentVideoIndex]);
+                    e.target.playVideo();
                 }
             }
         }
     });
 }
 
-const tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-document.head.appendChild(tag);
+// Load YouTube API
+(function loadYTAPI() {
+    const tag = document.createElement('script');
+    tag.src   = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+})();
 
 // ============================================
-// INITIALIZATION
+// SOUND TOGGLE
 // ============================================
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => DOM.preloader?.classList.add('hide'), 500);
-    AOS.init({ duration: 800, once: true, offset: 100 });
-    initializeApp();
-});
+function initSoundToggle() {
+    const btn  = $('soundToggle');
+    const icon = $('soundIcon');
+    if (!btn) return;
 
-function initializeApp() {
-    setupNavigation();
-    setupSmoothScroll();
-    setupFloatingMenu();
-    setupVideoSound();
-    setupLinks();
-    setupNavbarScroll();
-    setupActiveNavOnScroll();
-    
-    initializePTNGrid();
-    initializeLiveChat();
-    initializeTutorial();
-    initializePrivacy();
-    initializeFeedback();
-    initializeNewsModal();
-    initializeHistoryModal();
-    
-    loadAllData();
-    setupRealtimeListeners();
-    populateYearSelect();
-    checkChatStatus();
-
-    loadFloatingAnnouncement();
-    setupFloatingAnnouncement();
-    listenAnnouncementChanges();
-
-    enableKelulusanLink();
-}
-
-// ============================================
-// SETUP FUNCTIONS
-// ============================================
-function setupNavigation() {
-    DOM.navToggle?.addEventListener('click', () => {
-        DOM.navToggle.classList.toggle('active');
-        DOM.navMenu?.classList.toggle('active');
-    });
-    DOM.navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            DOM.navToggle.classList.remove('active');
-            DOM.navMenu?.classList.remove('active');
-            DOM.navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-        });
-    });
-}
-
-function setupSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', e => {
-            const href = anchor.getAttribute('href');
-            if (href === '#') return;
-            e.preventDefault();
-            const target = document.querySelector(href);
-            if (target) {
-                window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
-            }
-        });
-    });
-}
-
-function setupFloatingMenu() {
-    DOM.floatingToggle?.addEventListener('click', e => {
-        e.stopPropagation();
-        DOM.floatingMenu?.classList.toggle('active');
-    });
-    document.addEventListener('click', () => DOM.floatingMenu?.classList.remove('active'));
-}
-
-function setupVideoSound() {
-    document.getElementById('soundToggle')?.addEventListener('click', () => {
-        if (!player) return;
-        if (isMuted) { player.unMute(); document.querySelector('#soundToggle i').className = 'fas fa-volume-up'; }
-        else { player.mute(); document.querySelector('#soundToggle i').className = 'fas fa-volume-mute'; }
+    btn.addEventListener('click', () => {
+        if (!player || typeof player.isMuted !== 'function') return;
+        if (isMuted) {
+            player.unMute();
+            player.setVolume(40);
+            if (icon) icon.className = 'fas fa-volume-up';
+        } else {
+            player.mute();
+            if (icon) icon.className = 'fas fa-volume-mute';
+        }
         isMuted = !isMuted;
     });
 }
 
-function setupLinks() {
-    const linkIds = [
-        'topLoginSiswa','topLoginGuru','topPPDB','topVirsch',
-        'floatLoginSiswa','floatLoginGuru','floatPPDB','floatVirsch',
-        'footerLoginSiswa','footerLoginGuru','footerPPDB','footerVirsch',
-        'topPenmurmut', 'floatPenmurmut',
-        'topPemeringkatan','floatPemeringkatan','footerPemeringkatan',
-        'btnPemeringkatan',
-        'topKelulusan','floatKelulusan','footerKelulusan',
-        'navKelulusan', 'footerHukum'
-    ];
-    linkIds.forEach(id => {
-        const el = document.getElementById(id);
+// ============================================
+// HERO COUNTER ANIMATION
+// ============================================
+function initCounterAnimation() {
+    const counters = $$('.counter[data-target]');
+    if (!counters.length) return;
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !countersDone) {
+                countersDone = true;
+                counters.forEach(el => {
+                    const target   = parseInt(el.dataset.target);
+                    const duration = 2000;
+                    const step     = target / (duration / 16);
+                    let current    = 0;
+
+                    const timer = setInterval(() => {
+                        current += step;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(timer);
+                        }
+                        el.textContent = Math.floor(current).toLocaleString('id-ID');
+                    }, 16);
+                });
+            }
+        });
+    }, { threshold: 0.3 });
+
+    if (counters[0]) observer.observe(counters[0].closest('.hero-stats') || counters[0]);
+}
+
+// ============================================
+// FLOATING QUICK ACCESS (FAB)
+// ============================================
+function initFloatingFab() {
+    const fab    = $('floatingFab');
+    const toggle = $('fabToggle');
+    const icon   = $('fabIcon');
+    const items  = $('fabItems');
+
+    toggle?.addEventListener('click', e => {
+        e.stopPropagation();
+        fab?.classList.toggle('active');
+        if (icon) {
+            icon.className = fab?.classList.contains('active') ? 'fas fa-times' : 'fas fa-grip';
+        }
+    });
+
+    document.addEventListener('click', () => {
+        fab?.classList.remove('active');
+        if (icon) icon.className = 'fas fa-grip';
+    });
+
+    items?.addEventListener('click', e => e.stopPropagation());
+}
+
+// ============================================
+// LINK ROUTER
+// ============================================
+function initLinks() {
+    const map = {
+        topLoginSiswa:     'loginSiswa',
+        topLoginGuru:      'loginGuru',
+        topPPDB:           'ppdb',
+        topVirsch:         'virsch',
+        topPenmurmut:      'penmurmut',
+        floatLoginSiswa:   'loginSiswa',
+        floatLoginGuru:    'loginGuru',
+        floatPPDB:         'ppdb',
+        floatVirsch:       'virsch',
+        floatPenmurmut:    'penmurmut',
+        floatPemeringkatan:'pemeringkatan',
+        footerLoginSiswa:  'loginSiswa',
+        footerLoginGuru:   'loginGuru',
+        footerVirsch:      'virsch',
+        footerHukum:       'hukum',
+        btnPemeringkatan:  'pemeringkatan',
+        btnTopJurusan:     'topJurusan',
+        navKelulusan:      'kelulusan',
+        heroPPDB:          'ppdb'
+    };
+
+    Object.entries(map).forEach(([id, key]) => {
+        const el = $(id);
         if (el) {
             el.addEventListener('click', e => {
                 e.preventDefault();
-                if (id.includes('Siswa') || id.includes('LoginSiswa')) window.open(linkUrls.loginSiswa, '_blank');
-                else if (id.includes('Guru') || id.includes('LoginGuru')) window.open(linkUrls.loginGuru, '_blank');
-                else if (id.includes('PPDB') || id.includes('ppdb')) window.open(linkUrls.ppdb, '_blank');
-                else if (id.includes('Virsch') || id.includes('virsch')) window.open(linkUrls.virsch, '_blank');
-                else if (id.includes('Penmurmut') || id.includes('penmurmut')) window.open(linkUrls.penmurmut, '_blank');
-                else if (id.includes('Pemeringkatan') || id.includes('pemeringkatan')) window.open(linkUrls.pemeringkatan, '_blank');
-                else if (id.includes('Kelulusan') || id.includes('kelulusan')) window.open(linkUrls.kelulusan, '_blank');
-                else if (id.includes('Hukum') || id.includes('hukum')) window.open(linkUrls.hukum, '_blank');
+                if (linkUrls[key]) window.open(linkUrls[key], '_blank');
             });
         }
     });
 }
 
-function setupNavbarScroll() {
-    window.addEventListener('scroll', () => {
-        const navbar = document.getElementById('navbar');
-        if (window.scrollY > 100) navbar?.classList.add('scrolled');
-        else navbar?.classList.remove('scrolled');
-    });
-}
+// ============================================
+// KELULUSAN LINK — TIME-LOCKED
+// ============================================
+function initKelulusanLink() {
+    const target = new Date('2026-05-18T08:00:00+07:00');
+    const now    = new Date();
+    const el     = $('navKelulusan');
+    if (!el) return;
 
-function setupActiveNavOnScroll() {
-    const sections = document.querySelectorAll('section[id]');
-    window.addEventListener('scroll', () => {
-        let current = '';
-        const scrollY = window.scrollY + 100;
-        sections.forEach(section => {
-            if (scrollY >= section.offsetTop && scrollY < section.offsetTop + section.offsetHeight) {
-                current = section.getAttribute('id');
-            }
-        });
-        DOM.navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${current}`) link.classList.add('active');
-        });
-    });
+    if (now >= target) {
+        el.classList.remove('nav-disabled', 'nav-special');
+        el.textContent   = 'Unduh Kartu Peserta';
+        el.style.cssText = 'pointer-events:auto;opacity:1;cursor:pointer;';
+    }
 }
 
 // ============================================
-// PTN GRID
+// PTN GRID RENDER
 // ============================================
-function initializePTNGrid() {
-    if (!DOM.ptnGrid) return;
-    DOM.ptnGrid.innerHTML = '';
+function initPTNGrid() {
+    const grid = $('ptnGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
     ptnList.forEach(ptn => {
         const card = document.createElement('div');
         card.className = 'ptn-card';
         card.innerHTML = `
-            <img src="${ptn.logo}" alt="${ptn.name}" loading="lazy">
+            <img src="${ptn.logo}" alt="${ptn.name}" loading="lazy" onerror="this.src='https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png'">
             <h4>${ptn.fullName}</h4>
             <div class="ptn-count" id="count-${ptn.name}">0</div>
         `;
-        DOM.ptnGrid.appendChild(card);
+        grid.appendChild(card);
     });
 }
 
+// ============================================
+// YEAR SELECT POPULATE
+// ============================================
 function populateYearSelect() {
-    if (!DOM.yearSelect) return;
-    const currentYear = new Date().getFullYear();
-    for (let y = 2011; y <= currentYear; y++) {
-        const opt = document.createElement('option');
-        opt.value = y; opt.textContent = y;
-        DOM.yearSelect.appendChild(opt);
+    const sel = $('yearSelect');
+    if (!sel) return;
+
+    const year = new Date().getFullYear();
+    for (let y = 2011; y <= year; y++) {
+        const opt   = document.createElement('option');
+        opt.value   = y;
+        opt.textContent = y;
+        sel.appendChild(opt);
     }
-    DOM.yearSelect.addEventListener('change', loadPTNData);
+    sel.addEventListener('change', loadPTNData);
 }
 
+// ============================================
+// LOAD PTN DATA
+// ============================================
 async function loadPTNData() {
-    const selectedYear = DOM.yearSelect?.value || 'all';
+    const sel  = $('yearSelect');
+    const year = sel?.value || 'all';
+
     try {
         let query = db.collection('alumni');
-        if (selectedYear !== 'all') query = query.where('year', '==', parseInt(selectedYear));
-        const snapshot = await query.get();
+        if (year !== 'all') query = query.where('year', '==', parseInt(year));
+        const snap = await query.get();
         const counts = {};
-        if (!snapshot.empty) snapshot.forEach(doc => { const d = doc.data(); counts[d.ptn] = (counts[d.ptn] || 0) + 1; });
+
+        if (!snap.empty) {
+            snap.forEach(doc => {
+                const d = doc.data();
+                counts[d.ptn] = (counts[d.ptn] || 0) + 1;
+            });
+        }
+
         ptnList.forEach(ptn => {
-            const el = document.getElementById(`count-${ptn.name}`);
-            if (el) el.textContent = counts[ptn.name] || defaultAlumniData[ptn.name] || '0';
+            const el = $(`count-${ptn.name}`);
+            if (!el) return;
+            const val = counts[ptn.name] ?? defaultAlumniData[ptn.name] ?? 0;
+            animateCount(el, val);
         });
-    } catch (e) {
+    } catch {
         ptnList.forEach(ptn => {
-            const el = document.getElementById(`count-${ptn.name}`);
-            if (el) el.textContent = defaultAlumniData[ptn.name] || '0';
+            const el = $(`count-${ptn.name}`);
+            if (el) animateCount(el, defaultAlumniData[ptn.name] || 0);
         });
     }
 }
 
-// ============================================
-// LOAD ALL DATA
-// ============================================
-function loadAllData() {
-    loadPTNData();
-    loadNewsData();
-    loadAgendaData();
-    loadGalleryData();
-    loadTestimonialData();
-    loadFacilityData();
-    loadOperationalHours();
+function animateCount(el, target) {
+    const duration = 1200;
+    const step     = target / (duration / 16);
+    let current    = 0;
+
+    const timer = setInterval(() => {
+        current += step;
+        if (current >= target) { current = target; clearInterval(timer); }
+        el.textContent = Math.floor(current).toLocaleString('id-ID');
+    }, 16);
 }
 
 // ============================================
-// NEWS
+// LOAD NEWS — WITH PAGINATION
 // ============================================
-function initializeNewsModal() {
-    DOM.newsModal?.querySelector('.modal-close-btn')?.addEventListener('click', () => DOM.newsModal.classList.remove('active'));
-    DOM.newsModal?.addEventListener('click', e => { if (e.target === DOM.newsModal) DOM.newsModal.classList.remove('active'); });
-}
+const NEWS_PER_PAGE  = 9;
+let   newsLastDoc    = null;   // dokumen terakhir yang dimuat
+let   newsAllLoaded  = false;  // sudah habis semua?
+let   newsLoading    = false;  // sedang fetch?
 
 async function loadNewsData() {
-    if (!DOM.newsGrid) return;
+    // Reset state saat realtime listener trigger ulang
+    const grid = $('newsGrid');
+    if (!grid) return;
+
+    newsLastDoc   = null;
+    newsAllLoaded = false;
+    grid.innerHTML = '';
+    updateLoadMoreBtn(false);
+
     try {
-        const snapshot = await db.collection('news').orderBy('date', 'desc').limit(6).get();
-        DOM.newsGrid.innerHTML = '';
-        if (snapshot.empty) { DOM.newsGrid.innerHTML = '<div class="empty-state"><p>Belum ada berita</p></div>'; return; }
-        snapshot.forEach(doc => DOM.newsGrid.appendChild(createNewsCard(doc.id, doc.data())));
-    } catch (e) { DOM.newsGrid.innerHTML = '<div class="empty-state"><p>Gagal memuat berita</p></div>'; }
+        const snap = await db.collection('news')
+            .orderBy('date', 'desc')
+            .limit(NEWS_PER_PAGE)
+            .get();
+
+        if (snap.empty) {
+            grid.innerHTML = buildEmptyState('newspaper', 'Belum ada berita tersedia');
+            hideLoadMore();
+            return;
+        }
+
+        snap.forEach(doc => grid.appendChild(createNewsCard(doc.id, doc.data())));
+        newsLastDoc = snap.docs[snap.docs.length - 1];
+
+        // Jika hasil < limit, berarti sudah habis
+        if (snap.docs.length < NEWS_PER_PAGE) {
+            markAllLoaded();
+        }
+    } catch {
+        grid.innerHTML = buildEmptyState('exclamation-circle', 'Gagal memuat berita');
+        hideLoadMore();
+    }
+}
+
+async function loadMoreNews() {
+    if (newsAllLoaded || newsLoading || !newsLastDoc) return;
+    newsLoading = true;
+
+    const btn  = $('btnLoadMore');
+    const hint = $('loadMoreHint');
+    if (btn) {
+        btn.classList.add('loading');
+        btn.querySelector('span').textContent = 'Memuat...';
+    }
+
+    try {
+        const snap = await db.collection('news')
+            .orderBy('date', 'desc')
+            .startAfter(newsLastDoc)
+            .limit(NEWS_PER_PAGE)
+            .get();
+
+        const grid = $('newsGrid');
+        if (!grid) return;
+
+        if (snap.empty) {
+            markAllLoaded();
+            return;
+        }
+
+        snap.forEach(doc => {
+            const card = createNewsCard(doc.id, doc.data());
+            card.style.opacity   = '0';
+            card.style.transform = 'translateY(20px)';
+            grid.appendChild(card);
+            // Animate in
+            requestAnimationFrame(() => {
+                card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                card.style.opacity    = '1';
+                card.style.transform  = 'translateY(0)';
+            });
+        });
+
+        newsLastDoc = snap.docs[snap.docs.length - 1];
+
+        if (snap.docs.length < NEWS_PER_PAGE) {
+            markAllLoaded();
+        } else {
+            if (hint) hint.textContent = snap.docs.length + ' berita berhasil dimuat';
+            setTimeout(() => { if (hint) hint.textContent = ''; }, 2500);
+        }
+    } catch {
+        showToast('Gagal memuat berita lainnya.', 'error');
+    } finally {
+        newsLoading = false;
+        if (btn) {
+            btn.classList.remove('loading');
+            btn.querySelector('span').textContent = 'Lihat Berita Sebelumnya';
+        }
+    }
+}
+
+function markAllLoaded() {
+    newsAllLoaded = true;
+    const btn  = $('btnLoadMore');
+    const hint = $('loadMoreHint');
+    if (btn) {
+        btn.classList.add('all-loaded');
+        btn.querySelector('span').textContent = 'Semua berita sudah ditampilkan';
+        btn.querySelector('i:first-child').className = 'fas fa-check-circle';
+    }
+    if (hint) hint.textContent = '';
+}
+
+function hideLoadMore() {
+    const wrap = $('newsLoadMore');
+    if (wrap) wrap.style.display = 'none';
+}
+
+function updateLoadMoreBtn(loading) {
+    const btn = $('btnLoadMore');
+    if (!btn) return;
+    btn.classList.remove('loading', 'all-loaded');
+    btn.querySelector('span').textContent = 'Lihat Berita Sebelumnya';
+    if ($('btnLoadMoreChevron')) $('btnLoadMoreChevron').style.transform = '';
+}
+
+function initLoadMoreNews() {
+    const btn = $('btnLoadMore');
+    btn?.addEventListener('click', loadMoreNews);
 }
 
 function createNewsCard(id, data) {
     const card = document.createElement('div');
     card.className = 'news-card';
-    const date = data.date?.toDate ? new Date(data.date.toDate()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+
+    const dateStr = data.date?.toDate
+        ? new Date(data.date.toDate()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '';
+
+    const excerpt = data.excerpt || (data.content?.substring(0, 110) + '...') || '';
+    const img     = data.image || 'https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png';
+
     card.innerHTML = `
-        <img src="${data.image || ''}" alt="${data.title}" class="news-image" loading="lazy">
+        <div class="news-image-wrap">
+            <img src="${img}" alt="${data.title}" class="news-image" loading="lazy"
+                 onerror="this.src='https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png'">
+        </div>
         <div class="news-content">
-            <div class="news-date"><i class="far fa-calendar-alt"></i> ${date}</div>
+            <div class="news-date"><i class="far fa-calendar-alt"></i> ${dateStr}</div>
             <h3 class="news-title">${data.title}</h3>
-            <p class="news-excerpt">${data.excerpt || data.content?.substring(0, 100) || ''}...</p>
-            <button class="btn-readmore">Baca Selengkapnya →</button>
+            <p class="news-excerpt">${excerpt}</p>
+            <button class="btn-readmore">Baca Selengkapnya <i class="fas fa-arrow-right"></i></button>
         </div>
     `;
-    card.querySelector('.btn-readmore').addEventListener('click', () => showNewsDetail(data, date));
+
+    card.querySelector('.btn-readmore').addEventListener('click', () => openNewsModal(data, dateStr));
+    card.addEventListener('click', e => {
+        if (!e.target.closest('.btn-readmore')) openNewsModal(data, dateStr);
+    });
     return card;
 }
 
-function showNewsDetail(data, date) {
-    if (!DOM.newsModal || !DOM.newsModalBody) return;
-    
-    // Ubah konten jadi paragraf yang rapi
-    let contentHtml = data.content || 'Konten lengkap akan segera tersedia.';
-    if (contentHtml.includes('\n')) {
-        contentHtml = contentHtml
-            .split('\n\n')
-            .map(p => p.trim())
-            .filter(p => p.length > 0)
-            .map(p => `<p style="margin-bottom:20px;line-height:1.9;color:var(--dark-gray);text-indent:30px;">${p.replace(/\n/g, '<br>')}</p>`)
+function openNewsModal(data, dateStr) {
+    const modal = $('newsModal');
+    const body  = $('newsModalBody');
+    if (!modal || !body) return;
+
+    let html = data.content || 'Konten akan segera tersedia.';
+    if (html.includes('\n')) {
+        html = html.split('\n\n')
+            .map(p => p.trim()).filter(Boolean)
+            .map(p => `<p style="margin-bottom:18px;line-height:1.9;text-indent:2em;">${p.replace(/\n/g,'<br>')}</p>`)
             .join('');
     } else {
-        contentHtml = `<p style="margin-bottom:20px;line-height:1.9;color:var(--dark-gray);text-indent:30px;">${contentHtml}</p>`;
+        html = `<p style="line-height:1.9;text-indent:2em;">${html}</p>`;
     }
-    
-    DOM.newsModalBody.innerHTML = `
-        <h2 style="color:var(--dark);margin-bottom:10px;font-size:1.5rem;font-weight:700;">${data.title}</h2>
-        <div style="display:flex;gap:20px;margin-bottom:25px;color:var(--primary-blue);font-size:0.9rem;">
-            <span><i class="far fa-calendar-alt"></i> ${date}</span>
+
+    const img = data.image
+        ? `<img src="${data.image}" style="width:100%;border-radius:16px;margin-bottom:24px;box-shadow:0 8px 32px rgba(0,0,0,.12);" loading="lazy">`
+        : '';
+
+    body.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="background:var(--emerald-50);color:var(--primary);padding:3px 12px;border-radius:999px;font-size:.7rem;font-weight:700;letter-spacing:1px;">BERITA</span>
+        </div>
+        <h2 style="font-family:var(--font-heading);font-size:1.4rem;font-weight:800;margin-bottom:12px;line-height:1.25;">${data.title}</h2>
+        <div style="display:flex;gap:16px;margin-bottom:20px;color:var(--primary);font-size:.8rem;">
+            <span><i class="far fa-calendar-alt"></i> ${dateStr}</span>
             <span><i class="far fa-folder"></i> Berita</span>
         </div>
-        ${data.image ? `<img src="${data.image}" style="width:100%;border-radius:12px;margin-bottom:25px;box-shadow:var(--shadow-md);">` : ''}
-        ${contentHtml}
+        ${img}
+        ${html}
     `;
-    DOM.newsModal.classList.add('active');
+    modal.classList.add('active');
+}
+
+function initNewsModal() {
+    const modal  = $('newsModal');
+    const closeX = modal?.querySelector('.news-modal-close');
+    closeX?.addEventListener('click', () => modal.classList.remove('active'));
+    modal?.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
 }
 
 // ============================================
-// AGENDA
+// LOAD AGENDA
 // ============================================
 async function loadAgendaData() {
-    if (!DOM.agendaGrid) return;
+    const grid = $('agendaGrid');
+    if (!grid) return;
+
     try {
-        const today = new Date(); today.setHours(0,0,0,0);
-        const snapshot = await db.collection('agenda').where('date', '>=', today).orderBy('date', 'asc').limit(6).get();
-        DOM.agendaGrid.innerHTML = '';
-        if (snapshot.empty) { DOM.agendaGrid.innerHTML = '<div class="empty-state"><p>Belum ada agenda</p></div>'; return; }
-        snapshot.forEach(doc => DOM.agendaGrid.appendChild(createAgendaCard(doc.data())));
-    } catch (e) { DOM.agendaGrid.innerHTML = '<div class="empty-state"><p>Gagal memuat agenda</p></div>'; }
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const snap  = await db.collection('agenda')
+            .where('date', '>=', today)
+            .orderBy('date', 'asc')
+            .limit(6).get();
+
+        grid.innerHTML = '';
+        if (snap.empty) {
+            grid.innerHTML = buildEmptyState('calendar-alt', 'Belum ada agenda mendatang');
+            return;
+        }
+        snap.forEach(doc => grid.appendChild(createAgendaCard(doc.data())));
+    } catch {
+        grid.innerHTML = buildEmptyState('exclamation-circle', 'Gagal memuat agenda');
+    }
 }
 
 function createAgendaCard(data) {
-    const card = document.createElement('div');
+    const card    = document.createElement('div');
     card.className = 'agenda-card';
-    const date = data.date?.toDate ? new Date(data.date.toDate()).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    const dateStr = data.date?.toDate
+        ? new Date(data.date.toDate()).toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
+        : '';
+
     card.innerHTML = `
         <span class="agenda-category">${data.category || 'Akademik'}</span>
         <h4 class="agenda-title">${data.title}</h4>
-        <div class="agenda-detail"><i class="fas fa-map-marker-alt"></i> ${data.location}</div>
-        <div class="agenda-detail"><i class="far fa-clock"></i> ${data.time}</div>
-        <div class="agenda-date"><i class="far fa-calendar-alt"></i> ${date}</div>
+        <div class="agenda-detail"><i class="fas fa-map-marker-alt"></i> ${data.location || '-'}</div>
+        <div class="agenda-detail"><i class="far fa-clock"></i> ${data.time || '-'}</div>
+        <div class="agenda-date"><i class="far fa-calendar-alt"></i> ${dateStr}</div>
     `;
     return card;
 }
 
 // ============================================
-// GALLERY
+// LOAD GALLERY
 // ============================================
 async function loadGalleryData() {
-    if (!DOM.galleryGrid) return;
+    const grid = $('galleryGrid');
+    if (!grid) return;
+
     try {
-        const snapshot = await db.collection('gallery').limit(8).get();
-        DOM.galleryGrid.innerHTML = '';
-        if (snapshot.empty) { DOM.galleryGrid.innerHTML = '<div class="empty-state"><p>Belum ada foto</p></div>'; return; }
-        snapshot.forEach(doc => DOM.galleryGrid.appendChild(createGalleryItem(doc.data())));
-    } catch (e) { DOM.galleryGrid.innerHTML = '<div class="empty-state"><p>Gagal memuat galeri</p></div>'; }
+        const snap = await db.collection('gallery').limit(8).get();
+        grid.innerHTML = '';
+        if (snap.empty) {
+            grid.innerHTML = buildEmptyState('images', 'Belum ada foto tersedia');
+            return;
+        }
+        snap.forEach(doc => grid.appendChild(createGalleryItem(doc.data())));
+    } catch {
+        grid.innerHTML = buildEmptyState('exclamation-circle', 'Gagal memuat galeri');
+    }
 }
 
 function createGalleryItem(data) {
-    const item = document.createElement('div');
+    const item    = document.createElement('div');
     item.className = 'gallery-item';
     item.innerHTML = `
-        <img src="${data.imageUrl}" alt="${data.caption}" loading="lazy">
-        <div class="gallery-overlay"><i class="fas fa-search-plus"></i><p>${data.caption}</p></div>
+        <img src="${data.imageUrl}" alt="${data.caption || ''}" loading="lazy"
+             onerror="this.src='https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png'">
+        <div class="gallery-item-overlay">
+            <i class="fas fa-expand-alt"></i>
+            <p>${data.caption || ''}</p>
+        </div>
     `;
-    item.addEventListener('click', () => showLightbox(data.imageUrl, data.caption));
+    item.addEventListener('click', () => openLightbox(data.imageUrl, data.caption));
     return item;
 }
 
-function showLightbox(url, caption) {
-    const lb = document.createElement('div');
-    lb.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';
-    lb.innerHTML = `<div style="max-width:90%;max-height:90%;text-align:center"><img src="${url}" style="max-width:100%;max-height:85vh;border-radius:16px"><p style="color:#fff;margin-top:15px">${caption}</p><button style="position:absolute;top:20px;right:30px;background:none;border:none;color:#fff;font-size:40px;cursor:pointer">&times;</button></div>`;
-    document.body.appendChild(lb);
-    lb.addEventListener('click', e => { if (e.target === lb || e.target.tagName === 'BUTTON') document.body.removeChild(lb); });
+function openLightbox(url, caption) {
+    const lb  = $('lightbox');
+    const img = $('lightboxImg');
+    const cap = $('lightboxCaption');
+    if (!lb) return;
+    if (img) img.src = url;
+    if (cap) cap.textContent = caption || '';
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function initLightbox() {
+    const lb  = $('lightbox');
+    const btn = $('lightboxClose');
+    btn?.addEventListener('click', closeLightbox);
+    lb?.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+}
+
+function closeLightbox() {
+    const lb = $('lightbox');
+    lb?.classList.remove('active');
+    document.body.style.overflow = '';
 }
 
 // ============================================
-// TESTIMONIALS
+// LOAD TESTIMONIALS — WITH PAGINATION
 // ============================================
+const TESTI_PER_PAGE  = 3;
+let   testiLastDoc    = null;
+let   testiAllLoaded  = false;
+let   testiLoading    = false;
+
 async function loadTestimonialData() {
-    if (!DOM.testimonialGrid) return;
+    const grid = $('testimonialGrid');
+    if (!grid) return;
+
+    testiLastDoc  = null;
+    testiAllLoaded = false;
+    grid.innerHTML = '';
+    updateTestiBtn(false);
+
     try {
-        const snapshot = await db.collection('testimonials').limit(6).get();
-        DOM.testimonialGrid.innerHTML = '';
-        if (snapshot.empty) { DOM.testimonialGrid.innerHTML = '<div class="empty-state"><p>Belum ada testimoni</p></div>'; return; }
-        snapshot.forEach(doc => DOM.testimonialGrid.appendChild(createTestimonialCard(doc.data())));
-    } catch (e) { DOM.testimonialGrid.innerHTML = '<div class="empty-state"><p>Gagal memuat testimoni</p></div>'; }
+        const snap = await db.collection('testimonials')
+            .limit(TESTI_PER_PAGE).get();
+
+        if (snap.empty) {
+            grid.innerHTML = buildEmptyState('comment-dots', 'Belum ada testimoni');
+            hideTestiLoadMore();
+            return;
+        }
+        snap.forEach(doc => grid.appendChild(createTestimonialCard(doc.data())));
+        testiLastDoc = snap.docs[snap.docs.length - 1];
+
+        if (snap.docs.length < TESTI_PER_PAGE) markTestiAllLoaded();
+    } catch {
+        grid.innerHTML = buildEmptyState('exclamation-circle', 'Gagal memuat testimoni');
+        hideTestiLoadMore();
+    }
+}
+
+async function loadMoreTestimonials() {
+    if (testiAllLoaded || testiLoading || !testiLastDoc) return;
+    testiLoading = true;
+
+    const btn  = $('btnLoadMoreTestimonial');
+    const hint = $('testiLoadHint');
+    if (btn) {
+        btn.classList.add('loading');
+        btn.querySelector('span').textContent = 'Memuat...';
+    }
+
+    try {
+        const snap = await db.collection('testimonials')
+            .startAfter(testiLastDoc)
+            .limit(TESTI_PER_PAGE).get();
+
+        const grid = $('testimonialGrid');
+        if (!grid) return;
+
+        if (snap.empty) { markTestiAllLoaded(); return; }
+
+        snap.forEach(doc => {
+            const card = createTestimonialCard(doc.data());
+            card.style.opacity   = '0';
+            card.style.transform = 'translateY(20px)';
+            grid.appendChild(card);
+            requestAnimationFrame(() => {
+                card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                card.style.opacity    = '1';
+                card.style.transform  = 'translateY(0)';
+            });
+        });
+
+        testiLastDoc = snap.docs[snap.docs.length - 1];
+        if (snap.docs.length < TESTI_PER_PAGE) {
+            markTestiAllLoaded();
+        } else {
+            if (hint) hint.textContent = snap.docs.length + ' testimoni berhasil dimuat';
+            setTimeout(() => { if (hint) hint.textContent = ''; }, 2500);
+        }
+    } catch {
+        showToast('Gagal memuat testimoni lainnya.', 'error');
+    } finally {
+        testiLoading = false;
+        if (btn) {
+            btn.classList.remove('loading');
+            btn.querySelector('span').textContent = 'Lihat Testimoni Selengkapnya';
+        }
+    }
+}
+
+function markTestiAllLoaded() {
+    testiAllLoaded = true;
+    const btn = $('btnLoadMoreTestimonial');
+    if (btn) {
+        btn.classList.add('all-loaded');
+        btn.querySelector('span').textContent = 'Semua testimoni sudah ditampilkan';
+        btn.querySelector('i:first-child').className = 'fas fa-check-circle';
+    }
+}
+
+function hideTestiLoadMore() {
+    const wrap = $('testimonialLoadMore');
+    if (wrap) wrap.style.display = 'none';
+}
+
+function updateTestiBtn(loading) {
+    const btn = $('btnLoadMoreTestimonial');
+    if (!btn) return;
+    btn.classList.remove('loading', 'all-loaded');
+    btn.querySelector('span').textContent = 'Lihat Testimoni Selengkapnya';
+}
+
+function initLoadMoreTestimonials() {
+    const btn = $('btnLoadMoreTestimonial');
+    btn?.addEventListener('click', loadMoreTestimonials);
 }
 
 function createTestimonialCard(data) {
-    const card = document.createElement('div');
+    const card    = document.createElement('div');
     card.className = 'testimonial-card';
-    const stars = '★'.repeat(data.stars || 5) + '☆'.repeat(5 - (data.stars || 5));
+
+    const stars    = '★'.repeat(data.stars || 5) + '☆'.repeat(5 - (data.stars || 5));
     const initials = (data.author || 'A').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
     card.innerHTML = `
         <div class="testimonial-stars">${stars}</div>
         <p class="testimonial-text">"${data.text}"</p>
-        <div class="testimonial-author"><div class="author-avatar">${initials}</div><div class="author-info"><h4>${data.author}</h4><p>${data.role}</p></div></div>
+        <div class="testimonial-author">
+            <div class="author-avatar">${initials}</div>
+            <div class="author-info">
+                <h4>${data.author || 'Alumni'}</h4>
+                <p>${data.role || 'Alumni SMAN 68'}</p>
+            </div>
+        </div>
     `;
     return card;
 }
 
 // ============================================
-// FACILITIES
+// LOAD FACILITIES
 // ============================================
 async function loadFacilityData() {
-    if (!DOM.facilityGrid) return;
+    const grid = $('facilityGrid');
+    if (!grid) return;
+
     try {
-        const snapshot = await db.collection('facilities').get();
-        DOM.facilityGrid.innerHTML = '';
-        if (snapshot.empty) { DOM.facilityGrid.innerHTML = '<div class="empty-state"><p>Belum ada fasilitas</p></div>'; return; }
-        snapshot.forEach(doc => DOM.facilityGrid.appendChild(createFacilityCard(doc.data())));
-    } catch (e) { DOM.facilityGrid.innerHTML = '<div class="empty-state"><p>Gagal memuat fasilitas</p></div>'; }
+        const snap = await db.collection('facilities').get();
+        grid.innerHTML = '';
+        if (snap.empty) {
+            grid.innerHTML = buildEmptyState('building', 'Belum ada data fasilitas');
+            return;
+        }
+        snap.forEach(doc => grid.appendChild(createFacilityCard(doc.data())));
+    } catch {
+        grid.innerHTML = buildEmptyState('exclamation-circle', 'Gagal memuat fasilitas');
+    }
 }
 
 function createFacilityCard(data) {
-    const card = document.createElement('div');
+    const card    = document.createElement('div');
     card.className = 'facility-card';
-    card.innerHTML = `<img src="${data.imageUrl}" alt="${data.name}" loading="lazy"><div class="facility-info"><h4>${data.name}</h4><p>${data.description}</p></div>`;
+    card.innerHTML = `
+        <img src="${data.imageUrl}" alt="${data.name}" loading="lazy"
+             onerror="this.src='https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png'">
+        <div class="facility-info">
+            <h4>${data.name}</h4>
+            <p>${data.description || ''}</p>
+        </div>
+    `;
     return card;
 }
 
@@ -511,461 +1078,691 @@ function createFacilityCard(data) {
 // OPERATIONAL HOURS
 // ============================================
 async function loadOperationalHours() {
-    if (!DOM.operationalHours) return;
+    const el = $('operationalHours');
+    if (!el) return;
+
+    const fallback = [
+        { label: 'Senin–Kamis', val: '07.00–16.00 WIB' },
+        { label: 'Jumat',       val: '07.00–16.30 WIB' },
+        { label: 'Sabtu',       val: '07.00–13.00 WIB' },
+        { label: 'Minggu',      val: 'Tutup' }
+    ];
+
     try {
-        const doc = await db.collection('settings').doc('operationalHours').get();
-        const days = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+        const doc  = await db.collection('settings').doc('operationalHours').get();
+        const days = ['senin','selasa','rabu','kamis','jumat','sabtu','minggu'];
+        const lbls = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+
         if (doc.exists) {
-            DOM.operationalHours.innerHTML = days.map(d => doc.data()[d.toLowerCase()] ? `<div><strong>${d}:</strong> ${doc.data()[d.toLowerCase()]}</div>` : '').join('');
+            const data = doc.data();
+            el.innerHTML = days
+                .filter(d => data[d])
+                .map((d, i) => `<div><strong>${lbls[i]}:</strong> ${data[d]}</div>`)
+                .join('');
         } else {
-            DOM.operationalHours.innerHTML = '<div><strong>Senin-Kamis:</strong> 07.00-16.00 WIB</div><div><strong>Jumat:</strong> 07.00-16.30 WIB</div><div><strong>Sabtu:</strong> 07.00-13.00 WIB</div><div><strong>Minggu:</strong> Tutup</div>';
+            el.innerHTML = fallback.map(f => `<div><strong>${f.label}:</strong> ${f.val}</div>`).join('');
         }
-    } catch (e) { DOM.operationalHours.innerHTML = '<div>Gagal memuat jam operasional</div>'; }
+    } catch {
+        el.innerHTML = fallback.map(f => `<div><strong>${f.label}:</strong> ${f.val}</div>`).join('');
+    }
 }
 
 // ============================================
-// CHECK CHAT STATUS (ONLINE/OFFLINE)
+// CHAT STATUS
 // ============================================
 async function checkChatStatus() {
     try {
-        const doc = await db.collection('settings').doc('chatStatus').get();
+        const doc   = await db.collection('settings').doc('chatStatus').get();
         isChatOnline = doc.exists ? (doc.data().isOnline !== false) : true;
-        updateChatUI();
-    } catch (e) { isChatOnline = true; updateChatUI(); }
-    
+    } catch {
+        isChatOnline = true;
+    }
+    updateChatStatusUI();
+
     // Real-time listener
     db.collection('settings').doc('chatStatus').onSnapshot(doc => {
         if (doc.exists) {
+            const was    = isChatOnline;
             isChatOnline = doc.data().isOnline !== false;
-            updateChatUI();
-            if (!isChatOnline && chatSession) {
+            updateChatStatusUI();
+            if (was && !isChatOnline && chatSession) {
                 showToast('Helpdesk telah offline. Chat akan diakhiri.', 'error');
-                endChatSession();
+                forceEndChat();
             }
         }
     });
 }
 
-function updateChatUI() {
-    const statusText = document.getElementById('chatStatusText');
-    const offlineEl = document.getElementById('chatOffline');
-    const registration = document.getElementById('chatRegistration');
-    
+function updateChatStatusUI() {
+    const statusText = $('chatStatusText');
+    const statusDot  = $('chatStatusDot');
+    const offline    = $('chatOffline');
+    const reg        = $('chatRegistration');
+
     if (statusText) {
-        statusText.innerHTML = isChatOnline ? '<span class="online-dot"></span> Online' : '<span style="color:#ef4444;">●</span> Offline';
+        statusText.innerHTML = isChatOnline
+            ? '<span class="status-dot online"></span> Online'
+            : '<span class="status-dot offline"></span> Offline';
     }
-    if (offlineEl && registration) {
-        if (isChatOnline) {
-            offlineEl.style.display = 'none';
-            registration.style.display = 'block';
-        } else {
-            offlineEl.style.display = 'block';
-            registration.style.display = 'none';
-        }
+    if (statusDot) {
+        statusDot.classList.toggle('offline', !isChatOnline);
+    }
+    if (offline && reg) {
+        offline.style.display = isChatOnline ? 'none' : 'block';
+        reg.style.display     = isChatOnline ? 'block' : 'none';
     }
 }
 
 // ============================================
-// LIVE CHAT (UPDATED)
+// LIVE CHAT WIDGET
 // ============================================
-function initializeLiveChat() {
-    const toggle = document.getElementById('livechatToggle');
-    const window = document.getElementById('livechatWindow');
-    const close = document.getElementById('livechatClose');
-    const form = document.getElementById('chatRegForm');
-    const registration = document.getElementById('chatRegistration');
-    const messages = document.getElementById('chatMessages');
-    const footer = document.getElementById('chatFooter');
-    const messageList = document.getElementById('chatMessageList');
-    const input = document.getElementById('chatInput');
-    const sendBtn = document.getElementById('sendMessageBtn');
-    const endBtn = document.getElementById('endChatBtn');
-    const endedNotification = document.getElementById('chatEndedNotification');
-    const btnNewChat = document.getElementById('btnNewChat');
-    
-    toggle?.addEventListener('click', () => window?.classList.toggle('active'));
-    close?.addEventListener('click', () => window?.classList.remove('active'));
-    
-    form?.addEventListener('submit', async e => {
+function initLiveChat() {
+    const toggle  = $('chatToggle');
+    const window_ = $('chatWindow');
+    const close   = $('chatClose');
+    const regForm = $('chatRegForm');
+    const reg     = $('chatRegistration');
+    const msgs    = $('chatMessages');
+    const footer  = $('chatFooter');
+    const list    = $('chatMessageList');
+    const input   = $('chatInput');
+    const sendBtn = $('sendMessageBtn');
+    const endBtn  = $('endChatBtn');
+    const ended   = $('chatEndedNotification');
+    const newChat = $('btnNewChat');
+
+    // Toggle open/close
+    toggle?.addEventListener('click', () => window_?.classList.toggle('active'));
+    close?.addEventListener('click',  () => window_?.classList.remove('active'));
+
+    // Registration submit
+    regForm?.addEventListener('submit', async e => {
         e.preventDefault();
-        
         if (!isChatOnline) {
-            showToast('Helpdesk sedang offline. Silakan coba lagi nanti.', 'error');
+            showToast('Helpdesk sedang offline. Silakan coba nanti.', 'error');
             return;
         }
-        
-        const name = document.getElementById('chatName').value.trim();
-        const phone = document.getElementById('chatPhone').value.trim();
-        const status = document.getElementById('chatStatusSelect').value;
-        
-        if (!name || !phone || !status) { showToast('Mohon isi semua field', 'error'); return; }
-        
+
+        const name   = $('chatName')?.value.trim();
+        const phone  = $('chatPhone')?.value.trim();
+        const status = $('chatStatusSelect')?.value;
+
+        if (!name || !phone || !status) {
+            showToast('Mohon lengkapi semua data.', 'error');
+            return;
+        }
+
         currentUser = { name, phone, status };
-        
+
         try {
-            const sessionRef = await db.collection('chatSessions').add({
-                userName: name, userPhone: phone, userStatus: status,
-                startedAt: firebase.firestore.FieldValue.serverTimestamp(), status: 'active'
+            const ref  = await db.collection('chatSessions').add({
+                userName:  name,
+                userPhone: phone,
+                userStatus: status,
+                startedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'active'
             });
-            
-            chatSession = sessionRef.id;
-            chatEnded = false;
-            
-            subscribeToMessages(chatSession);
-            
-            registration.style.display = 'none';
-            messages.style.display = 'block';
-            footer.style.display = 'flex';
-            endedNotification.style.display = 'none';
-            messageList.innerHTML = '';
-            
-            addBotMessage('Terima kasih telah menghubungi helpdesk SMAN 68 JAKARTA, operator segera membalas pertanyaan atau keluhan anda, silahkan kirimkan pesan pertanyaan atau keluhan.');
-            showToast('Chat dimulai!', 'success');
-        } catch (error) { showToast('Gagal memulai chat', 'error'); }
+            chatSession = ref.id;
+            chatEnded   = false;
+
+            if (reg)    reg.style.display    = 'none';
+            if (msgs)   msgs.style.display   = 'flex';
+            if (footer) footer.style.display = 'flex';
+            if (ended)  ended.style.display  = 'none';
+            if (list)   list.innerHTML       = '';
+
+            appendBotMessage('Halo ' + name + '! 👋 Terima kasih telah menghubungi Helpdesk SMAN 68 Jakarta. Operator kami akan segera membalas pesan Anda.');
+            subscribeToChat(chatSession);
+            showToast('Obrolan dimulai!', 'success');
+        } catch {
+            showToast('Gagal memulai obrolan. Coba lagi.', 'error');
+        }
     });
-    
-    sendBtn?.addEventListener('click', sendChatMessage);
-    input?.addEventListener('keypress', e => { if (e.key === 'Enter') sendChatMessage(); });
-    
+
+    // Send message
+    sendBtn?.addEventListener('click', sendMsg);
+    input?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) sendMsg(); });
+
+    function sendMsg() {
+        const text = input?.value.trim();
+        if (!text || !chatSession || chatEnded) return;
+
+        db.collection('chatSessions').doc(chatSession)
+            .collection('messages').add({
+                sender:     'user',
+                senderName: currentUser?.name || 'User',
+                message:    text,
+                timestamp:  firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(() => showToast('Gagal mengirim pesan.', 'error'));
+
+        appendUserMessage(text);
+        if (input) input.value = '';
+    }
+
+    // End chat
     endBtn?.addEventListener('click', async () => {
         if (!chatSession || chatEnded) return;
-        
         try {
             await db.collection('chatSessions').doc(chatSession).update({
-                status: 'ended', endedAt: firebase.firestore.FieldValue.serverTimestamp()
+                status:  'ended',
+                endedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            
-            chatEnded = true;
-            input.disabled = true;
-            sendBtn.disabled = true;
-            endBtn.disabled = true;
-            
-            // Tampilkan notifikasi chat berakhir
-            messages.style.display = 'none';
-            footer.style.display = 'none';
-            endedNotification.style.display = 'block';
-            
+            forceEndChat();
             showToast('Chat telah diakhiri.', 'success');
-        } catch (error) { showToast('Gagal mengakhiri chat', 'error'); }
+        } catch {
+            showToast('Gagal mengakhiri chat.', 'error');
+        }
     });
-    
-    // Tombol Mulai Obrolan Baru
-    btnNewChat?.addEventListener('click', () => {
-        resetChat();
-    });
-    
-    function sendChatMessage() {
-        const message = input.value.trim();
-        if (!message || !chatSession || chatEnded) return;
-        
-        db.collection('chatSessions').doc(chatSession).collection('messages').add({
-            sender: 'user', senderName: currentUser.name, message,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(() => showToast('Gagal mengirim pesan', 'error'));
-        
-        addUserMessage(message);
-        input.value = '';
-    }
-    
-    function subscribeToMessages(sessionId) {
-        db.collection('chatSessions').doc(sessionId).collection('messages')
+
+    // New chat
+    newChat?.addEventListener('click', resetChat);
+
+    // ---- helpers ----
+    function subscribeToChat(sessionId) {
+        // Listen for new messages
+        db.collection('chatSessions').doc(sessionId)
+            .collection('messages')
             .orderBy('timestamp', 'asc')
-            .onSnapshot(snapshot => {
-                snapshot.docChanges().forEach(change => {
+            .onSnapshot(snap => {
+                snap.docChanges().forEach(change => {
                     if (change.type === 'added' && change.doc.data().sender === 'operator') {
-                        addOperatorMessage(change.doc.data().message);
+                        appendOperatorMessage(change.doc.data().message);
                     }
                 });
             });
-        
+
+        // Listen for session status
         db.collection('chatSessions').doc(sessionId).onSnapshot(doc => {
             if (doc.exists && doc.data().status === 'ended' && !chatEnded) {
-                chatEnded = true;
-                input.disabled = true;
-                sendBtn.disabled = true;
-                endBtn.disabled = true;
-                messages.style.display = 'none';
-                footer.style.display = 'none';
-                endedNotification.style.display = 'block';
+                forceEndChat();
             }
         });
     }
-    
-    function addUserMessage(msg) {
+
+    function appendUserMessage(text) {
         const div = document.createElement('div');
         div.className = 'message-user';
-        div.innerHTML = `<div>${msg}</div>`;
-        messageList.appendChild(div);
-        messageList.scrollTop = messageList.scrollHeight;
+        div.innerHTML = `<div>${escapeHtml(text)}</div>`;
+        list?.appendChild(div);
+        scrollChatBottom();
     }
-    
-    function addOperatorMessage(msg) {
+
+    function appendOperatorMessage(text) {
         const div = document.createElement('div');
         div.className = 'message-operator';
-        div.innerHTML = `<div>${msg}</div>`;
-        messageList.appendChild(div);
-        messageList.scrollTop = messageList.scrollHeight;
+        div.innerHTML = `<div>${escapeHtml(text)}</div>`;
+        list?.appendChild(div);
+        scrollChatBottom();
     }
-    
-    function addBotMessage(msg) {
-        const div = document.createElement('div');
-        div.className = 'message-bot';
-        div.textContent = msg;
-        messageList.appendChild(div);
+
+    function scrollChatBottom() {
+        if (list) list.scrollTop = list.scrollHeight;
     }
-    
+
     function resetChat() {
-        registration.style.display = 'block';
-        messages.style.display = 'none';
-        footer.style.display = 'none';
-        endedNotification.style.display = 'none';
-        messageList.innerHTML = '';
-        document.getElementById('chatRegForm').reset();
+        if (reg)    reg.style.display    = 'block';
+        if (msgs)   msgs.style.display   = 'none';
+        if (footer) footer.style.display = 'none';
+        if (ended)  ended.style.display  = 'none';
+        if (list)   list.innerHTML       = '';
+        if (input)  { input.value = ''; input.disabled = false; }
+        if (sendBtn) sendBtn.disabled = false;
+        if (endBtn)  endBtn.disabled  = false;
+        regForm?.reset();
         chatSession = null;
         currentUser = null;
-        chatEnded = false;
-        input.disabled = false;
-        sendBtn.disabled = false;
-        endBtn.disabled = false;
+        chatEnded   = false;
     }
 }
 
-function endChatSession() {
-    // Client-side reset
+function appendBotMessage(text) {
+    const list = $('chatMessageList');
+    if (!list) return;
+    const div = document.createElement('div');
+    div.className   = 'message-bot';
+    div.textContent = text;
+    list.appendChild(div);
+    list.scrollTop  = list.scrollHeight;
+}
+
+function forceEndChat() {
     chatEnded = true;
-    document.getElementById('chatInput').disabled = true;
-    document.getElementById('sendMessageBtn').disabled = true;
-    document.getElementById('endChatBtn').disabled = true;
-    document.getElementById('chatMessages').style.display = 'none';
-    document.getElementById('chatFooter').style.display = 'none';
-    document.getElementById('chatEndedNotification').style.display = 'block';
+    const input  = $('chatInput');
+    const sendBtn = $('sendMessageBtn');
+    const endBtn  = $('endChatBtn');
+    const msgs    = $('chatMessages');
+    const footer  = $('chatFooter');
+    const ended   = $('chatEndedNotification');
+
+    if (input)  input.disabled   = true;
+    if (sendBtn) sendBtn.disabled = true;
+    if (endBtn)  endBtn.disabled  = true;
+    if (msgs)    msgs.style.display   = 'none';
+    if (footer)  footer.style.display = 'none';
+    if (ended)   ended.style.display  = 'block';
 }
 
 // ============================================
-// FEEDBACK
+// FEEDBACK FORM
 // ============================================
-function initializeFeedback() {
-    const form = document.getElementById('feedbackForm');
-    const historyBtn = document.getElementById('showHistoryBtn');
-    
+function initFeedback() {
+    const form    = $('feedbackForm');
+    const histBtn = $('showHistoryBtn');
+
     form?.addEventListener('submit', async e => {
         e.preventDefault();
-        const name = document.getElementById('feedbackName').value.trim() || 'Anonymous';
-        const email = document.getElementById('feedbackEmail').value.trim();
-        const category = document.getElementById('feedbackCategory').value;
-        const message = document.getElementById('feedbackMessage').value.trim();
-        
-        if (!email || !category || !message) { showToast('Mohon isi semua field wajib', 'error'); return; }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Format email tidak valid', 'error'); return; }
-        
+        const name     = $('feedbackName')?.value.trim() || 'Anonymous';
+        const email    = $('feedbackEmail')?.value.trim();
+        const category = $('feedbackCategory')?.value;
+        const message  = $('feedbackMessage')?.value.trim();
+
+        if (!email || !category || !message) {
+            showToast('Mohon isi semua field yang wajib.', 'error');
+            return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showToast('Format email tidak valid.', 'error');
+            return;
+        }
+
+        const submitBtn = form.querySelector('.btn-submit');
+        if (submitBtn) {
+            submitBtn.disabled    = true;
+            submitBtn.innerHTML   = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+        }
+
         try {
             await db.collection('feedbacks').add({
-                name, email, category, message, status: 'pending',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(), replies: []
+                name, email, category, message,
+                status:    'pending',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                replies:   []
             });
-            showToast('✅ Pesan akan direspon dalam 1x24 jam. Terima kasih!', 'success');
+            showToast('✅ Pesan terkirim! Akan direspon dalam 1×24 jam.', 'success');
             form.reset();
-        } catch (error) { showToast('❌ Terjadi kesalahan', 'error'); }
+        } catch {
+            showToast('❌ Terjadi kesalahan. Coba lagi.', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled  = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pesan';
+            }
+        }
     });
-    
-    historyBtn?.addEventListener('click', () => DOM.historyModal?.classList.add('active'));
+
+    histBtn?.addEventListener('click', () => $('historyModal')?.classList.add('active'));
 }
 
-function initializeHistoryModal() {
-    const closeBtn = DOM.historyModal?.querySelector('.history-close');
-    const loadBtn = document.getElementById('loadHistoryBtn');
-    
-    closeBtn?.addEventListener('click', () => DOM.historyModal?.classList.remove('active'));
-    DOM.historyModal?.addEventListener('click', e => { if (e.target === DOM.historyModal) DOM.historyModal.classList.remove('active'); });
-    
+// ============================================
+// HISTORY MODAL
+// ============================================
+function initHistoryModal() {
+    const modal    = $('historyModal');
+    const closeBtn = modal?.querySelector('.history-close');
+    const loadBtn  = $('loadHistoryBtn');
+    const list     = $('historyList');
+
+    closeBtn?.addEventListener('click', () => modal?.classList.remove('active'));
+    modal?.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+
     loadBtn?.addEventListener('click', async () => {
-        const email = document.getElementById('historyEmail').value.trim();
-        if (!email) { showToast('Masukkan email Anda', 'error'); return; }
-        
+        const email = $('historyEmail')?.value.trim();
+        if (!email) { showToast('Masukkan email Anda.', 'error'); return; }
+        if (!list) return;
+
+        list.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted)"><i class="fas fa-spinner fa-spin"></i> Memuat...</p>';
+
         try {
-            const snapshot = await db.collection('feedbacks').where('email', '==', email).orderBy('createdAt', 'desc').get();
-            if (!DOM.historyList) return;
-            DOM.historyList.innerHTML = '';
-            
-            if (snapshot.empty) { DOM.historyList.innerHTML = '<p style="text-align:center;padding:20px;">Tidak ada riwayat</p>'; return; }
-            
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const date = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString('id-ID') : '';
-                const repliesHtml = data.replies?.map(r => `<div style="background:#e8f5e9;padding:10px;border-radius:8px;margin-top:8px;"><strong>Balasan:</strong><br>${r.message}</div>`).join('') || '';
-                
+            const snap = await db.collection('feedbacks')
+                .where('email', '==', email)
+                .orderBy('createdAt', 'desc').get();
+
+            if (snap.empty) {
+                list.innerHTML = '<p style="text-align:center;padding:24px;color:var(--text-muted);">Tidak ada riwayat ditemukan.</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            snap.forEach(doc => {
+                const d    = doc.data();
+                const date = d.createdAt?.toDate ? new Date(d.createdAt.toDate()).toLocaleString('id-ID') : '';
+                const reps = (d.replies || []).map(r =>
+                    `<div style="background:var(--emerald-50);border-left:3px solid var(--primary);padding:10px 12px;border-radius:8px;margin-top:10px;font-size:.8rem;">
+                        <strong style="color:var(--primary);">Balasan Operator:</strong><br>${escapeHtml(r.message)}
+                    </div>`
+                ).join('');
+
                 const item = document.createElement('div');
                 item.className = 'history-item';
                 item.innerHTML = `
-                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><strong>${data.category}</strong><small>${date}</small></div>
-                    <p>${data.message}</p>${repliesHtml}
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <span style="background:var(--emerald-50);color:var(--primary);padding:2px 10px;border-radius:999px;font-size:.65rem;font-weight:700;">${d.category}</span>
+                        <small style="color:var(--text-muted);font-size:.7rem;">${date}</small>
+                    </div>
+                    <p style="font-size:.85rem;color:var(--text);margin-bottom:4px;">${escapeHtml(d.message)}</p>
+                    ${reps}
                 `;
-                DOM.historyList.appendChild(item);
+                list.appendChild(item);
             });
-        } catch (error) { showToast('Gagal memuat riwayat', 'error'); }
+        } catch {
+            list.innerHTML = '<p style="text-align:center;padding:24px;color:#ef4444;">Gagal memuat riwayat.</p>';
+        }
     });
 }
 
 // ============================================
-// TUTORIAL & PRIVACY
+// TUTORIAL MODAL
 // ============================================
-function initializeTutorial() {
-    document.getElementById('tutorialTrigger')?.addEventListener('click', () => DOM.tutorialModal?.classList.add('active'));
-    document.getElementById('tutorialClose')?.addEventListener('click', () => DOM.tutorialModal?.classList.remove('active'));
-    DOM.tutorialModal?.addEventListener('click', e => { if (e.target === DOM.tutorialModal) DOM.tutorialModal.classList.remove('active'); });
-}
+function initTutorial() {
+    const trigger = $('tutorialTrigger');
+    const modal   = $('tutorialModal');
+    const close   = $('tutorialClose');
 
-function initializePrivacy() {
-    document.getElementById('privacyLink')?.addEventListener('click', e => { e.preventDefault(); DOM.privacyModal?.classList.add('active'); });
-    DOM.privacyModal?.querySelector('.privacy-close')?.addEventListener('click', () => DOM.privacyModal?.classList.remove('active'));
-    DOM.privacyModal?.addEventListener('click', e => { if (e.target === DOM.privacyModal) DOM.privacyModal.classList.remove('active'); });
-}
-
-// ============================================
-// TOAST
-// ============================================
-function showToast(message, type = 'success') {
-    if (!DOM.toastContainer) return;
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i><span>${message}</span>`;
-    DOM.toastContainer.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
+    trigger?.addEventListener('click', () => modal?.classList.add('active'));
+    close?.addEventListener('click',   () => modal?.classList.remove('active'));
+    modal?.addEventListener('click',   e => { if (e.target === modal) modal.classList.remove('active'); });
 }
 
 // ============================================
-// REALTIME LISTENERS
+// PRIVACY MODAL
 // ============================================
-function setupRealtimeListeners() {
-    db.collection('news').onSnapshot(() => loadNewsData());
-    db.collection('agenda').onSnapshot(() => loadAgendaData());
-    db.collection('gallery').onSnapshot(() => loadGalleryData());
-    db.collection('facilities').onSnapshot(() => loadFacilityData());
-    db.collection('testimonials').onSnapshot(() => loadTestimonialData());
-    db.collection('alumni').onSnapshot(() => loadPTNData());
-    db.collection('settings').doc('operationalHours').onSnapshot(() => loadOperationalHours());
+function initPrivacy() {
+    const link  = $('privacyLink');
+    const modal = $('privacyModal');
+    const close = modal?.querySelector('.privacy-close');
+
+    link?.addEventListener('click',  e => { e.preventDefault(); modal?.classList.add('active'); });
+    close?.addEventListener('click', () => modal?.classList.remove('active'));
+    modal?.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+}
+
+// ============================================
+// FLOATING ANNOUNCEMENT
+// ============================================
+async function initFloatingAnnouncement() {
+    try {
+        const doc = await db.collection('settings').doc('announcement').get();
+        if (doc.exists && doc.data().active === true) {
+            const data = doc.data();
+
+            if (data.endTime) {
+                const end = data.endTime.toDate();
+                if (new Date() > end) {
+                    await db.collection('settings').doc('announcement').update({
+                        active:    false,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    return;
+                }
+            }
+
+            if (!sessionStorage.getItem('sman68-ann-shown')) {
+                showAnnouncement(data.text || '');
+            }
+        }
+    } catch { /* no announcement */ }
+
+    // Real-time listener
+    db.collection('settings').doc('announcement').onSnapshot(doc => {
+        if (!doc.exists) return;
+        const d = doc.data();
+        if (d.active && !sessionStorage.getItem('sman68-ann-shown')) {
+            showAnnouncement(d.text || '');
+        } else if (!d.active) {
+            hideAnnouncement();
+        }
+    });
+
+    // Close button
+    $('announcementClose')?.addEventListener('click', hideAnnouncement);
+}
+
+function showAnnouncement(text) {
+    if (!text.trim()) return;
+    const el   = $('floatingAnnouncement');
+    const textEl = $('announcementText');
+    if (el && textEl) {
+        textEl.textContent = text;
+        el.style.display   = 'block';
+        sessionStorage.setItem('sman68-ann-shown', '1');
+    }
+}
+
+function hideAnnouncement() {
+    const el = $('floatingAnnouncement');
+    if (!el) return;
+    el.classList.add('hide');
+    setTimeout(() => {
+        el.style.display = 'none';
+        el.classList.remove('hide');
+    }, 500);
 }
 
 // ============================================
 // DOWNLOAD APK BUTTON
 // ============================================
-document.getElementById('btnDownloadAPK')?.addEventListener('click', function(e) {
-    e.preventDefault();
-    // Ganti dengan link APK Anda
-    const apkUrl = 'https://github.com/nadhiframadhan780-dev/smanegeri68jakarta/raw/refs/heads/main/SMAN%2068%20JAKARTA%202.5.0.apk'; // GANTI INI
-    window.open(apkUrl, '_blank');
+function initDownloadAPK() {
+    $('btnDownloadAPK')?.addEventListener('click', e => {
+        e.preventDefault();
+        const url = 'https://github.com/nadhiframadhan780-dev/smanegeri68jakarta/raw/refs/heads/main/SMAN%2068%20JAKARTA%202.5.0.apk';
+        window.open(url, '_blank');
+    });
+}
+
+// ============================================
+// REALTIME FIRESTORE LISTENERS
+// ============================================
+function setupRealtimeListeners() {
+    db.collection('news').onSnapshot(()         => loadNewsData());
+    db.collection('agenda').onSnapshot(()        => loadAgendaData());
+    db.collection('gallery').onSnapshot(()       => loadGalleryData());
+    db.collection('facilities').onSnapshot(()    => loadFacilityData());
+    db.collection('testimonials').onSnapshot(()  => loadTestimonialData());
+    db.collection('alumni').onSnapshot(()        => loadPTNData());
+    db.collection('settings').doc('operationalHours').onSnapshot(() => loadOperationalHours());
+}
+
+// ============================================
+// TOAST NOTIFICATION
+// ============================================
+function showToast(message, type = 'success') {
+    const container = $('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        <span>${message}</span>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 350);
+    }, 4000);
+}
+
+// ============================================
+// MAGNETIC BUTTON EFFECT
+// ============================================
+function initMagneticButtons() {
+    if (window.matchMedia('(max-width:768px)').matches) return;
+
+    $$('.magnetic-btn').forEach(btn => {
+        btn.addEventListener('mousemove', e => {
+            const rect   = btn.getBoundingClientRect();
+            const x      = e.clientX - rect.left - rect.width  / 2;
+            const y      = e.clientY - rect.top  - rect.height / 2;
+            const factor = 0.25;
+            btn.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = '';
+        });
+    });
+}
+
+// ============================================
+// AOS (SCROLL REVEAL) INIT
+// ============================================
+function initAOS() {
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            once:     true,
+            offset:   80,
+            easing:   'ease-out-cubic'
+        });
+    }
+}
+
+// ============================================
+// MOBILE BOTTOM NAV SMOOTH SCROLL
+// ============================================
+function initMobileNav() {
+    $$('.mob-nav-item').forEach(item => {
+        item.addEventListener('click', e => {
+            e.preventDefault();
+            const id = item.getAttribute('data-section');
+            const el = document.getElementById(id);
+            if (!el) return;
+            const navH = 60;
+            window.scrollTo({ top: el.offsetTop - navH, behavior: 'smooth' });
+            $$('.mob-nav-item').forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+        });
+    });
+}
+
+// ============================================
+// MOUSE-FOLLOW GRADIENT (DESKTOP ONLY)
+// ============================================
+function initMouseGradient() {
+    if (window.matchMedia('(max-width:768px)').matches) return;
+
+    document.addEventListener('mousemove', e => {
+        const x = (e.clientX / window.innerWidth) * 100;
+        const y = (e.clientY / window.innerHeight) * 100;
+        document.documentElement.style.setProperty('--mouse-x', x + '%');
+        document.documentElement.style.setProperty('--mouse-y', y + '%');
+    });
+}
+
+// ============================================
+// INTERSECTION OBSERVER — GENERIC REVEAL
+// ============================================
+function initRevealOnScroll() {
+    const targets = $$('.ptn-card, .bento-card, .vm-card, .news-card, .agenda-card, .gallery-item, .testimonial-card, .facility-card, .subject-card, .download-card, .benefit-item, .ranking-card');
+
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity   = '1';
+                entry.target.style.transform = 'translateY(0)';
+                obs.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    targets.forEach((el, i) => {
+        el.style.opacity    = '0';
+        el.style.transform  = 'translateY(24px)';
+        el.style.transition = `opacity 0.5s ease ${(i % 6) * 0.07}s, transform 0.5s ease ${(i % 6) * 0.07}s`;
+        observer.observe(el);
+    });
+}
+
+// ============================================
+// ESCAPE HTML (XSS PREVENTION)
+// ============================================
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+// ============================================
+// EMPTY STATE HELPER
+// ============================================
+function buildEmptyState(icon, message) {
+    return `
+        <div class="empty-state" style="grid-column:1/-1;text-align:center;padding:48px 24px;color:var(--text-muted);">
+            <i class="fas fa-${icon}" style="font-size:2rem;margin-bottom:12px;display:block;opacity:.4;"></i>
+            <p style="font-size:.875rem;">${message}</p>
+        </div>
+    `;
+}
+
+// ============================================
+// MAIN INIT — DOMContentLoaded
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Core UI ---
+    initPreloader();
+    initCursor();
+    initScrollProgress();
+    initClock();
+    initThemeToggle();
+    initNavbar();
+    initSmoothScroll();
+    initHeroParticles();
+    initSoundToggle();
+    initCounterAnimation();
+
+    // --- FAB & Links ---
+    initFloatingFab();
+    initLinks();
+    initKelulusanLink();
+    initMobileNav();
+    initMagneticButtons();
+    initMouseGradient();
+
+    // --- PTN & Data ---
+    initPTNGrid();
+    populateYearSelect();
+
+    // --- Firebase Data ---
+    loadPTNData();
+    loadNewsData();
+    loadAgendaData();
+    loadGalleryData();
+    loadTestimonialData();
+    loadFacilityData();
+    loadOperationalHours();
+    checkChatStatus();
+
+    // --- Realtime ---
+    setupRealtimeListeners();
+
+    // --- Modals & UI ---
+    initLiveChat();
+    initNewsModal();
+    initLoadMoreNews();
+    initLoadMoreTestimonials();
+    initLightbox();
+    initTutorial();
+    initPrivacy();
+    initFeedback();
+    initHistoryModal();
+    initFloatingAnnouncement();
+    initDownloadAPK();
+
+    // --- Animations ---
+    initAOS();
+    setTimeout(initRevealOnScroll, 600); // after AOS
+
+    console.log('✅ SMAN 68 Jakarta — Premium Website v4.0 Loaded');
 });
 
 // ============================================
-// FLOATING ANNOUNCEMENT
+// PERFORMANCE: PASSIVE EVENT LISTENERS
 // ============================================
-async function loadFloatingAnnouncement() {
-    try {
-        const doc = await db.collection('settings').doc('announcement').get();
-        if (doc.exists) {
-            const data = doc.data();
-            
-            // Cek apakah announcement aktif
-            if (data.active === true) {
-                // Cek apakah ada durasi (endTime)
-                if (data.endTime) {
-                    const endTime = data.endTime.toDate();
-                    const now = new Date();
-                    
-                    if (now > endTime) {
-                        // Announcement sudah expired
-                        await db.collection('settings').doc('announcement').update({
-                            active: false,
-                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        return;
-                    }
-                }
-                
-                showAnnouncement(data.text || '');
-            }
-        }
-    } catch (error) {
-        console.log('No announcement data');
-    }
-}
-
-function showAnnouncement(text) {
-    if (!text || text.trim() === '') return;
-    
-    const announcement = document.getElementById('floatingAnnouncement');
-    const textEl = document.getElementById('announcementText');
-    
-    if (announcement && textEl) {
-        textEl.textContent = text;
-        announcement.style.display = 'block';
-        
-        // Simpan ke sessionStorage agar tidak muncul lagi di sesi yang sama
-        sessionStorage.setItem('announcementShown', 'true');
-    }
-}
-
-function setupFloatingAnnouncement() {
-    const closeBtn = document.getElementById('announcementClose');
-    const announcement = document.getElementById('floatingAnnouncement');
-    
-    closeBtn?.addEventListener('click', () => {
-        if (announcement) {
-            announcement.classList.add('hide');
-            setTimeout(() => {
-                announcement.style.display = 'none';
-                announcement.classList.remove('hide');
-            }, 500);
-        }
-    });
-}
-
-// Real-time listener untuk perubahan announcement
-function listenAnnouncementChanges() {
-    db.collection('settings').doc('announcement').onSnapshot((doc) => {
-        if (doc.exists) {
-            const data = doc.data();
-            
-            if (data.active === true) {
-                // Cek sudah ditampilkan di sesi ini?
-                const shown = sessionStorage.getItem('announcementShown');
-                if (!shown) {
-                    showAnnouncement(data.text || '');
-                }
-            } else {
-                // Sembunyikan announcement
-                const announcement = document.getElementById('floatingAnnouncement');
-                if (announcement) {
-                    announcement.classList.add('hide');
-                    setTimeout(() => {
-                        announcement.style.display = 'none';
-                        announcement.classList.remove('hide');
-                    }, 500);
-                }
-            }
-        }
-    });
-}
-
-
-// ============================================
-// ENABLE KELULUSAN LINK
-// ============================================
-function enableKelulusanLink() {
-    const targetDate = new Date('2026-05-18T08:00:00+07:00');
-    const now = new Date();
-    
-    if (now >= targetDate) {
-        const kelulusanLink = document.getElementById('navKelulusan');
-        if (kelulusanLink) {
-            kelulusanLink.classList.remove('nav-disabled');
-            kelulusanLink.innerHTML = 'Unduh Kartu Peserta Mutasi';
-            kelulusanLink.style.pointerEvents = 'auto';
-            kelulusanLink.style.opacity = '1';
-            kelulusanLink.style.cursor = 'pointer';
-            kelulusanLink.style.color = '';
-        }
-    }
-}
-
-console.log('✅ SMAN 68 Jakarta - Website Updated Successfully');
+window.addEventListener('resize', () => {
+    // Re-init mag buttons on resize
+    initMagneticButtons();
+}, { passive: true });
