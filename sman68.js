@@ -1544,7 +1544,7 @@ function hideAnnouncement() {
 function initDownloadAPK() {
     $('btnDownloadAPK')?.addEventListener('click', e => {
         e.preventDefault();
-        const url = 'https://github.com/nadhiframadhan780-dev/smanegeri68jakarta/raw/refs/heads/main/SMAN%2068%20JAKARTA%202.5.0.apk';
+        const url = './68-404.html';
         window.open(url, '_blank');
     });
 }
