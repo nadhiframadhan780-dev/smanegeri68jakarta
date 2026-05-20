@@ -3,516 +3,585 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Daftar Akun Siswa - SMAN 68 Jakarta</title>
+    <title>Portal Pendaftaran Akun Siswa | SMAN 68 Jakarta Premium</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
     
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (Compat Version as requested) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons: FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* CSS Variables - Premium Color Palette */
         :root {
-            --primary: #006633;
-            --primary-blue: #0088cc;
-            --gradient: linear-gradient(135deg, #006633 0%, #0088cc 100%);
-            --white: #ffffff;
-            --bg: #f1f5f9;
-            --card-bg: rgba(255, 255, 255, 0.98);
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 20px rgba(0,0,0,0.08);
-            --shadow-lg: 0 25px 80px rgba(0,0,0,0.2);
+            --primary-green: #008744; /* SMAN 68 Base */
+            --primary-green-glow: rgba(0, 135, 68, 0.4);
+            --primary-blue: #0056b3;
+            --gold-accent: #d4af37;
+            --dark-bg: #0f172a;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --error: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            
             --radius-sm: 12px;
-            --radius: 20px;
-            --radius-full: 50px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --radius-md: 20px;
+            --radius-lg: 30px;
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px;
             position: relative;
             overflow-x: hidden;
+            background-color: var(--dark-bg);
         }
 
-        /* Background JERNIH */
-        .bg-image {
+        h1, h2, h3, h4, h5, h6, .btn, .badge, .step-label {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* --- Background System --- */
+        .bg-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2;
             background: url('https://media.indozone.id/crop/0x0:0x0/images/2026/01/14/1768352620_6966eb6c54bf6_maxresdefault.jpg') center/cover no-repeat;
-            z-index: -1;
+            transform: scale(1.05); /* Prevent edge bleeding on blur */
+            filter: blur(10px);
         }
 
         .bg-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.3);
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(0, 50, 25, 0.75) 100%);
         }
 
-        /* Container Utama */
-        .register-wrapper {
+        /* Particles */
+        #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+        /* --- Main Layout --- */
+        .portal-wrapper {
             width: 100%;
-            max-width: 540px;
-            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            z-index: 1;
+            max-width: 900px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            animation: fadeUpIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(30px);
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes fadeUpIn {
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Logo di Tengah Atas */
-        .logo-container {
+        /* --- Header Premium --- */
+        .portal-header {
             text-align: center;
-            margin-bottom: -25px;
             position: relative;
-            z-index: 2;
         }
 
-        .logo-wrapper {
-            display: inline-block;
+        .logo-container {
             position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
         }
 
         .logo-ring {
             position: absolute;
-            inset: -12px;
+            inset: -15px;
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            animation: ringRotate 10s linear infinite;
+            border: 2px solid transparent;
+            border-top-color: var(--primary-green);
+            border-bottom-color: var(--gold-accent);
+            animation: spin 8s linear infinite;
+        }
+        .logo-ring.inner {
+            inset: -8px;
+            border-top-color: var(--gold-accent);
+            border-bottom-color: var(--primary-blue);
+            animation: spin 6s linear infinite reverse;
         }
 
-        .logo-ring:nth-child(2) {
-            inset: -24px;
-            border-style: dashed;
-            animation-duration: 15s;
-            animation-direction: reverse;
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .logo-ring:nth-child(3) {
-            inset: -36px;
-            border-style: dotted;
-            animation-duration: 20s;
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        @keyframes ringRotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         .logo-img {
-            width: 90px;
-            height: 90px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             background: white;
             padding: 8px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
             position: relative;
-            z-index: 1;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            transition: var(--transition);
+            z-index: 2;
         }
 
-        /* Card Form */
-        .register-card {
-            background: var(--card-bg);
+        .badge-premium {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border-radius: var(--radius);
-            padding: 40px 35px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        
+        .badge-premium i { color: var(--gold-accent); }
+
+        .portal-header h1 {
+            color: #fff;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 5px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .portal-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        /* --- Glassmorphism Card --- */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 50px;
+            box-shadow: var(--glass-shadow);
             position: relative;
             overflow: hidden;
         }
 
-        .register-card::before {
+        .glass-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient);
-            border-radius: var(--radius) var(--radius) 0 0;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-green), var(--primary-blue), var(--gold-accent));
         }
 
-        .register-header {
-            text-align: center;
-            margin-bottom: 25px;
+        /* --- Progress Bar --- */
+        .progress-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+            padding: 0 20px;
         }
 
-        .badge-sekolah {
-            display: inline-block;
-            background: var(--gradient);
-            color: white;
-            padding: 6px 18px;
-            border-radius: var(--radius-full);
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            letter-spacing: 1.5px;
+        .progress-track {
+            position: absolute;
+            top: 24px;
+            left: 50px;
+            right: 50px;
+            height: 3px;
+            background: #e2e8f0;
+            z-index: 1;
+            border-radius: 3px;
         }
 
-        .register-header h2 {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: var(--text);
-            margin-bottom: 4px;
-            letter-spacing: -0.3px;
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-green);
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 0 10px var(--primary-green-glow);
         }
 
-        .register-header p {
-            color: var(--text-light);
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        /* Progress Bar */
-        .progress-container {
+        .progress-steps {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 28px;
             position: relative;
-            padding: 0 10px;
+            z-index: 2;
         }
 
-        .progress-line {
-            position: absolute;
-            top: 16px;
-            left: 40px;
-            right: 40px;
-            height: 3px;
-            background: #e5e7eb;
-            z-index: 0;
-            border-radius: 3px;
-        }
-
-        .progress-line-fill {
-            height: 100%;
-            background: var(--gradient);
-            border-radius: 3px;
-            transition: width 0.5s ease;
-            width: 0%;
-        }
-
-        .progress-step {
-            position: relative;
-            z-index: 1;
+        .step-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
+            width: 100px;
         }
 
-        .step-circle {
-            width: 34px;
-            height: 34px;
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border: 2px solid #cbd5e1;
             border-radius: 50%;
-            background: white;
-            border: 3px solid #d1d5db;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 0.8rem;
-            color: #9ca3af;
+            font-size: 1.1rem;
+            color: #94a3b8;
             transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        .step-circle.active {
-            background: var(--gradient);
-            border-color: transparent;
-            color: white;
-            box-shadow: 0 4px 15px rgba(0,102,51,0.4);
+        .step-item.active .step-icon {
+            border-color: var(--primary-green);
+            background: var(--primary-green);
+            color: #fff;
+            box-shadow: 0 0 20px var(--primary-green-glow);
+            transform: scale(1.1);
         }
 
-        .step-circle.done {
-            background: #10b981;
-            border-color: #10b981;
-            color: white;
+        .step-item.completed .step-icon {
+            border-color: var(--primary-green);
+            background: #fff;
+            color: var(--primary-green);
         }
 
         .step-label {
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             font-weight: 600;
-            color: #9ca3af;
+            color: #94a3b8;
             text-align: center;
-            white-space: nowrap;
             transition: var(--transition);
         }
 
-        .step-label.active {
-            color: var(--primary);
-            font-weight: 700;
-        }
+        .step-item.active .step-label { color: var(--primary-green); }
+        .step-item.completed .step-label { color: var(--text-main); }
 
-        /* Form Steps */
-        .form-step {
+        /* --- Forms & Floating Labels --- */
+        .form-section {
             display: none;
-            animation: fadeSlide 0.4s ease;
+            animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .form-section.active { display: block; }
+        
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
-        .form-step.active {
-            display: block;
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
         }
+        .form-grid.full { grid-template-columns: 1fr; }
 
-        @keyframes fadeSlide {
-            from {
-                opacity: 0;
-                transform: translateX(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 0.83rem;
-            color: var(--text);
-        }
-
-        .form-group label .required {
-            color: #ef4444;
-            margin-left: 2px;
-        }
-
-        .input-wrapper {
+        .input-group {
             position: relative;
+            background: #f8fafc;
+            border-radius: var(--radius-sm);
+            border: 1px solid #e2e8f0;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
         }
 
-        .input-wrapper i {
+        .input-group:focus-within {
+            background: #fff;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(0, 135, 68, 0.1);
+        }
+
+        .input-group i.icon-left {
             position: absolute;
-            left: 14px;
+            left: 18px;
+            color: #94a3b8;
+            font-size: 1rem;
+            transition: var(--transition);
+            z-index: 2;
+        }
+
+        .input-group:focus-within i.icon-left { color: var(--primary-green); }
+
+        .form-control {
+            width: 100%;
+            padding: 22px 18px 10px 50px;
+            border: none;
+            background: transparent;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        /* Floating Label Logic */
+        .floating-label {
+            position: absolute;
+            left: 50px;
             top: 50%;
             transform: translateY(-50%);
-            color: #9ca3af;
-            font-size: 0.9rem;
-            transition: var(--transition);
+            color: #64748b;
+            font-size: 0.95rem;
             pointer-events: none;
+            transition: var(--transition);
             z-index: 1;
         }
 
-        .input-wrapper input,
-        .input-wrapper select {
-            width: 100%;
-            padding: 13px 14px 13px 40px;
-            border: 2px solid #e5e7eb;
-            border-radius: var(--radius-sm);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 0.88rem;
-            transition: var(--transition);
-            background: #fafbfc;
-            color: var(--text);
-            -webkit-appearance: none;
+        .form-control:focus ~ .floating-label,
+        .form-control:not(:placeholder-shown) ~ .floating-label,
+        select.form-control:valid ~ .floating-label {
+            top: 12px;
+            font-size: 0.75rem;
+            color: var(--primary-green);
+            font-weight: 500;
+        }
+        
+        .form-control::placeholder { color: transparent; }
+        
+        /* Select specific styling */
+        select.form-control {
             appearance: none;
+            cursor: pointer;
+            padding-top: 22px; /* align with floating label */
+        }
+        .select-arrow {
+            position: absolute;
+            right: 18px;
+            color: #94a3b8;
+            pointer-events: none;
         }
 
-        .input-wrapper select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            padding-right: 35px;
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+            padding-top: 26px;
         }
 
-        .input-wrapper input:focus,
-        .input-wrapper select:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(0,102,51,0.06);
+        .toggle-password {
+            position: absolute;
+            right: 18px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: var(--transition);
+            padding: 5px;
+        }
+        .toggle-password:hover { color: var(--text-main); }
+
+        /* Error States */
+        .input-group.error { border-color: var(--error); background: #fef2f2; }
+        .input-group.error i.icon-left { color: var(--error); }
+        .input-group.error .floating-label { color: var(--error); }
+        .error-message {
+            color: var(--error);
+            font-size: 0.75rem;
+            margin-top: 6px;
+            display: none;
+            margin-left: 4px;
+        }
+        .input-group.error + .error-message { display: block; }
+
+        /* Password Strength */
+        .password-strength { margin-top: 10px; }
+        .strength-bars {
+            display: flex;
+            gap: 5px;
+            height: 6px;
+            margin-bottom: 5px;
+        }
+        .strength-bar {
+            flex: 1;
+            background: #e2e8f0;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+        .strength-text { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+        
+        .strength-1 .strength-bar:nth-child(1) { background: var(--error); }
+        .strength-2 .strength-bar:nth-child(1), .strength-2 .strength-bar:nth-child(2) { background: var(--warning); }
+        .strength-3 .strength-bar { background: var(--success); }
+
+        /* --- Step 3: Confirmation Summary --- */
+        .summary-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-sm);
+            padding: 25px;
+            margin-bottom: 25px;
         }
 
-        .input-wrapper input:focus ~ i,
-        .input-wrapper select:focus ~ i {
-            color: var(--primary);
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #cbd5e1;
         }
 
-        .form-row {
+        .summary-header h3 {
+            font-size: 1.1rem;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-edit {
+            background: rgba(0, 86, 179, 0.1);
+            color: var(--primary-blue);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-edit:hover { background: var(--primary-blue); color: white; }
+
+        .summary-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 14px;
+            gap: 15px;
         }
 
-        /* Buttons */
-        .btn-container {
+        .summary-item {
             display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .summary-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .summary-value { font-size: 0.95rem; color: var(--text-main); font-weight: 600; }
+
+        .agreement-box {
+            display: flex;
+            align-items: flex-start;
             gap: 12px;
-            margin-top: 24px;
+            background: #fffbeb;
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            border: 1px solid #fde68a;
+            cursor: pointer;
+        }
+
+        .custom-checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d97706;
+            border-radius: 4px;
+            background: #fff;
+            position: relative;
+            cursor: pointer;
+            margin-top: 2px;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        .custom-checkbox:checked {
+            background: #d97706;
+            border-color: #d97706;
+        }
+
+        .custom-checkbox:checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            position: absolute;
+            font-size: 12px;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .agreement-text { font-size: 0.85rem; color: #92400e; line-height: 1.5; }
+
+        /* --- Buttons --- */
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 1px solid #e2e8f0;
         }
 
         .btn {
-            flex: 1;
-            padding: 14px 20px;
-            border: none;
+            padding: 14px 28px;
             border-radius: var(--radius-sm);
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: var(--transition);
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .btn-back {
-            background: #f3f4f6;
-            color: var(--text);
-            border: 2px solid #e5e7eb;
-        }
-
-        .btn-back:hover {
-            background: #e5e7eb;
-        }
-
-        .btn-next {
-            background: var(--gradient);
-            color: white;
-            box-shadow: 0 6px 20px rgba(0,102,51,0.25);
-        }
-
-        .btn-next:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0,102,51,0.35);
-        }
-
-        .btn-submit {
-            background: var(--gradient);
-            color: white;
-            box-shadow: 0 6px 20px rgba(0,102,51,0.25);
-            font-size: 0.95rem;
+            gap: 10px;
+            transition: var(--transition);
+            border: none;
             letter-spacing: 0.5px;
         }
 
-        .btn-submit:hover {
+        .btn-prev {
+            background: #f1f5f9;
+            color: var(--text-muted);
+        }
+        .btn-prev:hover { background: #e2e8f0; color: var(--text-main); }
+
+        .btn-next, .btn-submit {
+            background: linear-gradient(135deg, var(--primary-green), #00b359);
+            color: white;
+            box-shadow: 0 10px 20px rgba(0, 135, 68, 0.2);
+            margin-left: auto;
+        }
+        
+        .btn-next:hover, .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0,102,51,0.35);
+            box-shadow: 0 15px 25px rgba(0, 135, 68, 0.3);
         }
 
         .btn-submit:disabled {
-            opacity: 0.6;
+            opacity: 0.7;
             cursor: not-allowed;
             transform: none;
         }
 
-        /* Ringkasan Data */
-        .ringkasan-box {
-            background: #f9fafb;
-            padding: 18px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 14px;
-            border: 1px solid #e5e7eb;
-        }
-
-        .ringkasan-box h4 {
-            margin-bottom: 12px;
-            color: var(--primary);
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .ringkasan-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px dashed #e5e7eb;
-            font-size: 0.82rem;
-        }
-
-        .ringkasan-item:last-child {
-            border-bottom: none;
-        }
-
-        .ringkasan-item .label {
-            color: var(--text-light);
-            font-weight: 500;
-        }
-
-        .ringkasan-item .value {
-            font-weight: 600;
-            color: var(--text);
-            text-align: right;
-        }
-
-        .catatan-box {
-            background: #fffbeb;
-            padding: 14px;
-            border-radius: var(--radius-sm);
-            border: 1px solid #fde68a;
-            font-size: 0.78rem;
-            color: #92400e;
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            line-height: 1.6;
-        }
-
-        /* Footer */
-        .register-footer {
+        /* --- Footer --- */
+        .portal-footer {
             text-align: center;
-            margin-top: 20px;
-            color: white;
-            font-size: 0.88rem;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            margin-top: auto;
         }
 
-        .register-footer a {
-            color: white;
+        .portal-footer a {
+            color: var(--gold-accent);
             text-decoration: none;
-            font-weight: 700;
+            font-weight: 600;
+            margin-left: 5px;
             transition: var(--transition);
         }
+        .portal-footer a:hover { color: #fff; }
 
-        .register-footer a:hover {
-            text-decoration: underline;
-            opacity: 0.9;
-        }
-
-        /* Toast Notification */
+        /* --- Toasts Premium --- */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -520,340 +589,336 @@
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-width: 380px;
+            gap: 15px;
             pointer-events: none;
         }
 
         .toast {
-            background: white;
-            padding: 14px 18px;
-            border-radius: var(--radius-sm);
-            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 16px 20px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
             display: flex;
-            align-items: center;
-            gap: 12px;
+            align-items: flex-start;
+            gap: 15px;
+            width: 380px;
+            max-width: calc(100vw - 40px);
             transform: translateX(120%);
-            animation: toastIn 0.4s ease forwards;
-            border-left: 5px solid var(--primary);
+            animation: slideInToast 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             pointer-events: auto;
+            border-left: 5px solid transparent;
         }
 
-        @keyframes toastIn {
-            to { transform: translateX(0); }
+        @keyframes slideInToast { to { transform: translateX(0); } }
+        @keyframes slideOutToast { to { transform: translateX(120%); opacity: 0; } }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--error); }
+        .toast.warning { border-left-color: var(--warning); }
+
+        .toast-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
-
-        .toast.success { border-left-color: #10b981; }
-        .toast.error { border-left-color: #ef4444; }
-        .toast.warning { border-left-color: #f59e0b; }
-
-        .toast i { font-size: 1.3rem; flex-shrink: 0; }
-        .toast.success i { color: #10b981; }
-        .toast.error i { color: #ef4444; }
-        .toast.warning i { color: #f59e0b; }
+        .toast.success .toast-icon { color: var(--success); }
+        .toast.error .toast-icon { color: var(--error); }
+        .toast.warning .toast-icon { color: var(--warning); }
 
         .toast-content { flex: 1; }
-        .toast-title { font-weight: 700; font-size: 0.85rem; }
-        .toast-message { font-size: 0.78rem; color: var(--text-light); }
+        .toast-title { font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 4px; font-family: 'Plus Jakarta Sans', sans-serif;}
+        .toast-message { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
 
-        /* Responsive */
-        @media (max-width: 640px) {
-            body {
-                padding: 12px;
-                align-items: flex-start;
-                padding-top: 20px;
-            }
-
-            .register-card {
-                padding: 30px 20px;
-                border-radius: var(--radius-sm);
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-
-            .register-header h2 {
-                font-size: 1.4rem;
-            }
-
-            .logo-img {
-                width: 70px;
-                height: 70px;
-            }
-
-            .logo-container {
-                margin-bottom: -20px;
-            }
-
-            .logo-ring {
-                inset: -10px;
-            }
-            .logo-ring:nth-child(2) {
-                inset: -20px;
-            }
-            .logo-ring:nth-child(3) {
-                inset: -30px;
-            }
-
-            .btn-container {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .btn-back {
-                order: 2;
-            }
-
-            .btn-next {
-                order: 1;
-            }
-
-            .btn {
-                padding: 12px 20px;
-                font-size: 0.85rem;
-            }
-
-            .progress-line {
-                left: 30px;
-                right: 30px;
-            }
-
-            .step-label {
-                font-size: 0.65rem;
-            }
-
-            .step-circle {
-                width: 30px;
-                height: 30px;
-                font-size: 0.7rem;
-            }
-
-            .toast-container {
-                top: 10px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-
-            .toast {
-                padding: 12px 14px;
-                font-size: 0.8rem;
-            }
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .glass-card { padding: 30px 20px; }
+            .form-grid { grid-template-columns: 1fr; gap: 16px; }
+            .progress-track { left: 30px; right: 30px; }
+            .step-item { width: 70px; }
+            .step-icon { width: 40px; height: 40px; font-size: 1rem; }
+            .step-label { font-size: 0.75rem; }
+            .summary-grid { grid-template-columns: 1fr; gap: 12px; }
+            .portal-header h1 { font-size: 1.8rem; }
+            .logo-img { width: 80px; height: 80px; }
         }
 
-        @media (max-width: 400px) {
-            .register-card {
-                padding: 25px 15px;
-            }
-
-            .progress-container {
-                padding: 0 5px;
-            }
-
-            .step-label {
-                font-size: 0.6rem;
-            }
-
-            .input-wrapper input,
-            .input-wrapper select {
-                font-size: 0.8rem;
-                padding: 11px 11px 11px 36px;
-            }
-
-            .form-group label {
-                font-size: 0.78rem;
-            }
+        @media (max-width: 480px) {
+            body { padding: 20px 15px; }
+            .portal-header h1 { font-size: 1.5rem; }
+            .btn { padding: 12px 20px; font-size: 0.85rem; }
+            .form-actions { flex-direction: column-reverse; gap: 10px; }
+            .btn-prev { width: 100%; justify-content: center; }
+            .btn-next, .btn-submit { width: 100%; justify-content: center; margin-left: 0; }
         }
     </style>
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-image"></div>
-    <div class="bg-overlay"></div>
 
-    <!-- Toast Container -->
+    <!-- Background Elements -->
+    <div class="bg-container"></div>
+    <div class="bg-overlay"></div>
+    <div id="particles-js"></div>
+
+    <!-- Toast Notifications -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Wrapper -->
-    <div class="register-wrapper">
-        <!-- Logo -->
-        <div class="logo-container">
-            <div class="logo-wrapper">
+    <div class="portal-wrapper">
+        
+        <!-- Header -->
+        <div class="portal-header">
+            <div class="logo-container">
                 <div class="logo-ring"></div>
-                <div class="logo-ring"></div>
-                <div class="logo-ring"></div>
-                <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68 Jakarta" class="logo-img">
+                <div class="logo-ring inner"></div>
+                <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo SMAN 68" class="logo-img">
             </div>
+            <div>
+                <span class="badge-premium"><i class="fas fa-shield-halved"></i> Official Registration System</span>
+            </div>
+            <h1>Portal Pendaftaran Akun</h1>
+            <p>SMAN 68 Jakarta - Excellence and Integrity</p>
         </div>
 
-        <!-- Card -->
-        <div class="register-card">
-            <div class="register-header">
-                <span class="badge-sekolah">SMAN 68 JAKARTA</span>
-                <h2>Daftar Akun Siswa</h2>
-                <p>Isi data diri dengan lengkap dan benar</p>
-            </div>
-
-            <!-- Progress -->
-            <div class="progress-container">
-                <div class="progress-line">
-                    <div class="progress-line-fill" id="progressFill"></div>
+        <!-- Main Card -->
+        <div class="glass-card">
+            
+            <!-- Progress Bar -->
+            <div class="progress-wrapper">
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
-                <div class="progress-step">
-                    <div class="step-circle active" id="step1Circle">1</div>
-                    <span class="step-label active" id="step1Label">Data Diri</span>
-                </div>
-                <div class="progress-step">
-                    <div class="step-circle" id="step2Circle">2</div>
-                    <span class="step-label" id="step2Label">Akun</span>
-                </div>
-                <div class="progress-step">
-                    <div class="step-circle" id="step3Circle">3</div>
-                    <span class="step-label" id="step3Label">Konfirmasi</span>
+                <div class="progress-steps">
+                    <div class="step-item active" id="step1Indicator">
+                        <div class="step-icon"><i class="fas fa-user"></i></div>
+                        <span class="step-label">Data Diri</span>
+                    </div>
+                    <div class="step-item" id="step2Indicator">
+                        <div class="step-icon"><i class="fas fa-school"></i></div>
+                        <span class="step-label">Sekolah & Akun</span>
+                    </div>
+                    <div class="step-item" id="step3Indicator">
+                        <div class="step-icon"><i class="fas fa-check-double"></i></div>
+                        <span class="step-label">Konfirmasi</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Form -->
-            <form id="registerForm" autocomplete="off">
-                <!-- Step 1: Data Diri -->
-                <div class="form-step active" id="step1">
-                    <div class="form-group">
-                        <label>Nama Lengkap <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-user"></i>
-                            <input type="text" id="nama" placeholder="Nama lengkap sesuai dokumen" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>NISN <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-id-card"></i>
-                            <input type="text" id="nisn" placeholder="10 digit NISN" maxlength="10" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Tempat Lahir <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <input type="text" id="tempatLahir" placeholder="Kota kelahiran" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tanggal Lahir <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-calendar"></i>
-                                <input type="date" id="tanggalLahir" required>
+            <!-- Forms -->
+            <form id="registrationForm" autocomplete="off" novalidate>
+                
+                <!-- STEP 1: Data Diri -->
+                <div class="form-section active" id="step1">
+                    <div class="form-grid">
+                        <div>
+                            <div class="input-group">
+                                <i class="fas fa-user-graduate icon-left"></i>
+                                <input type="text" id="nama" class="form-control" placeholder=" " required oninput="this.value = this.value.toUpperCase()">
+                                <label class="floating-label">Nama Lengkap Sesuai Dokumen *</label>
                             </div>
+                            <div class="error-message">Nama lengkap wajib diisi</div>
                         </div>
-                        <div class="form-group">
-                            <label>Jenis Kelamin <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-venus-mars"></i>
-                                <select id="jenisKelamin" required>
-                                    <option value="">Pilih</option>
+
+                        <div>
+                            <div class="input-group">
+                                <i class="fas fa-id-card icon-left"></i>
+                                <input type="number" id="nisn" class="form-control" placeholder=" " required maxlength="10" oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10);">
+                                <label class="floating-label">NISN (10 Digit) *</label>
+                            </div>
+                            <div class="error-message">NISN harus 10 digit angka</div>
+                        </div>
+
+                        <div>
+                            <div class="input-group">
+                                <i class="fas fa-map-marker-alt icon-left"></i>
+                                <input type="text" id="tempatLahir" class="form-control" placeholder=" " required>
+                                <label class="floating-label">Tempat Lahir *</label>
+                            </div>
+                            <div class="error-message">Tempat lahir wajib diisi</div>
+                        </div>
+
+                        <div>
+                            <div class="input-group">
+                                <i class="fas fa-calendar icon-left"></i>
+                                <input type="date" id="tanggalLahir" class="form-control" required style="color: transparent;" onfocus="this.style.color='var(--text-main)'" onblur="if(!this.value) this.style.color='transparent'">
+                                <label class="floating-label">Tanggal Lahir *</label>
+                            </div>
+                            <div class="error-message">Tanggal lahir wajib dipilih</div>
+                        </div>
+
+                        <div>
+                            <div class="input-group">
+                                <i class="fas fa-venus-mars icon-left"></i>
+                                <select id="jenisKelamin" class="form-control" required>
+                                    <option value="" disabled selected hidden></option>
                                     <option value="L">Laki-laki</option>
                                     <option value="P">Perempuan</option>
                                 </select>
+                                <label class="floating-label">Jenis Kelamin *</label>
+                                <i class="fas fa-chevron-down select-arrow"></i>
                             </div>
+                            <div class="error-message">Pilih jenis kelamin</div>
+                        </div>
+
+                        <div>
+                            <div class="input-group">
+                                <i class="fas fa-phone icon-left"></i>
+                                <input type="tel" id="noHp" class="form-control" placeholder=" ">
+                                <label class="floating-label">Nomor WhatsApp / HP Aktif</label>
+                            </div>
+                        </div>
+
+                        <div style="grid-column: 1 / -1;">
+                            <div class="input-group">
+                                <i class="fas fa-envelope icon-left"></i>
+                                <input type="email" id="email" class="form-control" placeholder=" ">
+                                <label class="floating-label">Email Siswa Aktif *</label>
+                            </div>
+                            <div class="error-message">Format email tidak valid</div>
+                        </div>
+                        
+                        <div style="grid-column: 1 / -1;">
+                            <div class="input-group">
+                                <i class="fas fa-home icon-left" style="top: 25px; transform: none;"></i>
+                                <textarea id="alamat" class="form-control" placeholder=" " required></textarea>
+                                <label class="floating-label" style="top: 25px;">Alamat Lengkap *</label>
+                            </div>
+                            <div class="error-message">Alamat wajib diisi</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 2: Data Akun & Sekolah -->
-                <div class="form-step" id="step2">
-                    <div class="form-group">
-                        <label>NIS (Nomor Induk Sekolah) <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-hashtag"></i>
-                            <input type="text" id="nis" placeholder="NIS untuk login" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Kelas <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-graduation-cap"></i>
-                                <select id="kelas" required>
-                                    <option value="">Pilih kelas</option>
-                                    <option value="X">X</option>
-                                    <option value="XI">XI</option>
-                                    <option value="XII">XII</option>
-                                </select>
+                <!-- STEP 2: Sekolah & Akun -->
+                <div class="form-section" id="step2">
+                    <div class="form-grid">
+                        <div>
+                            <div class="input-group">
+                                <i class="fas fa-hashtag icon-left"></i>
+                                <input type="number" id="nis" class="form-control" placeholder=" " required>
+                                <label class="floating-label">NIS Sekolah *</label>
                             </div>
+                            <div class="error-message">NIS wajib diisi</div>
                         </div>
-                        <div class="form-group">
-                            <label>Jurusan <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-book"></i>
-                                <select id="jurusan" required>
-                                    <option value="">Pilih jurusan</option>
-                                    <option value="IPA">IPA</option>
+
+                        <div>
+                            <div class="input-group">
+                                <i class="fas fa-layer-group icon-left"></i>
+                                <select id="kelas" class="form-control" required>
+                                    <option value="" disabled selected hidden></option>
+                                    <option value="X">Kelas X</option>
+                                    <option value="XI">Kelas XI</option>
+                                    <option value="XII">Kelas XII</option>
+                                </select>
+                                <label class="floating-label">Kelas Saat Ini *</label>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                            <div class="error-message">Pilih kelas</div>
+                        </div>
+
+                        <div>
+                            <div class="input-group">
+                                <i class="fas fa-book-open icon-left"></i>
+                                <select id="jurusan" class="form-control" required>
+                                    <option value="" disabled selected hidden></option>
+                                    <option value="Umum">Umum (Kurikulum Merdeka)</option>
+                                    <option value="MIPA">MIPA</option>
                                     <option value="IPS">IPS</option>
                                 </select>
+                                <label class="floating-label">Jurusan / Peminatan *</label>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                            <div class="error-message">Pilih jurusan</div>
+                        </div>
+
+                        <div>
+                            <div class="input-group">
+                                <i class="fas fa-calendar-check icon-left"></i>
+                                <input type="number" id="tahunAjaran" class="form-control" placeholder=" " required value="2023" readonly style="background:#f1f5f9; color:#64748b; cursor:not-allowed;">
+                                <label class="floating-label" style="top: 12px; font-size: 0.75px; color: var(--primary-green);">Tahun Ajaran Masuk (Otomatis)</label>
+                            </div>
+                        </div>
+
+                        <!-- Password Section -->
+                        <div class="form-grid full" style="grid-column: 1 / -1; background: #fff; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1; margin-top: 10px;">
+                            <h4 style="margin-bottom: 5px; color: var(--text-main); font-size: 0.9rem;"><i class="fas fa-lock" style="color: var(--primary-green); margin-right: 8px;"></i>Setup Keamanan Akun</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Username login otomatis menggunakan <strong>NIS Sekolah</strong>.</p>
+                            
+                            <div class="form-grid">
+                                <div>
+                                    <div class="input-group">
+                                        <i class="fas fa-key icon-left"></i>
+                                        <input type="password" id="password" class="form-control" placeholder=" " required minlength="6">
+                                        <label class="floating-label">Buat Password *</label>
+                                        <i class="fas fa-eye toggle-password" onclick="togglePassword('password', this)"></i>
+                                    </div>
+                                    <div class="password-strength">
+                                        <div class="strength-bars">
+                                            <div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div>
+                                        </div>
+                                        <span class="strength-text" id="strengthText">Minimal 6 karakter</span>
+                                    </div>
+                                </div>
+        
+                                <div>
+                                    <div class="input-group">
+                                        <i class="fas fa-shield-check icon-left"></i>
+                                        <input type="password" id="confirmPassword" class="form-control" placeholder=" " required>
+                                        <label class="floating-label">Ulangi Password *</label>
+                                        <i class="fas fa-eye toggle-password" onclick="togglePassword('confirmPassword', this)"></i>
+                                    </div>
+                                    <div class="error-message" id="matchError">Password tidak sama</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Tanggal Masuk <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-calendar-check"></i>
-                            <input type="date" id="tanggalMasuk" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Password <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" id="password" placeholder="Minimal 6 karakter" minlength="6" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Konfirmasi Password <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" id="confirmPassword" placeholder="Ulangi password" minlength="6" required>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Step 3: Konfirmasi -->
-                <div class="form-step" id="step3">
-                    <div class="ringkasan-box">
-                        <h4><i class="fas fa-clipboard-check"></i> Ringkasan Data Pendaftaran</h4>
-                        <div id="ringkasanData"></div>
+                <!-- STEP 3: Konfirmasi -->
+                <div class="form-section" id="step3">
+                    <div class="summary-card">
+                        <div class="summary-header">
+                            <h3><i class="fas fa-file-signature"></i> Ringkasan Data Siswa</h3>
+                            <button type="button" class="btn-edit" onclick="goToStep(1)"><i class="fas fa-pen"></i> Edit Data</button>
+                        </div>
+                        
+                        <div class="summary-grid" id="summaryContainer">
+                            <!-- Populated via JS -->
+                        </div>
                     </div>
-                    <div class="catatan-box">
-                        <i class="fas fa-info-circle" style="flex-shrink: 0; margin-top: 2px;"></i>
-                        <span><strong>Catatan:</strong> Akun Anda akan diverifikasi oleh operator dalam 1x24 jam. Pastikan semua data sudah benar sebelum mengirim.</span>
-                    </div>
+
+                    <label class="agreement-box">
+                        <input type="checkbox" id="agreement" class="custom-checkbox">
+                        <div class="agreement-text">
+                            <strong>Pernyataan Kebenaran Data</strong><br>
+                            Saya menyatakan bahwa seluruh data yang diisikan adalah benar dan dapat dipertanggungjawabkan sesuai dokumen resmi. Saya mengerti akun ini akan divalidasi oleh pihak SMAN 68 Jakarta.
+                        </div>
+                    </label>
                 </div>
 
-                <!-- Buttons -->
-                <div class="btn-container">
-                    <button type="button" class="btn btn-back" id="btnBack" style="display:none;" onclick="prevStep()">
+                <!-- Navigation Buttons -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-prev" id="btnPrev" style="visibility: hidden;" onclick="prevStep()">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </button>
                     <button type="button" class="btn btn-next" id="btnNext" onclick="nextStep()">
-                        Selanjutnya <i class="fas fa-arrow-right"></i>
+                        Lanjutkan <i class="fas fa-arrow-right"></i>
                     </button>
-                    <button type="submit" class="btn btn-submit" id="btnSubmit" style="display:none;">
-                        <i class="fas fa-paper-plane"></i> Daftarkan Akun
+                    <button type="submit" class="btn btn-submit" id="btnSubmit" style="display: none;">
+                        <i class="fas fa-paper-plane"></i> Daftarkan Sekarang
                     </button>
                 </div>
             </form>
         </div>
 
         <!-- Footer -->
-        <div class="register-footer">
-            Sudah punya akun? <a href="portal-siswa-68.html">Masuk di sini</a>
+        <div class="portal-footer">
+            <p>&copy; 2026 SMAN 68 Jakarta. Sistem Pendaftaran Terintegrasi.</p>
+            <p style="margin-top: 5px;">Sudah memiliki akun? <a href="#"><i class="fas fa-sign-in-alt"></i> Login Portal Siswa</a></p>
         </div>
     </div>
 
+    <!-- JS Scripts -->
     <script>
-        // Firebase Config (SAMA PERSIS)
+        // --- Firebase Configuration (Provided by User) ---
         const firebaseConfig = {
             apiKey: "AIzaSyDAcKcg3alPOTH3FFGelYmsW7jcMMe2PLI",
             authDomain: "upnvjdatsystem.firebaseapp.com",
@@ -863,188 +928,355 @@
             appId: "1:57095309946:web:b0e9f3f86380d549ffc9c3"
         };
 
-        firebase.initializeApp(firebaseConfig);
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
 
+        // --- Multi-Step Form Logic ---
         let currentStep = 1;
         const totalSteps = 3;
 
-        // Toast
+        function updateUI() {
+            // Update Progress Line
+            const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+
+            // Update Step Indicators
+            for(let i=1; i<=totalSteps; i++) {
+                const indicator = document.getElementById(`step${i}Indicator`);
+                indicator.classList.remove('active', 'completed');
+                if(i < currentStep) indicator.classList.add('completed');
+                if(i === currentStep) indicator.classList.add('active');
+            }
+
+            // Show/Hide Sections
+            document.querySelectorAll('.form-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(`step${currentStep}`).classList.add('active');
+
+            // Buttons
+            document.getElementById('btnPrev').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+            
+            if(currentStep === totalSteps) {
+                document.getElementById('btnNext').style.display = 'none';
+                document.getElementById('btnSubmit').style.display = 'inline-flex';
+                populateSummary();
+            } else {
+                document.getElementById('btnNext').style.display = 'inline-flex';
+                document.getElementById('btnSubmit').style.display = 'none';
+            }
+        }
+
+        function validateEmail(email) {
+            return String(email).toLowerCase().match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+        }
+
+        function clearErrors(stepId) {
+            const step = document.getElementById(stepId);
+            step.querySelectorAll('.input-group').forEach(el => el.classList.remove('error'));
+        }
+
+        function showError(inputId) {
+            const el = document.getElementById(inputId);
+            el.closest('.input-group').classList.add('error');
+        }
+
+        function validateStep1() {
+            clearErrors('step1');
+            let isValid = true;
+            
+            const requiredIds = ['nama', 'nisn', 'tempatLahir', 'tanggalLahir', 'jenisKelamin', 'alamat'];
+            requiredIds.forEach(id => {
+                if(!document.getElementById(id).value.trim()) {
+                    showError(id);
+                    isValid = false;
+                }
+            });
+
+            const nisn = document.getElementById('nisn').value;
+            if(nisn && nisn.length !== 10) { showError('nisn'); isValid = false; }
+
+            const email = document.getElementById('email').value;
+            if(email && !validateEmail(email)) { showError('email'); isValid = false; }
+
+            if(!isValid) showToast('warning', 'Data Belum Lengkap', 'Mohon lengkapi kolom yang ditandai merah.');
+            return isValid;
+        }
+
+        function validateStep2() {
+            clearErrors('step2');
+            let isValid = true;
+
+            const requiredIds = ['nis', 'kelas', 'jurusan', 'password', 'confirmPassword'];
+            requiredIds.forEach(id => {
+                if(!document.getElementById(id).value.trim()) {
+                    showError(id);
+                    isValid = false;
+                }
+            });
+
+            const pass = document.getElementById('password').value;
+            const conf = document.getElementById('confirmPassword').value;
+
+            if(pass && pass.length < 6) { showError('password'); isValid = false; }
+            
+            if(pass !== conf) {
+                showError('confirmPassword');
+                document.getElementById('matchError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('matchError').style.display = 'none';
+            }
+
+            if(!isValid) showToast('warning', 'Cek Kembali Data Akun', 'Pastikan NIS dan Password sudah benar.');
+            return isValid;
+        }
+
+        function nextStep() {
+            if(currentStep === 1 && !validateStep1()) return;
+            if(currentStep === 2 && !validateStep2()) return;
+            
+            if(currentStep < totalSteps) {
+                currentStep++;
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if(currentStep > 1) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        function goToStep(step) {
+            currentStep = step;
+            updateUI();
+        }
+
+        // --- UI Interactions ---
+
+        // Toggle Password
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if(input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Password Strength Indicator
+        document.getElementById('password').addEventListener('input', function(e) {
+            const val = e.target.value;
+            const strengthBox = document.querySelector('.password-strength');
+            const text = document.getElementById('strengthText');
+            
+            strengthBox.classList.remove('strength-1', 'strength-2', 'strength-3');
+            
+            if(val.length === 0) {
+                text.innerText = 'Minimal 6 karakter';
+                text.style.color = 'var(--text-muted)';
+                return;
+            }
+
+            let strength = 0;
+            if(val.length >= 6) strength++;
+            if(val.match(/[A-Z]/) && val.match(/[0-9]/)) strength++;
+            if(val.match(/[^A-Za-z0-9]/)) strength++;
+
+            if(strength === 1) {
+                strengthBox.classList.add('strength-1');
+                text.innerText = 'Lemah';
+                text.style.color = 'var(--error)';
+            } else if(strength === 2) {
+                strengthBox.classList.add('strength-2');
+                text.innerText = 'Sedang';
+                text.style.color = 'var(--warning)';
+            } else if(strength >= 3) {
+                strengthBox.classList.add('strength-3');
+                text.innerText = 'Kuat';
+                text.style.color = 'var(--success)';
+            }
+        });
+
+        // Set Default Tahun Ajaran based on Date
+        window.addEventListener('DOMContentLoaded', () => {
+            const year = new Date().getFullYear();
+            document.getElementById('tahunAjaran').value = year;
+        });
+
+        // Populate Summary
+        function populateSummary() {
+            const container = document.getElementById('summaryContainer');
+            const jk = document.getElementById('jenisKelamin').value === 'L' ? 'Laki-Laki' : 'Perempuan';
+            
+            const html = `
+                <div class="summary-item"><span class="summary-label">Nama Lengkap</span><span class="summary-value">${document.getElementById('nama').value}</span></div>
+                <div class="summary-item"><span class="summary-label">NISN / NIS</span><span class="summary-value">${document.getElementById('nisn').value} / ${document.getElementById('nis').value}</span></div>
+                <div class="summary-item"><span class="summary-label">Tempat, Tanggal Lahir</span><span class="summary-value">${document.getElementById('tempatLahir').value}, ${document.getElementById('tanggalLahir').value}</span></div>
+                <div class="summary-item"><span class="summary-label">Jenis Kelamin</span><span class="summary-value">${jk}</span></div>
+                <div class="summary-item"><span class="summary-label">Kelas / Jurusan</span><span class="summary-value">${document.getElementById('kelas').value} - ${document.getElementById('jurusan').value}</span></div>
+                <div class="summary-item"><span class="summary-label">Email / No HP</span><span class="summary-value">${document.getElementById('email').value || '-'} / ${document.getElementById('noHp').value || '-'}</span></div>
+            `;
+            container.innerHTML = html;
+        }
+
+        // --- Toast Notification System ---
         function showToast(type, title, message) {
             const container = document.getElementById('toastContainer');
-            const icons = { success: 'check-circle', error: 'exclamation-circle', warning: 'exclamation-triangle' };
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
+            
+            let icon = 'info-circle';
+            if(type === 'success') icon = 'check-circle';
+            if(type === 'error') icon = 'circle-exclamation';
+            if(type === 'warning') icon = 'triangle-exclamation';
+
             toast.innerHTML = `
-                <i class="fas fa-${icons[type]}"></i>
+                <i class="fas fa-${icon} toast-icon"></i>
                 <div class="toast-content">
                     <div class="toast-title">${title}</div>
                     <div class="toast-message">${message}</div>
                 </div>
             `;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.transform = 'translateX(120%)';
-                setTimeout(() => toast.remove(), 300);
-            }, 5000);
-        }
-
-        // Update Progress
-        function updateProgress(step) {
-            currentStep = step;
             
-            for (let i = 1; i <= totalSteps; i++) {
-                const circle = document.getElementById(`step${i}Circle`);
-                const label = document.getElementById(`step${i}Label`);
-                circle.classList.remove('active', 'done');
-                label.classList.remove('active');
-                
-                if (i < step) {
-                    circle.classList.add('done');
-                    circle.innerHTML = '<i class="fas fa-check"></i>';
-                } else if (i === step) {
-                    circle.classList.add('active');
-                    circle.innerHTML = i;
-                    label.classList.add('active');
-                } else {
-                    circle.innerHTML = i;
-                }
-            }
-
-            const fillPercent = ((step - 1) / (totalSteps - 1)) * 100;
-            document.getElementById('progressFill').style.width = fillPercent + '%';
-
-            document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
-            document.getElementById(`step${step}`).classList.add('active');
-
-            document.getElementById('btnBack').style.display = step === 1 ? 'none' : 'flex';
-            document.getElementById('btnNext').style.display = step === totalSteps ? 'none' : 'flex';
-            document.getElementById('btnSubmit').style.display = step === totalSteps ? 'flex' : 'none';
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOutToast 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
         }
 
-        // Next
-        function nextStep() {
-            if (currentStep === 1) {
-                const nama = document.getElementById('nama').value.trim();
-                const nisn = document.getElementById('nisn').value.trim();
-                const tempatLahir = document.getElementById('tempatLahir').value.trim();
-                const tanggalLahir = document.getElementById('tanggalLahir').value;
-                const jenisKelamin = document.getElementById('jenisKelamin').value;
-
-                if (!nama || !nisn || !tempatLahir || !tanggalLahir || !jenisKelamin) {
-                    showToast('error', 'Data Belum Lengkap', 'Harap isi semua data diri!');
-                    return;
-                }
-                if (nisn.length < 10) {
-                    showToast('error', 'NISN Tidak Valid', 'NISN harus 10 digit!');
-                    return;
-                }
-                updateProgress(2);
-            } else if (currentStep === 2) {
-                const nis = document.getElementById('nis').value.trim();
-                const kelas = document.getElementById('kelas').value;
-                const jurusan = document.getElementById('jurusan').value;
-                const tanggalMasuk = document.getElementById('tanggalMasuk').value;
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-
-                if (!nis || !kelas || !jurusan || !tanggalMasuk || !password || !confirmPassword) {
-                    showToast('error', 'Data Belum Lengkap', 'Harap isi semua data akun!');
-                    return;
-                }
-                if (password.length < 6) {
-                    showToast('error', 'Password Pendek', 'Password minimal 6 karakter!');
-                    return;
-                }
-                if (password !== confirmPassword) {
-                    showToast('error', 'Password Tidak Cocok', 'Konfirmasi password tidak sesuai!');
-                    return;
-                }
-
-                // Tampilkan ringkasan
-                document.getElementById('ringkasanData').innerHTML = `
-                    <div class="ringkasan-item"><span class="label">Nama</span><span class="value">${document.getElementById('nama').value}</span></div>
-                    <div class="ringkasan-item"><span class="label">NISN</span><span class="value">${document.getElementById('nisn').value}</span></div>
-                    <div class="ringkasan-item"><span class="label">Tempat, Tgl Lahir</span><span class="value">${document.getElementById('tempatLahir').value}, ${document.getElementById('tanggalLahir').value}</span></div>
-                    <div class="ringkasan-item"><span class="label">Jenis Kelamin</span><span class="value">${document.getElementById('jenisKelamin').value === 'L' ? 'Laki-laki' : 'Perempuan'}</span></div>
-                    <div class="ringkasan-item"><span class="label">NIS</span><span class="value">${nis}</span></div>
-                    <div class="ringkasan-item"><span class="label">Kelas</span><span class="value">${kelas}</span></div>
-                    <div class="ringkasan-item"><span class="label">Jurusan</span><span class="value">${jurusan}</span></div>
-                    <div class="ringkasan-item"><span class="label">Tanggal Masuk</span><span class="value">${tanggalMasuk}</span></div>
-                `;
-
-                updateProgress(3);
-            }
-        }
-
-        // Previous
-        function prevStep() {
-            if (currentStep > 1) {
-                updateProgress(currentStep - 1);
-            }
-        }
-
-        // Submit
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        // --- Form Submission & Firebase ---
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const agreement = document.getElementById('agreement').checked;
+            if(!agreement) {
+                showToast('error', 'Persetujuan Dibutuhkan', 'Harap centang kotak persetujuan data di bawah ringkasan.');
+                return;
+            }
 
             const btnSubmit = document.getElementById('btnSubmit');
+            const originalContent = btnSubmit.innerHTML;
             btnSubmit.disabled = true;
-            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mendaftarkan...';
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses Data...';
 
             try {
                 const nis = document.getElementById('nis').value.trim();
-                
-                // Cek duplikat NIS
-                const existingSnapshot = await db.collection('siswa').where('nis', '==', nis).get();
-                if (!existingSnapshot.empty) {
-                    showToast('error', 'NIS Terdaftar', 'NIS ini sudah digunakan. Hubungi operator jika lupa password.');
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Daftarkan Akun';
+                const nisn = document.getElementById('nisn').value.trim();
+
+                // Check Duplicates in Firebase (NIS or NISN)
+                // Note: Compound queries with 'or' require newer SDKs, so we do two separate simple queries to be safe and compatible.
+                const nisCheck = await db.collection('siswa').where('nis', '==', nis).get();
+                if (!nisCheck.empty) {
+                    showToast('error', 'NIS Sudah Terdaftar', 'NIS yang Anda masukkan sudah terdaftar di sistem.');
+                    resetBtn(btnSubmit, originalContent);
                     return;
                 }
 
-                const tanggalMasuk = document.getElementById('tanggalMasuk').value;
-                // Hitung estimasi tanggal lulus (3 tahun setelah masuk)
-                const tglMasukDate = new Date(tanggalMasuk);
-                const tglLulusDate = new Date(tglMasukDate);
-                tglLulusDate.setFullYear(tglLulusDate.getFullYear() + 3);
-                const tanggalLulus = tglLulusDate.toISOString().split('T')[0];
+                const nisnCheck = await db.collection('siswa').where('nisn', '==', nisn).get();
+                if (!nisnCheck.empty) {
+                    showToast('error', 'NISN Sudah Terdaftar', 'NISN yang Anda masukkan sudah terdaftar di sistem.');
+                    resetBtn(btnSubmit, originalContent);
+                    return;
+                }
 
+                // Prepare Data
+                const tglMasuk = `${document.getElementById('tahunAjaran').value}-07-15`; // Default mid july
                 const dataSiswa = {
                     nama: document.getElementById('nama').value.trim(),
-                    nisn: document.getElementById('nisn').value.trim(),
+                    nisn: nisn,
                     tempatLahir: document.getElementById('tempatLahir').value.trim(),
                     tanggalLahir: document.getElementById('tanggalLahir').value,
                     jenisKelamin: document.getElementById('jenisKelamin').value,
+                    noHp: document.getElementById('noHp').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    alamat: document.getElementById('alamat').value.trim(),
                     nis: nis,
                     kelas: document.getElementById('kelas').value,
                     jurusan: document.getElementById('jurusan').value,
-                    tanggalMasuk: tanggalMasuk,
-                    tanggalLulus: tanggalLulus,
-                    password: document.getElementById('password').value,
+                    tanggalMasuk: tglMasuk,
+                    password: document.getElementById('password').value, // In real world, hash this!
                     status: 'pending',
                     tanggalDaftar: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
+                // Save to Firestore
                 await db.collection('siswa').add(dataSiswa);
 
-                showToast('success', 'Pendaftaran Berhasil!', 'Akun akan diverifikasi operator dalam 1x24 jam.');
+                showToast('success', 'Pendaftaran Berhasil!', 'Data Anda telah tersimpan dan menunggu verifikasi.');
+                btnSubmit.innerHTML = '<i class="fas fa-check"></i> Selesai';
                 
+                // Redirect simulation
                 setTimeout(() => {
-                    window.location.href = 'portal-siswa-68.html';
-                }, 2000);
+                    // window.location.href = 'portal-siswa-68.html'; // Adjust target URL
+                    document.getElementById('registrationForm').reset();
+                    goToStep(1);
+                    resetBtn(btnSubmit, originalContent);
+                }, 3000);
 
             } catch (error) {
-                console.error('Error:', error);
-                showToast('error', 'Gagal Mendaftar', 'Terjadi kesalahan server. Coba lagi nanti.');
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Daftarkan Akun';
+                console.error("Firebase Error:", error);
+                // Fallback for Canvas execution environment if Firebase blocks the explicit config
+                if(error.code === 'permission-denied' || error.message.includes('Missing or insufficient permissions')) {
+                    showToast('error', 'Koneksi Ditolak', 'Konfigurasi Firebase memerlukan autentikasi atau ada aturan keamanan (Security Rules) yang memblokir akses.');
+                } else {
+                    showToast('error', 'Gagal Memproses', 'Terjadi kesalahan sistem. Silakan coba lagi beberapa saat.');
+                }
+                resetBtn(btnSubmit, originalContent);
             }
         });
 
-        // Init
-        updateProgress(1);
+        function resetBtn(btn, content) {
+            btn.disabled = false;
+            btn.innerHTML = content;
+        }
+
+        // --- Simple Floating Particles (No heavy libraries) ---
+        function createParticles() {
+            const container = document.getElementById('particles-js');
+            const particleCount = 20;
+            
+            for(let i=0; i<particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'absolute';
+                particle.style.width = Math.random() * 5 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.background = 'rgba(255,255,255,0.1)';
+                particle.style.borderRadius = '50%';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.bottom = '-10px';
+                
+                // Animation settings
+                const duration = Math.random() * 10 + 10;
+                const delay = Math.random() * 10;
+                
+                particle.style.animation = `floatUp ${duration}s linear ${delay}s infinite`;
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Add dynamic CSS for particles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes floatUp {
+                0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                100% { transform: translateY(-100vh) translateX(${Math.random() * 100 - 50}px) scale(0); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
     </script>
 </body>
 </html>
