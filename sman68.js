@@ -73,7 +73,7 @@ const linkUrls = {
     virsch:        './virsch-68.html',
     penmurmut:     './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html',
     pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
-    topJurusan:    './jurusan-kuliah-terbaik-2026.html',
+    topJurusan:    './top-jurusan-kuliah-2026.html',
     kelulusan:     './unduh-kartu-peserta.html',
     hukum:         './hukum.html'
 };
@@ -1263,8 +1263,8 @@ function initLiveChat() {
         db.collection('chatSessions').doc(sessionId)
             .collection('messages')
             .orderBy('timestamp', 'asc')
-            .onSnapshot(snap => {
-                snap.docChanges().forEach(change => {
+            .onSnapshot(function(snap) {
+                snap.docChanges().forEach(function(change) {
                     if (change.type === 'added' && change.doc.data().sender === 'operator') {
                         appendOperatorMessage(change.doc.data().message);
                     }
@@ -1279,24 +1279,41 @@ function initLiveChat() {
         });
     }
 
+    function getTimeNow() {
+        var now = new Date();
+        var h   = String(now.getHours()).padStart(2,'0');
+        var m   = String(now.getMinutes()).padStart(2,'0');
+        return h + ':' + m;
+    }
+
     function appendUserMessage(text) {
-        const div = document.createElement('div');
+        var div = document.createElement('div');
         div.className = 'message-user';
-        div.innerHTML = `<div>${escapeHtml(text)}</div>`;
-        list?.appendChild(div);
+        div.innerHTML =
+            '<div>' + escapeHtml(text) + '</div>';
+        if (list) list.appendChild(div);
         scrollChatBottom();
     }
 
     function appendOperatorMessage(text) {
-        const div = document.createElement('div');
+        var div = document.createElement('div');
         div.className = 'message-operator';
-        div.innerHTML = `<div>${escapeHtml(text)}</div>`;
-        list?.appendChild(div);
+        div.innerHTML =
+            '<div>' + escapeHtml(text) + '</div>';
+        if (list) list.appendChild(div);
         scrollChatBottom();
     }
 
     function scrollChatBottom() {
-        if (list) list.scrollTop = list.scrollHeight;
+        if (!list) return;
+        // requestAnimationFrame: tunggu browser render dulu
+        requestAnimationFrame(function() {
+            list.scrollTop = list.scrollHeight;
+            // Double RAF untuk konten dinamis yang panjang
+            requestAnimationFrame(function() {
+                list.scrollTop = list.scrollHeight;
+            });
+        });
     }
 
     function resetChat() {
@@ -1316,13 +1333,18 @@ function initLiveChat() {
 }
 
 function appendBotMessage(text) {
-    const list = $('chatMessageList');
+    var list = document.getElementById('chatMessageList');
     if (!list) return;
-    const div = document.createElement('div');
+    var div = document.createElement('div');
     div.className   = 'message-bot';
     div.textContent = text;
     list.appendChild(div);
-    list.scrollTop  = list.scrollHeight;
+    requestAnimationFrame(function() {
+        list.scrollTop = list.scrollHeight;
+        requestAnimationFrame(function() {
+            list.scrollTop = list.scrollHeight;
+        });
+    });
 }
 
 function forceEndChat() {
@@ -1477,65 +1499,430 @@ function initPrivacy() {
 }
 
 // ============================================
-// FLOATING ANNOUNCEMENT
 // ============================================
-async function initFloatingAnnouncement() {
-    try {
-        const doc = await db.collection('settings').doc('announcement').get();
-        if (doc.exists && doc.data().active === true) {
-            const data = doc.data();
+// SISTEM NOTIFIKASI PENGUMUMAN BARU
+// ============================================
+let notifList = [];
 
-            if (data.endTime) {
-                const end = data.endTime.toDate();
-                if (new Date() > end) {
-                    await db.collection('settings').doc('announcement').update({
-                        active:    false,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    return;
-                }
+function initNotifSystem() {
+    var notifBtn          = document.getElementById('notifBtn');
+    var notifPanel        = document.getElementById('notifPanel');
+    var notifPanelClose   = document.getElementById('notifPanelClose');
+    var notifPanelOverlay = document.getElementById('notifPanelOverlay');
+
+    if (notifBtn) {
+        notifBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (notifPanel && notifPanel.classList.contains('active')) {
+                closeNotifPanel();
+            } else {
+                openNotifPanel();
             }
+        });
+    }
+    if (notifPanelClose)   notifPanelClose.addEventListener('click', closeNotifPanel);
+    if (notifPanelOverlay) notifPanelOverlay.addEventListener('click', closeNotifPanel);
 
-            if (!sessionStorage.getItem('sman68-ann-shown')) {
-                showAnnouncement(data.text || '');
-            }
-        }
-    } catch { /* no announcement */ }
-
-    // Real-time listener
-    db.collection('settings').doc('announcement').onSnapshot(doc => {
-        if (!doc.exists) return;
-        const d = doc.data();
-        if (d.active && !sessionStorage.getItem('sman68-ann-shown')) {
-            showAnnouncement(d.text || '');
-        } else if (!d.active) {
-            hideAnnouncement();
+    document.addEventListener('click', function(e) {
+        var panel = document.getElementById('notifPanel');
+        var btn   = document.getElementById('notifBtn');
+        if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) {
+            closeNotifPanel();
         }
     });
 
-    // Close button
-    $('announcementClose')?.addEventListener('click', hideAnnouncement);
+    var closeLetterBtn  = document.getElementById('notifLetterClose');
+    var letterModal     = document.getElementById('notifLetterModal');
+    if (closeLetterBtn) closeLetterBtn.addEventListener('click', closeLetterModal);
+    if (letterModal) {
+        letterModal.addEventListener('click', function(e) {
+            if (e.target === letterModal) closeLetterModal();
+        });
+    }
+
+    loadNotifications();
 }
 
-function showAnnouncement(text) {
-    if (!text.trim()) return;
-    const el   = $('floatingAnnouncement');
-    const textEl = $('announcementText');
-    if (el && textEl) {
-        textEl.textContent = text;
-        el.style.display   = 'block';
-        sessionStorage.setItem('sman68-ann-shown', '1');
+function openNotifPanel() {
+    var panel   = document.getElementById('notifPanel');
+    var overlay = document.getElementById('notifPanelOverlay');
+    if (panel)   panel.classList.add('active');
+    if (overlay) overlay.classList.add('active');
+    setTimeout(markAllRead, 600);
+}
+
+function closeNotifPanel() {
+    var panel   = document.getElementById('notifPanel');
+    var overlay = document.getElementById('notifPanelOverlay');
+    if (panel)   panel.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
+}
+
+function closeLetterModal() {
+    var modal = document.getElementById('notifLetterModal');
+    if (modal) modal.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+async function loadNotifications() {
+    notifList = [];
+
+    // ── Coba collection 'announcements' (multi-doc) ───────────────────────
+    // Pakai .get() tanpa .where() dulu untuk hindari error index Firestore,
+    // lalu filter active=true di sisi client
+    try {
+        var snap = await db.collection('announcements')
+            .orderBy('createdAt', 'desc')
+            .limit(20)
+            .get();
+
+        if (!snap.empty) {
+            snap.forEach(function(doc) {
+                var d = doc.data();
+                // Tampilkan: active===true ATAU field active tidak ada sama sekali
+                if (d.active === true || d.active === undefined) {
+                    notifList.push(Object.assign({ id: doc.id }, d));
+                }
+            });
+        }
+    } catch(e1) {
+        // Kalau orderBy gagal (no index), coba tanpa orderBy
+        try {
+            var snap2 = await db.collection('announcements').limit(20).get();
+            if (!snap2.empty) {
+                snap2.forEach(function(doc) {
+                    var d = doc.data();
+                    if (d.active === true || d.active === undefined) {
+                        notifList.push(Object.assign({ id: doc.id }, d));
+                    }
+                });
+            }
+        } catch(e2) {
+            console.warn('announcements collection error:', e2);
+        }
+    }
+
+    // ── Fallback ke settings/announcement (format single doc lama) ─────────
+    try {
+        var singleDoc = await db.collection('settings').doc('announcement').get();
+        if (singleDoc.exists) {
+            var sd = singleDoc.data();
+            // Tampilkan jika active atau field tidak ada
+            if (sd.active === true || sd.active === undefined) {
+                // Cek apakah sudah ada dari collection utama
+                var alreadyIn = notifList.some(function(n) { return n.id === 'single'; });
+                if (!alreadyIn) {
+                    notifList.push({
+                        id:        'single',
+                        title:     sd.title   || 'Pengumuman',
+                        text:      sd.text    || sd.message || '',
+                        createdAt: sd.createdAt || null,
+                        active:    true
+                    });
+                }
+            }
+        }
+    } catch(e3) {
+        console.warn('settings/announcement error:', e3);
+    }
+
+    // ── Render ──────────────────────────────────────────────────────────────
+    renderNotifPanel();
+    updateNotifBadge();
+
+    // ── Realtime listener (collection announcements) ────────────────────────
+    try {
+        db.collection('announcements').onSnapshot(function(snap) {
+            notifList = [];
+            snap.forEach(function(doc) {
+                var d = doc.data();
+                if (d.active === true || d.active === undefined) {
+                    notifList.push(Object.assign({ id: doc.id }, d));
+                }
+            });
+            renderNotifPanel();
+            updateNotifBadge();
+        });
+    } catch(e4) {}
+
+    // ── Realtime listener (settings/announcement) ───────────────────────────
+    try {
+        db.collection('settings').doc('announcement').onSnapshot(function(doc) {
+            if (!doc.exists) return;
+            var sd = doc.data();
+            // Update atau hapus entry 'single' dari list
+            notifList = notifList.filter(function(n) { return n.id !== 'single'; });
+            if (sd.active === true || sd.active === undefined) {
+                notifList.unshift({
+                    id:        'single',
+                    title:     sd.title   || 'Pengumuman',
+                    text:      sd.text    || sd.message || '',
+                    createdAt: sd.createdAt || null,
+                    active:    true
+                });
+            }
+            renderNotifPanel();
+            updateNotifBadge();
+        });
+    } catch(e5) {}
+}
+
+function renderNotifPanel() {
+    var list = document.getElementById('notifPanelList');
+    if (!list) return;
+
+    if (notifList.length === 0) {
+        list.innerHTML =
+            '<div class="notif-empty">' +
+                '<i class="fas fa-envelope-open"></i>' +
+                '<p>Tidak ada pengumuman aktif</p>' +
+            '</div>';
+        return;
+    }
+
+    var readSet = getReadSet();
+    var html    = '';
+
+    notifList.forEach(function(item) {
+        var isUnread = !readSet.has(item.id);
+        var dateStr  = '';
+        if (item.createdAt && item.createdAt.toDate) {
+            dateStr = new Date(item.createdAt.toDate()).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'short', year: 'numeric'
+            });
+        }
+        var raw     = item.text || '';
+        var preview = raw.replace(/\n/g, ' ').substring(0, 80) + (raw.length > 80 ? '…' : '');
+
+        html +=
+            '<div class="notif-item ' + (isUnread ? 'unread' : '') + '"' +
+                ' onclick="openLetterModal(\'' + item.id.replace(/'/g, "\\'") + '\')"' +
+                ' data-id="' + escapeHtml(item.id) + '">' +
+                '<div class="notif-item-icon">' +
+                    '<i class="fas fa-' + (isUnread ? 'envelope' : 'envelope-open-text') + '"></i>' +
+                '</div>' +
+                '<div class="notif-item-body">' +
+                    '<div class="notif-item-title">' + escapeHtml(item.title || 'Pengumuman') + '</div>' +
+                    '<div class="notif-item-preview">' + escapeHtml(preview) + '</div>' +
+                    '<div class="notif-item-date">' + dateStr + '</div>' +
+                '</div>' +
+            '</div>';
+    });
+
+    list.innerHTML = html;
+}
+
+window.openLetterModal = function(id) {
+    var item = null;
+    for (var i = 0; i < notifList.length; i++) {
+        if (notifList[i].id === id) { item = notifList[i]; break; }
+    }
+    if (!item) return;
+
+    // Mark as read
+    var readSet = getReadSet();
+    readSet.add(id);
+    localStorage.setItem('sman68-notif-read', JSON.stringify(Array.from(readSet)));
+    updateNotifBadge();
+    renderNotifPanel();
+
+    // Fill modal elements
+    var titleEl      = document.getElementById('letterTitle');
+    var dateEl       = document.getElementById('letterDate');
+    var bodyEl       = document.getElementById('letterBody');
+    var footerDateEl = document.getElementById('letterFooterDate');
+
+    if (titleEl) titleEl.textContent = item.title || 'Pengumuman';
+
+    var dateStr = '';
+    if (item.createdAt && item.createdAt.toDate) {
+        dateStr = new Date(item.createdAt.toDate()).toLocaleDateString('id-ID', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+        });
+    } else {
+        dateStr = new Date().toLocaleDateString('id-ID', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+        });
+    }
+
+    if (dateEl)       dateEl.innerHTML = '<i class="fas fa-calendar-alt"></i> ' + dateStr;
+    if (footerDateEl) footerDateEl.textContent = dateStr.split(',').slice(1).join(',').trim();
+
+    // Render body paragraf terstruktur
+    var rawText    = item.text || '';
+    var paragraphs = rawText.split(/\n{2,}/).map(function(p) { return p.trim(); }).filter(Boolean);
+
+    if (bodyEl) {
+        if (paragraphs.length > 0) {
+            bodyEl.innerHTML = paragraphs.map(function(p) {
+                return '<p class="letter-paragraph">' + escapeHtml(p).replace(/\n/g, '<br>') + '</p>';
+            }).join('');
+        } else {
+            bodyEl.innerHTML = '<p class="letter-paragraph">' + escapeHtml(rawText) + '</p>';
+        }
+    }
+
+    var modal = document.getElementById('notifLetterModal');
+    if (modal) modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    closeNotifPanel();
+};
+
+function updateNotifBadge() {
+    var badge   = document.getElementById('notifBadge');
+    var btn     = document.getElementById('notifBtn');
+    var icon    = document.getElementById('notifIcon');
+    var readSet = getReadSet();
+    var unread  = notifList.filter(function(n) { return !readSet.has(n.id); }).length;
+
+    if (badge) {
+        badge.textContent   = unread > 9 ? '9+' : String(unread);
+        badge.style.display = unread > 0 ? 'flex' : 'none';
+    }
+    if (btn)  btn.classList.toggle('has-notif', unread > 0);
+    if (icon) icon.className = unread > 0 ? 'fas fa-envelope' : 'fas fa-envelope-open';
+}
+
+function markAllRead() {
+    var readSet = getReadSet();
+    notifList.forEach(function(n) { readSet.add(n.id); });
+    localStorage.setItem('sman68-notif-read', JSON.stringify(Array.from(readSet)));
+    updateNotifBadge();
+    renderNotifPanel();
+}
+
+function getReadSet() {
+    try {
+        var stored = localStorage.getItem('sman68-notif-read');
+        return new Set(stored ? JSON.parse(stored) : []);
+    } catch(e) { return new Set(); }
+}
+
+// Legacy stubs
+function initFloatingAnnouncement() { initNotifSystem(); }
+function showAnnouncement() {}
+function hideAnnouncement() {}
+
+
+// ============================================
+// COOKIES CONSENT SYSTEM
+// ============================================
+function initCookies() {
+    var COOKIE_KEY = 'sman68-cookies-consent';
+
+    // Cek apakah sudah pernah setuju
+    var saved = localStorage.getItem(COOKIE_KEY);
+    if (saved) return; // Sudah pernah pilih, skip
+
+    // Tampilkan banner setelah 1.5 detik
+    setTimeout(function() {
+        var overlay = document.getElementById('cookiesOverlay');
+        if (overlay) overlay.classList.add('active');
+    }, 1500);
+
+    // Tombol Terima Semua
+    var acceptBtn = document.getElementById('cookiesAcceptBtn');
+    if (acceptBtn) {
+        acceptBtn.addEventListener('click', function() {
+            saveCookieConsent({
+                essential:  true,
+                analytic:   true,
+                functional: true,
+                marketing:  true,
+                all:        true
+            });
+            closeCookieBanner();
+            showToast('Preferensi cookies disimpan. Terima kasih! 🍪', 'success');
+        });
+    }
+
+    // Tombol Tolak
+    var declineBtn = document.getElementById('cookiesDeclineBtn');
+    if (declineBtn) {
+        declineBtn.addEventListener('click', function() {
+            saveCookieConsent({
+                essential:  true,
+                analytic:   false,
+                functional: false,
+                marketing:  false,
+                all:        false
+            });
+            closeCookieBanner();
+            showToast('Hanya cookies esensial yang diaktifkan.', 'success');
+        });
+    }
+
+    // Tombol Pengaturan — buka modal
+    var settingsBtn = document.getElementById('cookiesSettingsBtn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', function() {
+            var modal = document.getElementById('cookiesSettingsModal');
+            if (modal) modal.classList.add('active');
+        });
+    }
+
+    // Tutup settings modal
+    var settingsClose = document.getElementById('cookiesSettingsClose');
+    if (settingsClose) {
+        settingsClose.addEventListener('click', function() {
+            var modal = document.getElementById('cookiesSettingsModal');
+            if (modal) modal.classList.remove('active');
+        });
+    }
+
+    // Overlay settings modal klik luar
+    var settingsModal = document.getElementById('cookiesSettingsModal');
+    if (settingsModal) {
+        settingsModal.addEventListener('click', function(e) {
+            if (e.target === settingsModal) settingsModal.classList.remove('active');
+        });
+    }
+
+    // Simpan preferensi dari settings
+    var saveBtn = document.getElementById('cookiesSaveBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function() {
+            var analytic   = document.getElementById('cookieAnalytic');
+            var functional = document.getElementById('cookieFunctional');
+            var marketing  = document.getElementById('cookieMarketing');
+            saveCookieConsent({
+                essential:  true,
+                analytic:   analytic   ? analytic.checked   : false,
+                functional: functional ? functional.checked : false,
+                marketing:  marketing  ? marketing.checked  : false,
+                all:        false
+            });
+            var modal = document.getElementById('cookiesSettingsModal');
+            if (modal) modal.classList.remove('active');
+            closeCookieBanner();
+            showToast('Preferensi cookies berhasil disimpan! ✅', 'success');
+        });
+    }
+
+    // Link privacy di cookies
+    var privLink = document.getElementById('cookiesPrivacyLink');
+    if (privLink) {
+        privLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            var pm = document.getElementById('privacyModal');
+            if (pm) pm.classList.add('active');
+        });
     }
 }
 
-function hideAnnouncement() {
-    const el = $('floatingAnnouncement');
-    if (!el) return;
-    el.classList.add('hide');
-    setTimeout(() => {
-        el.style.display = 'none';
-        el.classList.remove('hide');
-    }, 500);
+function saveCookieConsent(prefs) {
+    var data = Object.assign({}, prefs, { timestamp: new Date().toISOString() });
+    localStorage.setItem('sman68-cookies-consent', JSON.stringify(data));
+}
+
+function closeCookieBanner() {
+    var overlay = document.getElementById('cookiesOverlay');
+    if (!overlay) return;
+    overlay.style.opacity    = '0';
+    overlay.style.transition = 'opacity 0.4s ease';
+    setTimeout(function() {
+        overlay.style.display = 'none';
+    }, 420);
 }
 
 // ============================================
@@ -1544,7 +1931,7 @@ function hideAnnouncement() {
 function initDownloadAPK() {
     $('btnDownloadAPK')?.addEventListener('click', e => {
         e.preventDefault();
-        const url = './68-404.html';
+        const url = 'https://github.com/nadhiframadhan780-dev/smanegeri68jakarta/raw/refs/heads/main/SMAN%2068%20JAKARTA%202.5.0.apk';
         window.open(url, '_blank');
     });
 }
@@ -1749,8 +2136,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initPrivacy();
     initFeedback();
     initHistoryModal();
-    initFloatingAnnouncement();
+    initNotifSystem();
     initDownloadAPK();
+    initCookies();
 
     // --- Animations ---
     initAOS();
