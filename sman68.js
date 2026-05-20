@@ -73,7 +73,7 @@ const linkUrls = {
     virsch:        './virsch-68.html',
     penmurmut:     './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html',
     pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
-    topJurusan:    './top-jurusan-kuliah-2026.html',
+    topJurusan:    './jurusan-kuliah-terbaik-2026.html',
     kelulusan:     './unduh-kartu-peserta.html',
     hukum:         './hukum.html'
 };
