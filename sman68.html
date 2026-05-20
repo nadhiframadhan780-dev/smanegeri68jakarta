@@ -64,21 +64,52 @@
 <div class="scroll-progress" id="scrollProgress"></div>
 
 <!-- ============================================ -->
-<!-- FLOATING ANNOUNCEMENT -->
+<!-- PANEL NOTIFIKASI PENGUMUMAN -->
 <!-- ============================================ -->
-<div class="floating-announcement" id="floatingAnnouncement" style="display:none">
-    <div class="announcement-glow"></div>
-    <div class="announcement-inner">
-        <div class="announcement-icon">
-            <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68">
+<div class="notif-panel-overlay" id="notifPanelOverlay"></div>
+<div class="notif-panel" id="notifPanel">
+    <div class="notif-panel-header">
+        <div class="notif-panel-title">
+            <i class="fas fa-envelope-open-text"></i>
+            <span>Pengumuman</span>
         </div>
-        <div class="announcement-body">
-            <span class="announcement-label">Pengumuman</span>
-            <p id="announcementText"></p>
-        </div>
-        <button class="announcement-close" id="announcementClose">
+        <button class="notif-panel-close" id="notifPanelClose">
             <i class="fas fa-times"></i>
         </button>
+    </div>
+    <div class="notif-panel-list" id="notifPanelList">
+        <!-- diisi JS -->
+    </div>
+</div>
+
+<!-- Modal baca pengumuman (tampilan surat) -->
+<div class="modal-overlay notif-letter-modal" id="notifLetterModal">
+    <div class="modal-card notif-letter-card">
+        <button class="modal-close-x notif-letter-close" id="notifLetterClose">
+            <i class="fas fa-times"></i>
+        </button>
+        <!-- Logo 68 background watermark -->
+        <div class="letter-watermark">
+            <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="">
+        </div>
+        <div class="letter-header">
+            <div class="letter-logo">
+                <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68">
+            </div>
+            <div class="letter-meta">
+                <h3 class="letter-school">SMA Negeri 68 Jakarta</h3>
+                <span class="letter-label">Pengumuman Resmi</span>
+            </div>
+        </div>
+        <div class="letter-divider"></div>
+        <h2 class="letter-title" id="letterTitle"></h2>
+        <div class="letter-date" id="letterDate"></div>
+        <div class="letter-body" id="letterBody"></div>
+        <div class="letter-footer">
+            <span>Jakarta, <span id="letterFooterDate"></span></span>
+            <span>Hormat Kami,</span>
+            <strong>SMAN 68 Jakarta</strong>
+        </div>
     </div>
 </div>
 
@@ -130,6 +161,11 @@
             <li><a href="#" class="nav-link nav-special" id="navKelulusan">Coming Soon</a></li>
         </ul>
         <div class="nav-actions">
+            <!-- Tombol Notifikasi Pengumuman -->
+            <button class="notif-btn" id="notifBtn" title="Pengumuman">
+                <i class="fas fa-envelope" id="notifIcon"></i>
+                <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+            </button>
             <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">
                 <i class="fas fa-moon" id="themeIcon"></i>
             </button>
@@ -189,17 +225,17 @@
         </div>
         <div class="hero-stats" data-aos="fade-up" data-aos-delay="700">
             <div class="hero-stat">
-                <span class="stat-num counter" data-target="45">0</span><span class="stat-unit">Tahun</span>
+                <span class="stat-num counter" data-target="13">0</span><span class="stat-unit">+</span>
                 <span class="stat-label">Tahun Berdiri</span>
             </div>
             <div class="hero-stat-divider"></div>
             <div class="hero-stat">
-                <span class="stat-num counter" data-target="850">0</span><span class="stat-unit">+</span>
+                <span class="stat-num counter" data-target="2450">0</span><span class="stat-unit">+</span>
                 <span class="stat-label">Alumni UI</span>
             </div>
             <div class="hero-stat-divider"></div>
             <div class="hero-stat">
-                <span class="stat-num counter" data-target="20">0</span><span class="stat-unit">+</span>
+                <span class="stat-num counter" data-target="50">0</span><span class="stat-unit">+</span>
                 <span class="stat-label">Ekskul Aktif</span>
             </div>
         </div>
@@ -377,7 +413,7 @@
 </div>
 
 <!-- ============================================ -->
-<!-- TUTORIAL TRIGGER -->
+<!-- TUTORIAL TRIGGER — posisi tengah kanan -->
 <!-- ============================================ -->
 <div class="tutorial-fab" id="tutorialTrigger">
     <i class="fas fa-question"></i>
@@ -475,7 +511,7 @@
                 <div class="bento-card-inner">
                     <img src="https://media.indozone.id/crop/0x0:0x0/images/2026/01/14/1768352620_6966eb6c54bf6_maxresdefault.jpg" alt="SMAN 68" class="bento-bg-img" loading="lazy">
                     <div class="bento-overlay">
-                        <div class="bento-tag">Est. 1981</div>
+                        <div class="bento-tag">Est. 2011</div>
                         <h3>DISIPLIN<br>KREASI<br>PRESTASI</h3>
                     </div>
                 </div>
@@ -894,14 +930,14 @@
                 <div class="dl-icon android-icon"><i class="fab fa-android"></i></div>
                 <h3>Android</h3>
                 <p>Untuk HP & Tablet Android</p>
-                <span class="dl-badge available disabled">Coming Soon on Juni 2026</span>
-                <button class="btn-download btn-disabled" id="btnDownloadAPK">
-                    <i class="fas fa-download disabled"></i> Dalam Update Besar
+                <span class="dl-badge available">Tersedia</span>
+                <button class="btn-download magnetic-btn" id="btnDownloadAPK">
+                    <i class="fas fa-download"></i> Download APK
                 </button>
                 <div class="dl-meta">
-                    <span><i class="fas fa-code-branch"></i> v4.0.0</span>
-                    <span><i class="fas fa-calendar"></i> Juni 2026</span>
-                    <span><i class="fas fa-file"></i> ~ MB</span>
+                    <span><i class="fas fa-code-branch"></i> v2.5.0</span>
+                    <span><i class="fas fa-calendar"></i> 02 Mei 2026</span>
+                    <span><i class="fas fa-file"></i> ~7 MB</span>
                 </div>
             </div>
 
@@ -1008,6 +1044,93 @@
 </div>
 
 <!-- ============================================ -->
+<!-- COOKIES CONSENT BANNER
+<!-- ============================================ -->
+<div class="cookies-overlay" id="cookiesOverlay">
+    <div class="cookies-banner">
+        <div class="cookies-inner">
+            <div class="cookies-icon-wrap">
+                <i class="fas fa-cookie-bite"></i>
+            </div>
+            <div class="cookies-text">
+                <h4>Kami Menggunakan Cookies 🍪</h4>
+                <p>Website SMAN 68 Jakarta menggunakan cookies untuk meningkatkan pengalaman Anda, menganalisis traffic, dan menyimpan preferensi. Dengan melanjutkan, Anda menyetujui <a id="cookiesPrivacyLink">Kebijakan Privasi</a> kami.</p>
+            </div>
+            <div class="cookies-actions">
+                <button class="btn-cookies-settings" id="cookiesSettingsBtn">
+                    <i class="fas fa-sliders-h"></i> Pengaturan
+                </button>
+                <button class="btn-cookies-decline" id="cookiesDeclineBtn">
+                    <i class="fas fa-times"></i> Tolak
+                </button>
+                <button class="btn-cookies-accept" id="cookiesAcceptBtn">
+                    <i class="fas fa-check"></i> Terima Semua
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cookies Settings Modal -->
+<div class="modal-overlay cookies-settings-modal" id="cookiesSettingsModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div class="modal-header-icon"><i class="fas fa-sliders-h"></i></div>
+            <div>
+                <h3>Pengaturan Cookies</h3>
+                <p>Kelola preferensi cookies Anda</p>
+            </div>
+            <button class="modal-close-x" id="cookiesSettingsClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cookies-options">
+            <div class="cookies-option">
+                <div class="cookies-option-info">
+                    <h5>Cookies Esensial</h5>
+                    <p>Diperlukan untuk fungsi dasar website seperti sesi login dan keamanan. Tidak dapat dinonaktifkan.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked disabled>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="cookies-option">
+                <div class="cookies-option-info">
+                    <h5>Cookies Analitik</h5>
+                    <p>Membantu kami memahami cara pengunjung menggunakan website ini untuk meningkatkan layanan.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="cookieAnalytic" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="cookies-option">
+                <div class="cookies-option-info">
+                    <h5>Cookies Fungsional</h5>
+                    <p>Menyimpan preferensi Anda seperti tema tampilan, bahasa, dan pengaturan lainnya.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="cookieFunctional" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="cookies-option">
+                <div class="cookies-option-info">
+                    <h5>Cookies Pemasaran</h5>
+                    <p>Digunakan untuk menampilkan konten yang relevan dan mengukur efektivitas informasi.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="cookieMarketing">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <button class="cookies-save-btn" id="cookiesSaveBtn">
+            <i class="fas fa-save"></i> Simpan Preferensi
+        </button>
+    </div>
+</div>
+
+<!-- ============================================ -->
 <!-- TOAST CONTAINER -->
 <!-- ============================================ -->
 <div class="toast-stack" id="toastContainer"></div>
@@ -1076,7 +1199,7 @@
                 <div class="footer-col">
                     <h4>Layanan</h4>
                     <ul>
-                        <li><a href="#" id="footerLoginSiswa" class=""><i class="fas fa-chevron-right"></i> Login Siswa</a></li>
+                        <li><a href="#" id="footerLoginSiswa"><i class="fas fa-chevron-right"></i> Login Siswa</a></li>
                         <li><a href="#" id="footerLoginGuru"><i class="fas fa-chevron-right"></i> Login Guru</a></li>
                         <li><a href="#" id="footerHukum"><i class="fas fa-chevron-right"></i> Hukum SMAN 68</a></li>
                         <li><a href="#" id="footerVirsch"><i class="fas fa-chevron-right"></i> VIRSCH 68</a></li>
