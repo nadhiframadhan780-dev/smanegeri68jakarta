@@ -1,267 +1,454 @@
-/* ═══════════════════════════════════════════════════════════════════════ */
-/* SPLASH SCREEN SMAN 68 JAKARTA - PREMIUM JS v2.0                       */
-/* ═══════════════════════════════════════════════════════════════════════ */
+// ============================================
+// SMAN 68 JAKARTA — SPLASH SCREEN JS v3.0
+// Clean rewrite · Maintenance complete
+// ============================================
 
-'use strict';
-
-// ============================================================
-// CONFIGURATION
-// ============================================================
-const CONFIG = {
-    countdownDuration: 3, // detik
-    redirectUrl: './sman68.html',
-    particleCount: 50,
-    bubbleCount: 15,
-    progressInterval: 30, // ms per update
+// ── FIREBASE ──────────────────────────────────
+var firebaseConfig = {
+    apiKey:            "AIzaSyDAcKcg3alPOTH3FFGelYmsW7jcMMe2PLI",
+    authDomain:        "upnvjdatsystem.firebaseapp.com",
+    databaseURL:       "https://upnvjdatsystem-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId:         "upnvjdatsystem",
+    storageBucket:     "upnvjdatsystem.firebasestorage.app",
+    messagingSenderId: "57095309946",
+    appId:             "1:57095309946:web:b0e9f3f86380d549ffc9c3"
 };
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
 
-// ============================================================
-// STATE
-// ============================================================
-const state = {
-    progress: 0,
-    countdown: CONFIG.countdownDuration,
-    isRedirecting: false,
-    intervalId: null,
-};
+// ── STATE ─────────────────────────────────────
+var isMaintenance    = false;
+var countdownValue   = 3;
+var countdownTimer   = null;
+var redirectTimer    = null;
+var progressTimer    = null;
+var progressVal      = 0;
+var maintCountdownTimer = null;
+var maintEndTime     = null;
+var redirectCanceled = false;
 
-// ============================================================
-// PARTICLES GENERATOR
-// ============================================================
-function createParticles() {
-    const container = document.getElementById('particlesContainer');
-    if (!container) return;
+// ── HELPERS ───────────────────────────────────
+function ge(id) { return document.getElementById(id); }
+function pad(n) { return String(Math.max(0, Math.floor(n))).padStart(2, '0'); }
 
-    const types = ['dot', 'glow', 'gold'];
-    const fragment = document.createDocumentFragment();
+// ── PARTICLES (Canvas) ────────────────────────
+function initParticles() {
+    var canvas = ge('spCanvas');
+    if (!canvas) return;
+    var ctx    = canvas.getContext('2d');
+    var W, H, particles = [];
 
-    for (let i = 0; i < CONFIG.particleCount; i++) {
-        const particle = document.createElement('div');
-        const type = types[Math.floor(Math.random() * types.length)];
-        
-        particle.className = `particle ${type}`;
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.animationDuration = `${8 + Math.random() * 15}s`;
-        particle.style.animationDelay = `${Math.random() * 10}s`;
-        particle.style.width = type === 'dot' ? `${2 + Math.random() * 3}px` : `${1 + Math.random() * 2}px`;
-        particle.style.height = particle.style.width;
+    function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
 
-        fragment.appendChild(particle);
+    var isMobile = window.innerWidth < 768;
+    var count    = isMobile ? 20 : 40;
+
+    for (var i = 0; i < count; i++) {
+        particles.push({
+            x:    Math.random() * (window.innerWidth  || 400),
+            y:    Math.random() * (window.innerHeight || 800),
+            r:    Math.random() * 2.5 + 0.8,
+            vy:   -(Math.random() * 0.5 + 0.2),
+            vx:   (Math.random() - 0.5) * 0.3,
+            o:    Math.random() * 0.4 + 0.1,
+            color: ['rgba(52,211,153,', 'rgba(251,191,36,', 'rgba(255,255,255,'][Math.floor(Math.random() * 3)]
+        });
     }
 
-    container.appendChild(fragment);
-}
-
-// ============================================================
-// BUBBLES GENERATOR
-// ============================================================
-function createBubbles() {
-    const container = document.getElementById('bubblesContainer');
-    if (!container) return;
-
-    const fragment = document.createDocumentFragment();
-
-    for (let i = 0; i < CONFIG.bubbleCount; i++) {
-        const bubble = document.createElement('div');
-        const size = 20 + Math.random() * 80;
-        
-        bubble.className = 'bubble';
-        bubble.style.width = `${size}px`;
-        bubble.style.height = `${size}px`;
-        bubble.style.left = `${Math.random() * 100}%`;
-        bubble.style.animationDuration = `${12 + Math.random() * 20}s`;
-        bubble.style.animationDelay = `${Math.random() * 15}s`;
-
-        fragment.appendChild(bubble);
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        particles.forEach(function(p) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = p.color + p.o + ')';
+            ctx.fill();
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.y < -10) {
+                p.y = H + 10;
+                p.x = Math.random() * W;
+            }
+            if (p.x < -10 || p.x > W + 10) {
+                p.x = Math.random() * W;
+            }
+        });
+        requestAnimationFrame(draw);
     }
-
-    container.appendChild(fragment);
+    draw();
 }
 
-// ============================================================
-// PROGRESS BAR
-// ============================================================
-function startProgressBar() {
-    const progressFill = document.getElementById('progressBarFill');
-    const progressText = document.getElementById('progressText');
-    if (!progressFill || !progressText) return;
+// ── PARALLAX ──────────────────────────────────
+function initParallax() {
+    var bg = ge('spBg');
+    if (!bg || window.innerWidth < 768) return;
 
-    const totalSteps = (CONFIG.countdownDuration * 1000) / CONFIG.progressInterval;
-    let currentStep = 0;
-
-    state.intervalId = setInterval(() => {
-        currentStep++;
-        state.progress = Math.min((currentStep / totalSteps) * 100, 100);
-        
-        progressFill.style.width = `${state.progress}%`;
-
-        // Update progress text
-        if (state.progress < 30) {
-            progressText.textContent = 'Mempersiapkan portal...';
-        } else if (state.progress < 60) {
-            progressText.textContent = 'Memuat konten...';
-        } else if (state.progress < 90) {
-            progressText.textContent = 'Hampir siap...';
-        } else {
-            progressText.textContent = 'Portal siap! ✨';
-        }
-
-        if (state.progress >= 100) {
-            clearInterval(state.intervalId);
-        }
-    }, CONFIG.progressInterval);
+    document.addEventListener('mousemove', function(e) {
+        var xp = (e.clientX / window.innerWidth  - 0.5) * 2;
+        var yp = (e.clientY / window.innerHeight - 0.5) * 2;
+        bg.style.transform = 'scale(1.12) translate(' + (xp * 7) + 'px,' + (yp * 7) + 'px)';
+    }, { passive: true });
 }
 
-// ============================================================
-// COUNTDOWN & REDIRECT
-// ============================================================
+// ── ENTRANCE ANIMATIONS ───────────────────────
+function playEntrance() {
+    var items = document.querySelectorAll('.sp-anim');
+    items.forEach(function(el) {
+        var delay = parseInt(el.getAttribute('data-delay')) || 0;
+        setTimeout(function() { el.classList.add('in'); }, delay);
+    });
+}
+
+// ── PROGRESS BAR ──────────────────────────────
+function startProgress(totalMs) {
+    progressVal = 0;
+    var fill  = ge('spProgressFill');
+    var glare = ge('spProgressGlare');
+    var fps   = 30;
+    var inc   = 100 / ((totalMs / 1000) * fps);
+
+    progressTimer = setInterval(function() {
+        progressVal += inc;
+        if (progressVal > 100) progressVal = 100;
+        var pct = Math.round(progressVal);
+
+        if (fill)  fill.style.width  = pct + '%';
+        if (glare) glare.style.width = pct + '%';
+
+        // Steps
+        if (pct >= 25) activateStep('spStep1');
+        if (pct >= 60) { activateStep('spStep2'); doneStep('spStep1'); updateStatus('Memuat konten…'); }
+        if (pct >= 90) { activateStep('spStep3'); doneStep('spStep2'); updateStatus('Mengalihkan portal…'); }
+
+        if (progressVal >= 100) clearInterval(progressTimer);
+    }, 1000 / fps);
+}
+
+function activateStep(id) {
+    var el = ge(id);
+    if (el && !el.classList.contains('active')) el.classList.add('active');
+}
+function doneStep(id) {
+    var el = ge(id);
+    if (el) { el.classList.remove('active'); el.classList.add('done'); }
+}
+function updateStatus(text) {
+    var el = ge('spStatus');
+    if (el) el.textContent = text;
+}
+
+// ── COUNTDOWN ─────────────────────────────────
 function startCountdown() {
-    let secondsLeft = CONFIG.countdownDuration;
+    countdownValue = 3;
+    var numEl = ge('spCountNum');
+    if (numEl) numEl.textContent = '3';
 
-    const countdownInterval = setInterval(() => {
-        secondsLeft--;
-        state.countdown = secondsLeft;
+    startProgress(3000);
 
-        if (secondsLeft <= 0) {
-            clearInterval(countdownInterval);
+    countdownTimer = setInterval(function() {
+        countdownValue--;
+        if (numEl) {
+            numEl.style.transform = 'scale(1.5)';
+            numEl.style.opacity   = '0.3';
+            setTimeout(function() {
+                numEl.style.transform = '';
+                numEl.style.opacity   = '1';
+                numEl.textContent = Math.max(0, countdownValue);
+            }, 120);
+        }
+        if (countdownValue <= 0) {
+            clearInterval(countdownTimer);
             redirectToMain();
         }
     }, 1000);
+
+    // Failsafe
+    redirectTimer = setTimeout(redirectToMain, 4200);
 }
 
-// ============================================================
-// REDIRECT WITH TRANSITION
-// ============================================================
+// ── REDIRECT ──────────────────────────────────
 function redirectToMain() {
-    if (state.isRedirecting) return;
-    state.isRedirecting = true;
+    if (isMaintenance || redirectCanceled) return;
+    if (countdownTimer) clearInterval(countdownTimer);
+    if (redirectTimer)  clearTimeout(redirectTimer);
+    if (progressTimer)  clearInterval(progressTimer);
 
-    const overlay = document.getElementById('transitionOverlay');
-    const mainContent = document.getElementById('mainContent');
-
-    // Fade out main content
-    if (mainContent) {
-        mainContent.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        mainContent.style.opacity = '0';
-        mainContent.style.transform = 'scale(0.95)';
+    var trans = ge('spTransition');
+    if (trans) {
+        trans.classList.add('active');
+        setTimeout(function() {
+            window.location.href = './sman68.html';
+        }, 700);
+    } else {
+        window.location.href = './sman68.html';
     }
-
-    // Fade in overlay
-    if (overlay) {
-        overlay.classList.add('active');
-    }
-
-    // Redirect after transition
-    setTimeout(() => {
-        window.location.href = CONFIG.redirectUrl;
-    }, 600);
 }
 
-// ============================================================
-// BUTTON HANDLER
-// ============================================================
-function initButton() {
-    const btnEnter = document.getElementById('btnEnter');
-    if (!btnEnter) return;
-
-    btnEnter.addEventListener('click', (e) => {
+// ── SKIP BUTTON ───────────────────────────────
+function initSkipButton() {
+    var btn = ge('spSkipBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function(e) {
         e.preventDefault();
-        
-        // Add click effect
-        btnEnter.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-            btnEnter.style.transform = '';
-        }, 150);
-
-        // Clear auto-redirect
-        if (state.intervalId) {
-            clearInterval(state.intervalId);
-        }
-
-        redirectToMain();
-    });
-
-    // Keyboard shortcut
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            btnEnter.click();
-        }
+        if (!isMaintenance) redirectToMain();
     });
 }
 
-// ============================================================
-// GLASS CARD ANIMATION
-// ============================================================
-function animateGlassCard() {
-    const card = document.getElementById('glassCard');
-    if (!card) return;
+// ══════════════════════════════════════════════
+// NORMAL MODE
+// ══════════════════════════════════════════════
+function showNormalMode() {
+    isMaintenance = false;
+    redirectCanceled = false;
 
-    // Add border light animation after delay
-    setTimeout(() => {
-        card.classList.add('card-visible');
-    }, 1500);
+    var normalScreen = ge('normalScreen');
+    var maintScreen  = ge('maintenanceScreen');
+
+    if (maintScreen)  maintScreen.style.display  = 'none';
+    if (normalScreen) normalScreen.style.display  = 'flex';
+
+    // Hentikan countdown maintenance jika ada
+    if (maintCountdownTimer) clearInterval(maintCountdownTimer);
+
+    hideChecking();
+    setTimeout(function() {
+        playEntrance();
+        setTimeout(startCountdown, 400);
+    }, 100);
 }
 
-// ============================================================
-// PERFORMANCE OPTIMIZATION
-// ============================================================
-function optimizePerformance() {
-    // Reduce particles on mobile
-    const isMobile = window.innerWidth < 768;
-    
-    if (isMobile) {
-        const particles = document.querySelectorAll('.particle');
-        const bubbles = document.querySelectorAll('.bubble');
-        
-        // Hide some particles for better performance
-        particles.forEach((p, i) => {
-            if (i % 2 === 0) p.style.display = 'none';
+// ══════════════════════════════════════════════
+// MAINTENANCE MODE — LENGKAP
+// ══════════════════════════════════════════════
+function showMaintenanceMode(data) {
+    isMaintenance    = true;
+    redirectCanceled = true;
+
+    // Stop redirect
+    if (countdownTimer) clearInterval(countdownTimer);
+    if (redirectTimer)  clearTimeout(redirectTimer);
+    if (progressTimer)  clearInterval(progressTimer);
+
+    var normalScreen = ge('normalScreen');
+    var maintScreen  = ge('maintenanceScreen');
+
+    if (normalScreen) normalScreen.style.display = 'none';
+    if (maintScreen)  maintScreen.style.display  = 'flex';
+
+    hideChecking();
+
+    // ── Isi konten maintenance ──
+    var titleEl   = ge('maintTitle');
+    var msgEl     = ge('maintMsg');
+    var timeEl    = ge('maintTimeText');
+    var statusEl  = ge('maintStatusText');
+
+    if (titleEl) titleEl.textContent  = data.title   || 'Website Sedang Dalam Pemeliharaan';
+    if (msgEl)   msgEl.textContent    = data.message || 'Mohon maaf, website SMAN 68 Jakarta sedang dalam proses pemeliharaan dan peningkatan sistem. Silakan kunjungi kembali beberapa saat lagi.';
+    if (statusEl) statusEl.textContent = data.statusText || 'Tim kami sedang bekerja…';
+
+    // ── Estimasi waktu & countdown ──
+    if (data.endTime) {
+        maintEndTime = data.endTime.toDate();
+        var formatted = maintEndTime.toLocaleString('id-ID', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
         });
-        
-        bubbles.forEach((b, i) => {
-            if (i % 3 === 0) b.style.display = 'none';
-        });
+        if (timeEl) timeEl.textContent = 'Estimasi selesai: ' + formatted + ' WIB';
+
+        // Tampilkan countdown jika endTime > sekarang dan dalam 48 jam
+        var diff = maintEndTime.getTime() - Date.now();
+        if (diff > 0 && diff < 172800000) {
+            var cdWrap = ge('maintCountdownWrap');
+            if (cdWrap) cdWrap.style.display = 'flex';
+            startMaintCountdown(maintEndTime);
+        }
+
+        // Auto-refresh saat endTime tercapai
+        if (diff > 0 && diff < 3600000) {
+            setTimeout(function() { checkMaintenanceStatus(); }, diff + 2000);
+        }
+    } else {
+        if (timeEl) timeEl.textContent = 'Estimasi selesai: Segera';
+    }
+
+    // Animasi masuk
+    var card = maintScreen.querySelector('.sp-card');
+    if (card) {
+        card.style.opacity   = '0';
+        card.style.transform = 'translateY(30px) scale(.97)';
+        setTimeout(function() {
+            card.style.transition = 'opacity .8s ease, transform .8s cubic-bezier(.34,1.56,.64,1)';
+            card.style.opacity    = '1';
+            card.style.transform  = 'translateY(0) scale(1)';
+        }, 100);
     }
 }
 
-// ============================================================
-// INITIALIZATION
-// ============================================================
-function init() {
-    console.log('✨ Splash Screen SMAN 68 Jakarta - Initializing...');
+// ── Countdown maintenance ─────────────────────
+function startMaintCountdown(endTime) {
+    if (maintCountdownTimer) clearInterval(maintCountdownTimer);
 
-    // Create visual elements
-    createParticles();
-    createBubbles();
+    function tick() {
+        var now  = Date.now();
+        var diff = endTime.getTime() - now;
 
-    // Start animations
-    startProgressBar();
-    startCountdown();
-    animateGlassCard();
-    initButton();
+        if (diff <= 0) {
+            clearInterval(maintCountdownTimer);
+            // Cek Firebase apakah sudah selesai
+            setTimeout(function() { checkMaintenanceStatus(); }, 1500);
+            return;
+        }
 
-    // Performance optimization
-    optimizePerformance();
+        var days  = diff / 86400000;
+        var hours = (diff % 86400000) / 3600000;
+        var mins  = (diff % 3600000)  / 60000;
+        var secs  = (diff % 60000)    / 1000;
 
-    // Handle resize
-    window.addEventListener('resize', () => {
-        optimizePerformance();
-    });
+        var dEl = ge('maintDaysNum');
+        var hEl = ge('maintHoursNum');
+        var mEl = ge('maintMinsNum');
+        var sEl = ge('maintSecsNum');
 
-    // Prevent accidental back navigation
-    window.history.pushState(null, '', window.location.href);
-    window.addEventListener('popstate', () => {
-        window.history.pushState(null, '', window.location.href);
-    });
+        if (dEl) dEl.textContent = pad(days);
+        if (hEl) hEl.textContent = pad(hours);
+        if (mEl) mEl.textContent = pad(mins);
+        if (sEl) sEl.textContent = pad(secs);
+    }
 
-    console.log('✅ Splash Screen Ready');
-    console.log(`⏳ Auto-redirect in ${CONFIG.countdownDuration} seconds`);
+    tick();
+    maintCountdownTimer = setInterval(tick, 1000);
 }
 
-// ============================================================
-// START WHEN DOM IS READY
-// ============================================================
+// ── Checking overlay ──────────────────────────
+function hideChecking() {
+    var el = ge('spChecking');
+    if (!el) return;
+    el.classList.add('hide');
+    setTimeout(function() { el.style.display = 'none'; }, 600);
+}
+
+function showChecking() {
+    var el = ge('spChecking');
+    if (!el) return;
+    el.style.display = 'flex';
+    el.style.opacity = '1';
+    el.style.visibility = 'visible';
+    el.classList.remove('hide');
+}
+
+// ══════════════════════════════════════════════
+// FIREBASE — CHECK MAINTENANCE
+// ══════════════════════════════════════════════
+window.checkMaintenanceStatus = async function() {
+    showChecking();
+
+    try {
+        var doc = await db.collection('settings').doc('maintenance').get();
+
+        if (!doc.exists) {
+            showNormalMode();
+            return;
+        }
+
+        var data = doc.data();
+
+        if (data.active !== true) {
+            showNormalMode();
+            return;
+        }
+
+        // Cek apakah endTime sudah lewat
+        if (data.endTime) {
+            var endT = data.endTime.toDate();
+            if (Date.now() > endT.getTime()) {
+                // Auto-deactivate
+                try {
+                    await db.collection('settings').doc('maintenance').update({
+                        active:    false,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch(e2) {}
+                showNormalMode();
+                return;
+            }
+        }
+
+        showMaintenanceMode(data);
+
+    } catch(err) {
+        console.warn('Firebase check error:', err);
+        // Gagal koneksi → tampilkan normal mode
+        showNormalMode();
+    }
+};
+
+// ── Realtime listener ─────────────────────────
+function setupRealtimeListener() {
+    try {
+        db.collection('settings').doc('maintenance')
+            .onSnapshot(function(doc) {
+                if (!doc.exists) { if (isMaintenance) showNormalMode(); return; }
+                var data = doc.data();
+                if (data.active === true) {
+                    if (!isMaintenance) showMaintenanceMode(data);
+                    else {
+                        // Update teks saja
+                        var tEl = ge('maintTitle');
+                        var mEl = ge('maintMsg');
+                        var sEl = ge('maintStatusText');
+                        if (tEl && data.title)   tEl.textContent   = data.title;
+                        if (mEl && data.message) mEl.textContent   = data.message;
+                        if (sEl && data.statusText) sEl.textContent = data.statusText;
+                    }
+                } else {
+                    if (isMaintenance) showNormalMode();
+                }
+            }, function(err) { console.warn('Snapshot err:', err); });
+    } catch(e) {}
+}
+
+// ── Auto refresh setiap 30 detik ──────────────
+function setupAutoRefresh() {
+    setInterval(async function() {
+        if (!isMaintenance) return;
+        try {
+            var doc  = await db.collection('settings').doc('maintenance').get();
+            if (!doc.exists || doc.data().active !== true) {
+                showNormalMode();
+                return;
+            }
+            if (doc.data().endTime) {
+                var et = doc.data().endTime.toDate();
+                if (Date.now() > et.getTime()) {
+                    await db.collection('settings').doc('maintenance').update({
+                        active: false,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showNormalMode();
+                }
+            }
+        } catch(e) {}
+    }, 30000);
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+function init() {
+    initParticles();
+    initParallax();
+    initSkipButton();
+    setupAutoRefresh();
+    checkMaintenanceStatus();
+    setupRealtimeListener();
+    console.log('✅ SMAN 68 — Splash Screen v3.0 loaded');
+}
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
