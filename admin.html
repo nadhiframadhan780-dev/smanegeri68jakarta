@@ -3,169 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Admin Panel - SMAN 68 Jakarta</title>
-    
+    <title>Admin Panel — SMAN 68 Jakarta</title>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+
     <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Styles -->
     <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-    <!-- Preloader -->
+
+    <!-- ========================================
+         PRELOADER
+    ======================================== -->
     <div class="preloader" id="preloader">
-        <div class="loader"></div>
+        <div class="preloader-inner">
+            <div class="preloader-logo">
+                <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo SMAN 68">
+            </div>
+            <div class="preloader-bar">
+                <div class="preloader-progress"></div>
+            </div>
+            <p class="preloader-text">Memuat Admin Panel...</p>
+        </div>
     </div>
 
-    <!-- Login Overlay -->
+    <!-- ========================================
+         LOGIN OVERLAY
+    ======================================== -->
     <div class="login-overlay" id="loginOverlay">
-        <div class="login-container">
-            <div class="login-header">
-                <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo">
-                <h2>Admin Panel</h2>
-                <p>SMAN 68 Jakarta</p>
+        <!-- Animated background blobs -->
+        <div class="login-bg">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+        </div>
+
+        <div class="login-card">
+            <!-- Left panel (decorative) -->
+            <div class="login-left">
+                <div class="login-left-content">
+                    <div class="school-badge">
+                        <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo">
+                    </div>
+                    <h1>SMAN 68<br>Jakarta</h1>
+                    <p>Sistem Manajemen Konten Sekolah Terpadu</p>
+                    <div class="login-features">
+                        <div class="login-feature"><i class="fas fa-shield-halved"></i><span>Keamanan Firebase Auth</span></div>
+                        <div class="login-feature"><i class="fas fa-bolt"></i><span>Realtime Database</span></div>
+                        <div class="login-feature"><i class="fas fa-mobile-screen"></i><span>Responsive Design</span></div>
+                    </div>
+                </div>
             </div>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label><i class="fas fa-envelope"></i> Email</label>
-                    <input type="email" id="loginEmail" placeholder="admin@sman68jkt.sch.id" required>
+
+            <!-- Right panel (form) -->
+            <div class="login-right">
+                <div class="login-form-wrap">
+                    <div class="login-form-header">
+                        <h2>Selamat Datang</h2>
+                        <p>Masuk ke dashboard admin Anda</p>
+                    </div>
+
+                    <form id="loginForm" autocomplete="off">
+                        <div class="field-group">
+                            <label class="field-label">Email Admin</label>
+                            <div class="field-input-wrap">
+                                <i class="fas fa-envelope field-icon"></i>
+                                <input type="email" id="loginEmail" class="field-input" placeholder="admin@sman68jkt.sch.id" required>
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">Password</label>
+                            <div class="field-input-wrap">
+                                <i class="fas fa-lock field-icon"></i>
+                                <input type="password" id="loginPassword" class="field-input" placeholder="••••••••" required>
+                                <button type="button" class="field-toggle-pass" id="togglePassword" tabindex="-1">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-login" id="loginBtn">
+                            <span class="btn-login-text"><i class="fas fa-arrow-right-to-bracket"></i> Masuk</span>
+                            <span class="btn-login-loading" style="display:none;"><i class="fas fa-spinner fa-spin"></i> Memuat...</span>
+                        </button>
+                    </form>
+
+                    <div class="login-links">
+                        <a href="setup-admin.html"><i class="fas fa-user-plus"></i> Setup Admin Baru</a>
+                        <a href="sman68.html"><i class="fas fa-house"></i> Kembali ke Website</a>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn-login">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </button>
-            </form>
-            <div class="login-footer">
-                <a href="setup-admin.html">Setup Admin Baru</a>
-                <a href="sman68.html">Kembali ke Website</a>
             </div>
         </div>
     </div>
 
-    <!-- Main Admin Panel -->
-    <div class="admin-panel" id="adminPanel" style="display: none;">
-        <!-- Sidebar -->
+    <!-- ========================================
+         MAIN ADMIN PANEL
+    ======================================== -->
+    <div class="admin-wrap" id="adminPanel" style="display:none;">
+
+        <!-- SIDEBAR OVERLAY (mobile) -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- ======================== SIDEBAR ======================== -->
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo">
-                <h3>SMAN 68 Admin</h3>
+            <div class="sidebar-brand">
+                <div class="brand-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo">
+                </div>
+                <div class="brand-info">
+                    <h3>SMAN 68</h3>
+                    <span>Admin Panel</span>
+                </div>
+                <button class="sidebar-close" id="sidebarClose"><i class="fas fa-xmark"></i></button>
             </div>
-            
+
+            <!-- Status Bar -->
+            <div class="sidebar-status">
+                <div class="status-dot online"></div>
+                <span id="sidebarStatusText">System Online</span>
+            </div>
+
+            <!-- Navigation -->
             <nav class="sidebar-nav">
+                <div class="nav-section-label">UTAMA</div>
                 <a href="#dashboard" class="nav-item active" data-page="dashboard">
-                    <i class="fas fa-home"></i>
-                    <span>Dashboard</span>
+                    <div class="nav-icon"><i class="fas fa-chart-pie"></i></div>
+                    <span class="nav-label">Dashboard</span>
                 </a>
                 <a href="#chat" class="nav-item" data-page="chat">
-                    <i class="fas fa-comments"></i>
-                    <span>Live Chat</span>
-                    <span class="badge" id="chatBadge">0</span>
+                    <div class="nav-icon"><i class="fas fa-comments"></i></div>
+                    <span class="nav-label">Live Chat</span>
+                    <span class="nav-badge" id="chatBadge" style="display:none;">0</span>
                 </a>
+
+                <div class="nav-section-label">KONTEN</div>
                 <a href="#news" class="nav-item" data-page="news">
-                    <i class="fas fa-newspaper"></i>
-                    <span>Berita</span>
+                    <div class="nav-icon"><i class="fas fa-newspaper"></i></div>
+                    <span class="nav-label">Berita</span>
                 </a>
                 <a href="#agenda" class="nav-item" data-page="agenda">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Agenda</span>
+                    <div class="nav-icon"><i class="fas fa-calendar-days"></i></div>
+                    <span class="nav-label">Agenda</span>
                 </a>
                 <a href="#gallery" class="nav-item" data-page="gallery">
-                    <i class="fas fa-images"></i>
-                    <span>Galeri</span>
+                    <div class="nav-icon"><i class="fas fa-images"></i></div>
+                    <span class="nav-label">Galeri</span>
                 </a>
                 <a href="#facilities" class="nav-item" data-page="facilities">
-                    <i class="fas fa-building"></i>
-                    <span>Fasilitas</span>
+                    <div class="nav-icon"><i class="fas fa-building"></i></div>
+                    <span class="nav-label">Fasilitas</span>
                 </a>
                 <a href="#testimonials" class="nav-item" data-page="testimonials">
-                    <i class="fas fa-star"></i>
-                    <span>Testimoni</span>
+                    <div class="nav-icon"><i class="fas fa-star"></i></div>
+                    <span class="nav-label">Testimoni</span>
                 </a>
+
+                <div class="nav-section-label">DATA</div>
                 <a href="#alumni" class="nav-item" data-page="alumni">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>Alumni PTN</span>
+                    <div class="nav-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <span class="nav-label">Alumni PTN</span>
                 </a>
                 <a href="#feedbacks" class="nav-item" data-page="feedbacks">
-                    <i class="fas fa-envelope"></i>
-                    <span>Kritik & Saran</span>
-                    <span class="badge" id="feedbackBadge">0</span>
+                    <div class="nav-icon"><i class="fas fa-envelope-open-text"></i></div>
+                    <span class="nav-label">Kritik & Saran</span>
+                    <span class="nav-badge" id="feedbackBadge" style="display:none;">0</span>
+                </a>
+
+                <div class="nav-section-label">SISTEM</div>
+                <a href="#announcements" class="nav-item" data-page="announcements">
+                    <div class="nav-icon"><i class="fas fa-bullhorn"></i></div>
+                    <span class="nav-label">Pengumuman</span>
+                </a>
+                <a href="#maintenance" class="nav-item" data-page="maintenance">
+                    <div class="nav-icon"><i class="fas fa-screwdriver-wrench"></i></div>
+                    <span class="nav-label">Maintenance</span>
                 </a>
                 <a href="#settings" class="nav-item" data-page="settings">
-                    <i class="fas fa-cog"></i>
-                    <span>Pengaturan</span>
+                    <div class="nav-icon"><i class="fas fa-gear"></i></div>
+                    <span class="nav-label">Pengaturan</span>
                 </a>
             </nav>
-            
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <i class="fas fa-user-circle"></i>
-                    <div>
-                        <p id="adminName">Admin</p>
-                        <small id="adminEmail">admin@sman68jkt.sch.id</small>
-                    </div>
+
+            <!-- User Profile -->
+            <div class="sidebar-user">
+                <div class="user-avatar" id="userAvatarInitials">A</div>
+                <div class="user-meta">
+                    <p class="user-name" id="adminName">Admin</p>
+                    <small class="user-email" id="adminEmail">admin@sman68.sch.id</small>
                 </div>
-                <button class="btn-logout" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i>
+                <button class="btn-logout" id="logoutBtn" title="Logout">
+                    <i class="fas fa-arrow-right-from-bracket"></i>
                 </button>
             </div>
         </aside>
 
-        <!-- Mobile Toggle -->
-        <button class="sidebar-toggle" id="sidebarToggle">
-            <i class="fas fa-bars"></i>
-        </button>
+        <!-- ======================== MAIN ======================== -->
+        <main class="main-area">
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Top Bar -->
+            <!-- TOPBAR -->
             <header class="topbar">
                 <div class="topbar-left">
-                    <h2 id="pageTitle">Dashboard</h2>
+                    <button class="hamburger-btn" id="sidebarToggle" aria-label="Toggle Sidebar">
+                        <span></span><span></span><span></span>
+                    </button>
+                    <div class="page-breadcrumb">
+                        <span class="breadcrumb-home"><i class="fas fa-house-chimney"></i></span>
+                        <i class="fas fa-chevron-right breadcrumb-sep"></i>
+                        <h2 id="pageTitle">Dashboard</h2>
+                    </div>
                 </div>
+
                 <div class="topbar-right">
-                    <div class="notification-bell" id="notificationBell">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-count" id="notificationCount">0</span>
-                        <div class="notification-dropdown" id="notificationDropdown">
-                            <div class="notification-header">
-                                <h4>Notifikasi</h4>
-                                <button id="clearNotifications">Tandai Semua Dibaca</button>
+                    <!-- Notification Bell -->
+                    <div class="notif-bell-wrap" id="notificationBell">
+                        <button class="notif-bell-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notif-count" id="notificationCount" style="display:none;">0</span>
+                        </button>
+                        <div class="notif-dropdown" id="notificationDropdown">
+                            <div class="notif-dropdown-head">
+                                <h4><i class="fas fa-bell"></i> Notifikasi</h4>
+                                <button id="clearNotifications" class="notif-clear-btn">Tandai Dibaca</button>
                             </div>
-                            <div class="notification-list" id="notificationList">
-                                <p class="no-notifications">Tidak ada notifikasi</p>
+                            <div class="notif-list" id="notificationList">
+                                <div class="notif-empty">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>Tidak ada notifikasi</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="datetime" id="datetime"></div>
+
+                    <!-- Datetime -->
+                    <div class="topbar-datetime" id="datetime"></div>
+
+                    <!-- User chip -->
+                    <div class="topbar-user-chip">
+                        <div class="chip-avatar" id="topbarAvatarInitials">A</div>
+                    </div>
                 </div>
             </header>
 
-            <!-- Page Container -->
-            <div class="page-container" id="pageContainer">
-                <!-- Pages will be loaded here dynamically -->
+            <!-- PAGE CONTAINER -->
+            <div class="page-wrap" id="pageContainer">
+                <!-- Pages load dynamically here -->
             </div>
         </main>
     </div>
 
-    <!-- Toast Notification -->
-    <div class="toast-notification" id="toast"></div>
+    <!-- ========================================
+         TOAST NOTIFICATION
+    ======================================== -->
+    <div class="toast-stack" id="toastStack"></div>
 
-    <!-- Modal Container -->
+    <!-- ========================================
+         MODAL OVERLAY
+    ======================================== -->
     <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-container" id="modalContainer"></div>
+        <div class="modal-box" id="modalContainer"></div>
     </div>
 
     <!-- Scripts -->
