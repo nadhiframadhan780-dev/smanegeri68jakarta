@@ -1684,27 +1684,39 @@ function renderNotifPanel() {
     var html    = '';
 
     notifList.forEach(function(item) {
-        var isUnread = !readSet.has(item.id);
-        var dateStr  = '';
+        var isUnread  = !readSet.has(item.id);
+        var dateStr   = '';
         if (item.createdAt && item.createdAt.toDate) {
             dateStr = new Date(item.createdAt.toDate()).toLocaleDateString('id-ID', {
                 day: 'numeric', month: 'short', year: 'numeric'
             });
         }
         var raw     = item.text || '';
-        var preview = raw.replace(/\n/g, ' ').substring(0, 80) + (raw.length > 80 ? '…' : '');
+        var preview = raw.replace(/\n/g, ' ').substring(0, 80) + (raw.length > 80 ? '\u2026' : '');
+
+        // Warna & icon dari Firestore (diset di admin panel)
+        var itemColor  = item.color || '#059669';
+        var itemIcon   = (item.icon && item.icon.trim()) ? item.icon.trim()
+                         : (isUnread ? 'fas fa-envelope' : 'fas fa-envelope-open-text');
+        var colorAlpha = itemColor + '22';
+        var borderStyle = 'border-left:3px solid ' + itemColor + ';';
+        var linkBadge  = item.link
+            ? ' &nbsp;<span style="font-size:0.62rem;background:' + colorAlpha + ';color:'
+              + itemColor + ';padding:1px 7px;border-radius:999px;font-weight:700;">\u2197 Buka Link</span>'
+            : '';
 
         html +=
             '<div class="notif-item ' + (isUnread ? 'unread' : '') + '"' +
-                ' onclick="openLetterModal(\'' + item.id.replace(/'/g, "\\'") + '\')"' +
-                ' data-id="' + escapeHtml(item.id) + '">' +
-                '<div class="notif-item-icon">' +
-                    '<i class="fas fa-' + (isUnread ? 'envelope' : 'envelope-open-text') + '"></i>' +
+                ' onclick="openLetterModal(\'' + item.id.replace(/\'/g, "\\'") + '\')"' +
+                ' data-id="' + escapeHtml(item.id) + '"' +
+                ' style="' + borderStyle + '">' +
+                '<div class="notif-item-icon" style="background:' + colorAlpha + ';color:' + itemColor + ';">' +
+                    '<i class="' + escapeHtml(itemIcon) + '"></i>' +
                 '</div>' +
                 '<div class="notif-item-body">' +
                     '<div class="notif-item-title">' + escapeHtml(item.title || 'Pengumuman') + '</div>' +
                     '<div class="notif-item-preview">' + escapeHtml(preview) + '</div>' +
-                    '<div class="notif-item-date">' + dateStr + '</div>' +
+                    '<div class="notif-item-date">' + dateStr + linkBadge + '</div>' +
                 '</div>' +
             '</div>';
     });
@@ -1726,11 +1738,30 @@ window.openLetterModal = function(id) {
     updateNotifBadge();
     renderNotifPanel();
 
+    // ── Ambil warna & link dari data Firestore ─────────────────────────────
+    var itemColor = item.color || '#059669';
+    var itemLink  = item.link  || '';
+
+    // Terapkan accent color ke elemen modal (letter-header, divider, dll)
+    var letterHeader  = document.querySelector('.letter-header');
+    var letterDivider = document.querySelector('.letter-divider');
+    var letterLabel   = document.querySelector('.letter-label');
+    if (letterHeader)  letterHeader.style.borderBottom = '2px solid ' + itemColor + '33';
+    if (letterDivider) letterDivider.style.background  = 'linear-gradient(90deg,' + itemColor + ',transparent)';
+    if (letterLabel) {
+        letterLabel.style.background = itemColor + '18';
+        letterLabel.style.color      = itemColor;
+    }
+
     // Fill modal elements
     var titleEl      = document.getElementById('letterTitle');
     var dateEl       = document.getElementById('letterDate');
     var bodyEl       = document.getElementById('letterBody');
     var footerDateEl = document.getElementById('letterFooterDate');
+
+    // Hapus tombol link lama kalau ada
+    var oldLinkBtn = document.getElementById('letterLinkBtn');
+    if (oldLinkBtn) oldLinkBtn.remove();
 
     if (titleEl) titleEl.textContent = item.title || 'Pengumuman';
 
@@ -1759,6 +1790,26 @@ window.openLetterModal = function(id) {
             }).join('');
         } else {
             bodyEl.innerHTML = '<p class="letter-paragraph">' + escapeHtml(rawText) + '</p>';
+        }
+
+        // ── Tampilkan tombol link jika admin mengisi field link ────────────
+        if (itemLink) {
+            var linkBtn = document.createElement('a');
+            linkBtn.id        = 'letterLinkBtn';
+            linkBtn.href      = itemLink;
+            linkBtn.target    = '_blank';
+            linkBtn.rel       = 'noopener noreferrer';
+            linkBtn.innerHTML = '<i class="fas fa-arrow-up-right-from-square"></i> Buka Informasi Selengkapnya';
+            linkBtn.style.cssText =
+                'display:inline-flex;align-items:center;gap:8px;' +
+                'margin-top:18px;padding:10px 22px;' +
+                'background:' + itemColor + ';color:#fff;' +
+                'border-radius:999px;font-size:0.85rem;font-weight:600;' +
+                'text-decoration:none;transition:opacity 0.2s;' +
+                'box-shadow:0 4px 14px ' + itemColor + '44;';
+            linkBtn.onmouseover = function() { this.style.opacity = '0.85'; };
+            linkBtn.onmouseout  = function() { this.style.opacity = '1'; };
+            bodyEl.appendChild(linkBtn);
         }
     }
 
