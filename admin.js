@@ -1430,14 +1430,26 @@ async function submitReply(feedbackId) {
 }
 
 // ============================================================
-// FLOATING ANNOUNCEMENTS PAGE (Multiple)
+// FLOATING ANNOUNCEMENTS PAGE
+// Menyimpan ke collection 'announcements' (tiap item = 1 dokumen)
+// agar terbaca oleh sman68.js di website utama
 // ============================================================
 function loadAnnouncementsPage() {
     pageContainer.innerHTML = `
     <div class="fade-in">
         <div class="section-header">
             <span class="section-title"><i class="fas fa-bullhorn"></i> Manajemen Pengumuman</span>
-            <button class="btn btn-primary" onclick="openAnnouncementModal()"><i class="fas fa-plus"></i> Tambah Pengumuman</button>
+            <button class="btn btn-primary" onclick="openAnnouncementModal()">
+                <i class="fas fa-plus"></i> Tambah Pengumuman
+            </button>
+        </div>
+        <!-- Info banner -->
+        <div style="background:linear-gradient(135deg,rgba(5,150,105,0.08),rgba(37,99,235,0.05));border:1px solid rgba(5,150,105,0.2);border-radius:var(--r-xl);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+            <i class="fas fa-circle-info" style="color:var(--primary);font-size:1.2rem;flex-shrink:0;"></i>
+            <div>
+                <strong style="font-size:0.88rem;color:var(--gray-800);">Pengumuman tersimpan di Firestore collection <code>announcements</code></strong>
+                <p style="font-size:0.8rem;color:var(--gray-500);margin-top:2px;">Setiap pengumuman aktif akan langsung muncul di tombol 🔔 website utama secara realtime.</p>
+            </div>
         </div>
         <div id="announcementList"><div class="loading-spinner"><div class="spin-ring"></div></div></div>
     </div>`;
@@ -1447,163 +1459,239 @@ function loadAnnouncementsPage() {
 async function loadAnnouncementList() {
     const container = $('announcementList');
     try {
-        const doc = await db.collection('settings').doc('announcements').get();
-        const list = doc.exists ? (doc.data().list || []) : [];
+        // Baca dari collection 'announcements' (format yang dibaca sman68.js)
+        const snap = await db.collection('announcements').orderBy('createdAt', 'desc').get();
 
-        if (list.length === 0) {
-            container.innerHTML = emptyState('fas fa-bullhorn', 'Belum Ada Pengumuman', 'Klik tombol "Tambah Pengumuman" untuk membuat yang pertama.');
+        if (snap.empty) {
+            container.innerHTML = emptyState('fas fa-bullhorn', 'Belum Ada Pengumuman',
+                'Klik "Tambah Pengumuman" untuk membuat pengumuman yang akan tampil di website utama.');
             return;
         }
 
+        const now = new Date();
         let html = '<div class="announcement-list">';
-        list.forEach((item, index) => {
-            const expiredBadge = item.endTime && new Date(item.endTime) < new Date()
-                ? '<span class="badge-pill red">Expired</span>'
-                : (item.active ? '<span class="badge-pill green">Aktif</span>' : '<span class="badge-pill gray">Nonaktif</span>');
+        snap.forEach(doc => {
+            const d = doc.data();
+            const isExpired = d.endTime && new Date(d.endTime) < now;
+            const badge = isExpired
+                ? '<span class="badge-pill red"><i class="fas fa-clock-rotate-left"></i> Expired</span>'
+                : (d.active
+                    ? '<span class="badge-pill green"><i class="fas fa-circle-dot"></i> Aktif</span>'
+                    : '<span class="badge-pill gray"><i class="fas fa-circle"></i> Nonaktif</span>');
 
-            html += `<div class="announcement-item ${item.active ? 'active-item' : ''}">
-                <div class="announcement-color-dot" style="background:${item.color || '#059669'};"></div>
+            const dateStr = d.createdAt
+                ? new Date(d.createdAt.toDate ? d.createdAt.toDate() : d.createdAt)
+                    .toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+                : '—';
+
+            html += `<div class="announcement-item ${d.active && !isExpired ? 'active-item' : ''}">
+                <div class="announcement-color-dot" style="background:${escHtml(d.color || '#059669')};width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:4px;box-shadow:0 0 0 3px ${escHtml(d.color || '#059669')}22;"></div>
                 <div class="announcement-body">
-                    <h4>${escHtml(item.title || 'Tanpa Judul')}</h4>
-                    <p>${escHtml((item.text || '').substring(0, 120))}${item.text && item.text.length > 120 ? '...' : ''}</p>
+                    <h4 style="font-size:0.95rem;font-weight:600;color:var(--gray-800);margin-bottom:5px;">
+                        ${d.icon ? `<i class="${escHtml(d.icon)}" style="color:${escHtml(d.color||'#059669')};margin-right:6px;"></i>` : ''}
+                        ${escHtml(d.title || 'Tanpa Judul')}
+                    </h4>
+                    <p style="font-size:0.82rem;color:var(--gray-500);line-height:1.5;margin-bottom:8px;">${escHtml((d.text || '').substring(0, 140))}${(d.text || '').length > 140 ? '…' : ''}</p>
                     <div class="announcement-meta">
-                        ${expiredBadge}
-                        ${item.icon ? `<span class="badge-pill gray"><i class="${escHtml(item.icon)}"></i> Icon</span>` : ''}
-                        ${item.endTime ? `<span class="badge-pill yellow"><i class="fas fa-clock"></i> Exp: ${new Date(item.endTime).toLocaleDateString('id-ID')}</span>` : ''}
+                        ${badge}
+                        <span class="badge-pill gray"><i class="fas fa-calendar"></i> ${dateStr}</span>
+                        ${d.endTime ? `<span class="badge-pill yellow"><i class="fas fa-hourglass-end"></i> Exp: ${new Date(d.endTime).toLocaleDateString('id-ID')}</span>` : ''}
+                        ${d.link ? `<span class="badge-pill blue"><i class="fas fa-link"></i> Ada Link</span>` : ''}
                     </div>
                 </div>
-                <div class="announcement-actions">
-                    <button class="icon-btn icon-btn-edit" onclick="editAnnouncement(${index})" title="Edit"><i class="fas fa-pen"></i></button>
-                    <button class="icon-btn icon-btn-delete" onclick="deleteAnnouncement(${index})" title="Hapus"><i class="fas fa-trash"></i></button>
-                    <label class="toggle-wrap" title="${item.active ? 'Nonaktifkan' : 'Aktifkan'}">
-                        <div class="toggle-switch ${item.active ? 'on' : ''}" onclick="toggleAnnouncement(${index})"></div>
-                    </label>
+                <div class="announcement-actions" style="display:flex;gap:6px;align-items:flex-start;flex-shrink:0;">
+                    <button class="icon-btn icon-btn-edit" onclick="editAnnouncement('${doc.id}')" title="Edit">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button class="icon-btn icon-btn-delete" onclick="deleteAnnouncement('${doc.id}')" title="Hapus">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <div class="toggle-wrap" onclick="toggleAnnouncement('${doc.id}',${d.active})" title="${d.active ? 'Nonaktifkan' : 'Aktifkan'}" style="cursor:pointer;">
+                        <div class="toggle-switch ${d.active ? 'on' : ''}"></div>
+                    </div>
                 </div>
             </div>`;
         });
         html += '</div>';
         container.innerHTML = html;
-    } catch (err) { console.error(err); container.innerHTML = emptyState('fas fa-exclamation-circle', 'Gagal memuat'); }
+    } catch (err) {
+        console.error('loadAnnouncementList error:', err);
+        container.innerHTML = emptyState('fas fa-exclamation-circle', 'Gagal memuat pengumuman',
+            'Pastikan Firestore index sudah dibuat atau cek konsol browser.');
+    }
 }
 
-function openAnnouncementModal(existingData = null, editIndex = null) {
+// Buka modal tambah/edit
+function openAnnouncementModal(existingData = null, editDocId = null) {
     const d = existingData || {};
+    const isEdit = editDocId !== null;
+
     openModal(`
         <div class="modal-head">
-            <span class="modal-title"><i class="fas fa-bullhorn"></i> ${editIndex !== null ? 'Edit' : 'Tambah'} Pengumuman</span>
+            <span class="modal-title">
+                <i class="fas fa-bullhorn"></i>
+                ${isEdit ? 'Edit Pengumuman' : 'Tambah Pengumuman Baru'}
+            </span>
             <button class="modal-close" onclick="closeModal()"><i class="fas fa-xmark"></i></button>
         </div>
-        <div class="modal-body">
-            <div class="form-group"><label><i class="fas fa-heading"></i> Judul</label><input type="text" id="annTitle" class="form-input" value="${escHtml(d.title || '')}" placeholder="Judul pengumuman"></div>
-            <div class="form-group"><label><i class="fas fa-align-left"></i> Teks Pengumuman <span class="form-required">*</span></label><textarea id="annText" class="form-input" rows="3">${escHtml(d.text || '')}</textarea></div>
-            <div class="form-row">
-                <div class="form-group"><label><i class="fas fa-palette"></i> Warna</label>
-                    <select id="annColor" class="form-input">
-                        <option value="#059669" ${d.color==='#059669'?'selected':''}>Hijau</option>
-                        <option value="#2563eb" ${d.color==='#2563eb'?'selected':''}>Biru</option>
-                        <option value="#dc2626" ${d.color==='#dc2626'?'selected':''}>Merah</option>
-                        <option value="#d97706" ${d.color==='#d97706'?'selected':''}>Oranye</option>
-                        <option value="#7c3aed" ${d.color==='#7c3aed'?'selected':''}>Ungu</option>
-                    </select>
-                </div>
-                <div class="form-group"><label><i class="fas fa-icons"></i> Icon (FA class)</label>
-                    <input type="text" id="annIcon" class="form-input" value="${escHtml(d.icon || '')}" placeholder="fas fa-bell">
-                </div>
-            </div>
-            <div class="form-group"><label><i class="fas fa-link"></i> Link (opsional)</label><input type="url" id="annLink" class="form-input" value="${escHtml(d.link || '')}" placeholder="https://..."></div>
-            <div class="form-row">
-                <div class="form-group"><label><i class="fas fa-calendar-plus"></i> Tanggal Publish</label><input type="datetime-local" id="annStart" class="form-input" value="${d.startTime || ''}"></div>
-                <div class="form-group"><label><i class="fas fa-calendar-xmark"></i> Expired Otomatis</label><input type="datetime-local" id="annEnd" class="form-input" value="${d.endTime || ''}"></div>
+        <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+            <div class="form-group">
+                <label><i class="fas fa-heading"></i> Judul Pengumuman <span class="form-required">*</span></label>
+                <input type="text" id="annTitle" class="form-input" value="${escHtml(d.title || '')}" placeholder="Contoh: Pengumuman PPDB 2026/2027">
             </div>
             <div class="form-group">
-                <label class="toggle-wrap"><div class="toggle-switch ${d.active !== false ? 'on' : ''}" id="annActiveTgl"></div><span>Aktifkan Pengumuman</span></label>
+                <label><i class="fas fa-align-left"></i> Isi Pengumuman <span class="form-required">*</span></label>
+                <textarea id="annText" class="form-input" rows="5" placeholder="Tulis isi pengumuman lengkap di sini...">${escHtml(d.text || '')}</textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-palette"></i> Warna Tema</label>
+                    <select id="annColor" class="form-input">
+                        <option value="#059669" ${(d.color||'#059669')==='#059669'?'selected':''}>🟢 Hijau (Default)</option>
+                        <option value="#2563eb" ${d.color==='#2563eb'?'selected':''}>🔵 Biru</option>
+                        <option value="#dc2626" ${d.color==='#dc2626'?'selected':''}>🔴 Merah (Penting)</option>
+                        <option value="#d97706" ${d.color==='#d97706'?'selected':''}>🟡 Oranye</option>
+                        <option value="#7c3aed" ${d.color==='#7c3aed'?'selected':''}>🟣 Ungu</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-icons"></i> Icon (Font Awesome)</label>
+                    <input type="text" id="annIcon" class="form-input"
+                        value="${escHtml(d.icon || '')}"
+                        placeholder="fas fa-bullhorn">
+                    <small style="font-size:0.72rem;color:var(--gray-400);margin-top:4px;display:block;">Kosongkan untuk icon default</small>
+                </div>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-link"></i> URL Link (opsional)</label>
+                <input type="url" id="annLink" class="form-input" value="${escHtml(d.link || '')}" placeholder="https://...">
+                <small style="font-size:0.72rem;color:var(--gray-400);margin-top:4px;display:block;">Pengunjung bisa klik untuk buka link ini</small>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-plus"></i> Tanggal Mulai</label>
+                    <input type="datetime-local" id="annStart" class="form-input" value="${d.startTime || ''}">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-xmark"></i> Expired Otomatis</label>
+                    <input type="datetime-local" id="annEnd" class="form-input" value="${d.endTime || ''}">
+                </div>
+            </div>
+            <div class="form-group">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--gray-50);border-radius:var(--r-lg);border:1.5px solid var(--gray-200);">
+                    <div>
+                        <p style="font-size:0.875rem;font-weight:500;color:var(--gray-800);">Aktifkan Pengumuman</p>
+                        <small style="color:var(--gray-500);font-size:0.75rem;">Pengumuman aktif akan langsung muncul di website</small>
+                    </div>
+                    <div class="toggle-switch ${d.active !== false ? 'on' : ''}" id="annActiveTgl" style="cursor:pointer;" onclick="this.classList.toggle('on')"></div>
+                </div>
             </div>
         </div>
         <div class="modal-foot">
-            <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
-            <button class="btn btn-primary" onclick="saveAnnouncement(${editIndex})"><i class="fas fa-floppy-disk"></i> Simpan</button>
+            <button class="btn btn-secondary" onclick="closeModal()"><i class="fas fa-xmark"></i> Batal</button>
+            <button class="btn btn-primary" onclick="saveAnnouncement('${editDocId || ''}')">
+                <i class="fas fa-floppy-disk"></i> ${isEdit ? 'Update' : 'Simpan & Publish'}
+            </button>
         </div>
     `);
-
-    // Toggle active
-    $('annActiveTgl')?.addEventListener('click', function() {
-        this.classList.toggle('on');
-    });
 }
 
-async function saveAnnouncement(editIndex) {
-    const title   = $('annTitle')?.value.trim();
-    const text    = $('annText')?.value.trim();
-    const color   = $('annColor')?.value;
-    const icon    = $('annIcon')?.value.trim();
-    const link    = $('annLink')?.value.trim();
-    const start   = $('annStart')?.value;
-    const end     = $('annEnd')?.value;
-    const active  = $('annActiveTgl')?.classList.contains('on');
+// Simpan ke collection 'announcements' — sesuai format yang dibaca sman68.js
+async function saveAnnouncement(editDocId) {
+    const title  = $('annTitle')?.value.trim();
+    const text   = $('annText')?.value.trim();
+    const color  = $('annColor')?.value  || '#059669';
+    const icon   = $('annIcon')?.value.trim()  || '';
+    const link   = $('annLink')?.value.trim()  || '';
+    const start  = $('annStart')?.value || '';
+    const end    = $('annEnd')?.value   || '';
+    const active = $('annActiveTgl')?.classList.contains('on') !== false;
 
-    if (!text) { showToast('Teks pengumuman wajib diisi', 'error'); return; }
+    if (!title) { showToast('Judul pengumuman wajib diisi', 'error'); return; }
+    if (!text)  { showToast('Isi pengumuman wajib diisi', 'error'); return; }
+
+    const saveBtn = document.querySelector('.modal-foot .btn-primary');
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...'; }
 
     try {
-        const docRef = db.collection('settings').doc('announcements');
-        const doc    = await docRef.get();
-        const list   = doc.exists ? (doc.data().list || []) : [];
+        // Data yang kompatibel dengan format yang dibaca sman68.js
+        const data = {
+            title,
+            text,
+            color,
+            icon,
+            link,
+            active,
+            startTime: start,
+            endTime:   end,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
 
-        const item = { title: title || '', text, color: color || '#059669', icon: icon || '', link: link || '', active, startTime: start || '', endTime: end || '', createdAt: new Date().toISOString() };
-
-        if (editIndex !== null && editIndex >= 0) {
-            list[editIndex] = item;
+        if (editDocId && editDocId !== '') {
+            // Update dokumen existing
+            await db.collection('announcements').doc(editDocId).update(data);
+            showToast('Pengumuman berhasil diperbarui!', 'success');
         } else {
-            list.push(item);
+            // Buat dokumen baru — tambahkan createdAt
+            data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            await db.collection('announcements').add(data);
+            showToast('Pengumuman berhasil dipublish ke website!', 'success');
         }
 
-        await docRef.set({ list, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-
-        // Auto expire timer
+        // Set timer auto-expired jika ada endTime
         if (end) {
-            const delay = new Date(end).getTime() - new Date().getTime();
-            if (delay > 0) setTimeout(async () => {
-                const d2 = await docRef.get();
-                const l2 = d2.data()?.list || [];
-                const idx = l2.findIndex(i => i.createdAt === item.createdAt);
-                if (idx >= 0) { l2[idx].active = false; await docRef.set({ list: l2 }); }
-            }, delay);
+            const delay = new Date(end).getTime() - Date.now();
+            if (delay > 0) {
+                setTimeout(async () => {
+                    try {
+                        // Cari dokumen berdasarkan konten (hanya jika baru dibuat)
+                        const snap = await db.collection('announcements')
+                            .where('title', '==', title).where('active', '==', true).get();
+                        snap.forEach(doc => doc.ref.update({ active: false }));
+                        showToast('Pengumuman otomatis dinonaktifkan (expired)', 'info');
+                    } catch {}
+                }, delay);
+            }
         }
 
         closeModal();
-        showToast('Pengumuman disimpan!', 'success');
         loadAnnouncementList();
-    } catch (err) { console.error(err); showToast('Gagal menyimpan', 'error'); }
+    } catch (err) {
+        console.error('saveAnnouncement error:', err);
+        showToast('Gagal menyimpan pengumuman: ' + err.message, 'error');
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fas fa-floppy-disk"></i> Simpan & Publish'; }
+    }
 }
 
-async function editAnnouncement(index) {
-    const doc = await db.collection('settings').doc('announcements').get();
-    const list = doc.exists ? (doc.data().list || []) : [];
-    if (!list[index]) return;
-    openAnnouncementModal(list[index], index);
-}
-
-async function deleteAnnouncement(index) {
-    if (!confirm('Hapus pengumuman ini?')) return;
+// Edit — baca dokumen dari collection lalu buka modal
+async function editAnnouncement(docId) {
     try {
-        const docRef = db.collection('settings').doc('announcements');
-        const doc = await docRef.get();
-        const list = doc.exists ? (doc.data().list || []) : [];
-        list.splice(index, 1);
-        await docRef.set({ list });
-        showToast('Pengumuman dihapus', 'success');
+        const doc = await db.collection('announcements').doc(docId).get();
+        if (!doc.exists) { showToast('Pengumuman tidak ditemukan', 'error'); return; }
+        const d = doc.data();
+        // Konversi Timestamp ke string untuk input datetime-local
+        if (d.startTime && d.startTime.toDate) d.startTime = d.startTime.toDate().toISOString().slice(0, 16);
+        if (d.endTime   && d.endTime.toDate)   d.endTime   = d.endTime.toDate().toISOString().slice(0, 16);
+        openAnnouncementModal(d, docId);
+    } catch (err) { showToast('Gagal memuat data', 'error'); }
+}
+
+// Hapus dokumen dari collection
+async function deleteAnnouncement(docId) {
+    if (!confirm('Hapus pengumuman ini? Pengumuman akan hilang dari website utama.')) return;
+    try {
+        await db.collection('announcements').doc(docId).delete();
+        showToast('Pengumuman berhasil dihapus', 'success');
         loadAnnouncementList();
     } catch { showToast('Gagal menghapus', 'error'); }
 }
 
-async function toggleAnnouncement(index) {
+// Toggle active field di dokumen
+async function toggleAnnouncement(docId, currentActive) {
     try {
-        const docRef = db.collection('settings').doc('announcements');
-        const doc    = await docRef.get();
-        const list   = doc.exists ? (doc.data().list || []) : [];
-        if (!list[index]) return;
-        list[index].active = !list[index].active;
-        await docRef.set({ list });
-        showToast(`Pengumuman ${list[index].active ? 'diaktifkan' : 'dinonaktifkan'}`, 'success');
+        const newActive = !currentActive;
+        await db.collection('announcements').doc(docId).update({ active: newActive });
+        showToast(`Pengumuman ${newActive ? 'diaktifkan' : 'dinonaktifkan'}`, 'success');
         loadAnnouncementList();
     } catch { showToast('Gagal mengubah status', 'error'); }
 }
@@ -1912,63 +2000,230 @@ async function deleteItem(collection, id) {
 }
 
 // ============================================================
-// NOTIFICATIONS
+// NOTIFICATIONS — PREMIUM MODEL
 // ============================================================
-function addNotification(type, message, link = '') {
-    notifications.unshift({ type, message, link, timestamp: new Date(), read: false });
+
+// Tipe notifikasi dan konfigurasinya
+const notifConfig = {
+    chat:        { icon: 'fas fa-comments',          color: '#059669', bg: 'rgba(5,150,105,0.1)',   label: 'Live Chat' },
+    feedback:    { icon: 'fas fa-envelope-open-text', color: '#2563eb', bg: 'rgba(37,99,235,0.1)',   label: 'Pesan Baru' },
+    announcement:{ icon: 'fas fa-bullhorn',           color: '#d97706', bg: 'rgba(217,119,6,0.1)',   label: 'Pengumuman' },
+    maintenance: { icon: 'fas fa-screwdriver-wrench', color: '#dc2626', bg: 'rgba(220,38,38,0.1)',   label: 'Maintenance' },
+    system:      { icon: 'fas fa-circle-info',        color: '#7c3aed', bg: 'rgba(124,58,237,0.1)',  label: 'Sistem' },
+    success:     { icon: 'fas fa-check-circle',       color: '#10b981', bg: 'rgba(16,185,129,0.1)',  label: 'Sukses' },
+};
+
+function addNotification(type, message, link = '', subtitle = '') {
+    const cfg = notifConfig[type] || notifConfig.system;
+    notifications.unshift({
+        id: Date.now() + Math.random(),
+        type,
+        message,
+        subtitle,
+        link,
+        timestamp: new Date(),
+        read: false,
+        cfg
+    });
+    // Maksimal 30 notifikasi
+    if (notifications.length > 30) notifications.splice(30);
     updateNotificationUI();
+    // Juga tampilkan mini toast kecil di pojok
+    showMiniNotifToast(type, message, cfg);
+}
+
+// Mini toast khusus notifikasi (lebih kecil, di kanan atas)
+function showMiniNotifToast(type, message, cfg) {
+    if (!toastStack) return;
+    const el = document.createElement('div');
+    el.className = 'toast info';
+    el.style.cssText = `max-width:300px;font-size:0.82rem;padding:10px 14px;`;
+    el.innerHTML = `
+        <i class="${cfg.icon}" style="color:${cfg.color};" class="toast-icon"></i>
+        <span style="flex:1;">${escHtml(message)}</span>
+        <button class="toast-dismiss" onclick="dismissToast(this.parentElement)"><i class="fas fa-xmark"></i></button>`;
+    toastStack.appendChild(el);
+    setTimeout(() => dismissToast(el), 4000);
 }
 
 function updateNotificationUI() {
     const unread = notifications.filter(n => !n.read).length;
+
+    // Update badge
     if (notifCount) {
-        notifCount.textContent = unread;
+        notifCount.textContent = unread > 9 ? '9+' : unread;
         notifCount.style.display = unread > 0 ? 'flex' : 'none';
+        if (unread > 0) notifCount.style.animation = 'badgePop 0.3s var(--ease)';
     }
-    if (notifList) {
-        if (notifications.length === 0) {
-            notifList.innerHTML = `<div class="notif-empty"><i class="fas fa-bell-slash"></i><p>Tidak ada notifikasi</p></div>`;
-            return;
-        }
-        notifList.innerHTML = notifications.slice(0, 15).map((n, i) => `
-            <div class="notif-item ${n.read ? '' : 'unread'}" onclick="markNotificationRead(${i})">
-                <div class="notif-item-icon"><i class="fas fa-${n.type === 'chat' ? 'comments' : 'envelope'}"></i></div>
-                <div class="notif-item-body">
-                    <p>${escHtml(n.message)}</p>
-                    <small>${n.timestamp.toLocaleTimeString('id-ID')}</small>
-                </div>
-            </div>`).join('');
+
+    // Render dropdown list
+    if (!notifList) return;
+
+    if (notifications.length === 0) {
+        notifList.innerHTML = `
+            <div class="notif-empty">
+                <i class="fas fa-bell-slash"></i>
+                <p>Belum ada notifikasi</p>
+                <small>Aktivitas baru akan muncul di sini</small>
+            </div>`;
+        return;
     }
+
+    // Group by: Hari ini vs Sebelumnya
+    const today = new Date().toDateString();
+    const todayItems = notifications.filter(n => n.timestamp.toDateString() === today);
+    const olderItems = notifications.filter(n => n.timestamp.toDateString() !== today);
+
+    let html = '';
+
+    if (todayItems.length > 0) {
+        html += `<div class="notif-group-label">Hari Ini</div>`;
+        html += todayItems.slice(0, 10).map((n, i) => buildNotifItem(n, i)).join('');
+    }
+    if (olderItems.length > 0) {
+        html += `<div class="notif-group-label">Sebelumnya</div>`;
+        html += olderItems.slice(0, 10).map((n, i) => buildNotifItem(n, todayItems.length + i)).join('');
+    }
+
+    notifList.innerHTML = html;
+}
+
+function buildNotifItem(n, globalIndex) {
+    const cfg = n.cfg || notifConfig[n.type] || notifConfig.system;
+    const timeStr = n.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = n.timestamp.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    const isToday = n.timestamp.toDateString() === new Date().toDateString();
+
+    return `
+    <div class="notif-item ${n.read ? '' : 'unread'}"
+         onclick="markNotificationRead(${globalIndex})"
+         style="display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-bottom:1px solid var(--gray-50);cursor:pointer;transition:background var(--t-fast);${n.read ? '' : 'background:rgba(5,150,105,0.04);'}">
+
+        <!-- Icon bubble -->
+        <div style="width:38px;height:38px;border-radius:var(--r-md);background:${cfg.bg};color:${cfg.color};display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;position:relative;">
+            <i class="${cfg.icon}"></i>
+            ${!n.read ? `<div style="position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:${cfg.color};border:2px solid white;"></div>` : ''}
+        </div>
+
+        <!-- Body -->
+        <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px;">
+                <span style="font-size:0.7rem;font-weight:600;color:${cfg.color};text-transform:uppercase;letter-spacing:0.06em;">${cfg.label}</span>
+                <span style="font-size:0.7rem;color:var(--gray-400);white-space:nowrap;">${isToday ? timeStr : dateStr}</span>
+            </div>
+            <p style="font-size:0.83rem;color:var(--gray-700);line-height:1.4;margin:0;${n.read ? 'font-weight:400;' : 'font-weight:500;'}">${escHtml(n.message)}</p>
+            ${n.subtitle ? `<small style="font-size:0.74rem;color:var(--gray-400);display:block;margin-top:3px;">${escHtml(n.subtitle)}</small>` : ''}
+        </div>
+    </div>`;
 }
 
 function setupNotifications() {
+    // Bell toggle
     notifBell?.addEventListener('click', (e) => {
         e.stopPropagation();
-        notifBell.classList.toggle('active');
+        const isOpen = notifBell.classList.toggle('active');
+        // Animasi bell saat buka
+        const bellIcon = notifBell.querySelector('.notif-bell-btn i');
+        if (isOpen && bellIcon) {
+            bellIcon.style.animation = 'none';
+            requestAnimationFrame(() => {
+                bellIcon.style.animation = 'bellRing 0.5s ease';
+            });
+        }
     });
+
+    // Close on outside click
     document.addEventListener('click', (e) => {
         if (!notifBell?.contains(e.target)) notifBell?.classList.remove('active');
     });
+
+    // Mark all read
     clearNotifBtn?.addEventListener('click', () => {
         notifications.forEach(n => n.read = true);
         updateNotificationUI();
+        showToast('Semua notifikasi ditandai sudah dibaca', 'success');
     });
+
+    // Inject bell ring animation jika belum ada
+    if (!document.getElementById('notifAnimStyle')) {
+        const style = document.createElement('style');
+        style.id = 'notifAnimStyle';
+        style.textContent = `
+            @keyframes bellRing {
+                0%   { transform: rotate(0); }
+                15%  { transform: rotate(15deg); }
+                30%  { transform: rotate(-13deg); }
+                45%  { transform: rotate(10deg); }
+                60%  { transform: rotate(-8deg); }
+                75%  { transform: rotate(5deg); }
+                90%  { transform: rotate(-3deg); }
+                100% { transform: rotate(0); }
+            }
+            .notif-group-label {
+                padding: 8px 18px 4px;
+                font-size: 0.68rem;
+                font-weight: 700;
+                color: var(--gray-400);
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                background: var(--gray-50);
+                border-bottom: 1px solid var(--gray-100);
+            }
+            .notif-item:hover { background: var(--gray-50) !important; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Render awal
+    updateNotificationUI();
 }
 
 function markNotificationRead(index) {
-    if (notifications[index]) { notifications[index].read = true; updateNotificationUI(); }
+    const allNotifs = [...notifications];
+    if (allNotifs[index]) {
+        allNotifs[index].read = true;
+        notifications = allNotifs;
+        updateNotificationUI();
+        // Navigasi ke link jika ada
+        if (allNotifs[index].link) {
+            navigateTo(allNotifs[index].link);
+            notifBell?.classList.remove('active');
+        }
+    }
 }
 
 // ============================================================
 // REALTIME LISTENERS
 // ============================================================
 function setupRealtimeListeners() {
+    // Feedback badge + notifikasi
     db.collection('feedbacks').where('status', '==', 'pending').onSnapshot((snap) => {
         const badge = $('feedbackBadge');
         if (badge) {
             badge.textContent = snap.size;
             badge.style.display = snap.size > 0 ? 'inline-flex' : 'none';
         }
+        snap.docChanges().forEach(change => {
+            if (change.type === 'added') {
+                const d = change.doc.data();
+                addNotification(
+                    'feedback',
+                    `Pesan baru dari ${d.name || 'Anonim'}`,
+                    'feedbacks',
+                    d.category ? `Kategori: ${d.category}` : ''
+                );
+            }
+        });
+    });
+
+    // Announcement changes
+    db.collection('announcements').onSnapshot((snap) => {
+        snap.docChanges().forEach(change => {
+            if (change.type === 'added' && change.doc.data().active) {
+                const d = change.doc.data();
+                addNotification('announcement', `Pengumuman aktif: "${d.title || 'Tanpa Judul'}"`, 'announcements');
+            }
+        });
     });
 }
 
@@ -1981,7 +2236,13 @@ function setupGlobalChatListener() {
         }
         snap.docChanges().forEach(change => {
             if (change.type === 'added') {
-                addNotification('chat', `Chat baru dari ${change.doc.data().userName || 'Pengguna'}`);
+                const d = change.doc.data();
+                addNotification(
+                    'chat',
+                    `Chat baru dari ${d.userName || 'Pengguna'}`,
+                    'chat',
+                    d.userStatus || ''
+                );
             }
         });
     });
@@ -2070,24 +2331,25 @@ function scrollToTop() {
 // ============================================================
 // GLOBAL WINDOW EXPOSURE
 // ============================================================
-window.deleteItem          = deleteItem;
-window.deleteAlumniByYear  = deleteAlumniByYear;
-window.showReplyModal      = showReplyModal;
-window.submitReply         = submitReply;
-window.closeModal          = closeModal;
-window.markNotificationRead= markNotificationRead;
-window.navigateTo          = navigateTo;
-window.editNews            = editNews;
-window.editAgenda          = editAgenda;
-window.editGallery         = editGallery;
-window.editFacility        = editFacility;
-window.editTestimonial     = editTestimonial;
-window.editAnnouncement    = editAnnouncement;
-window.deleteAnnouncement  = deleteAnnouncement;
-window.toggleAnnouncement  = toggleAnnouncement;
-window.saveAnnouncement    = saveAnnouncement;
-window.openAnnouncementModal = openAnnouncementModal;
-window.dismissToast        = dismissToast;
-window.filterFeedback      = filterFeedback;
+window.deleteItem            = deleteItem;
+window.deleteAlumniByYear    = deleteAlumniByYear;
+window.showReplyModal        = showReplyModal;
+window.submitReply           = submitReply;
+window.closeModal            = closeModal;
+window.markNotificationRead  = markNotificationRead;
+window.navigateTo            = navigateTo;
+window.editNews              = editNews;
+window.editAgenda            = editAgenda;
+window.editGallery           = editGallery;
+window.editFacility          = editFacility;
+window.editTestimonial       = editTestimonial;
+// Announcement — signature baru (pakai docId string)
+window.editAnnouncement      = editAnnouncement;
+window.deleteAnnouncement    = deleteAnnouncement;
+window.toggleAnnouncement    = toggleAnnouncement;
+window.saveAnnouncement      = saveAnnouncement;
+window.openAnnouncementModal  = openAnnouncementModal;
+window.dismissToast          = dismissToast;
+window.filterFeedback        = filterFeedback;
 
 console.log('✅ SMAN 68 Admin Panel — Super Premium Edition Loaded');
