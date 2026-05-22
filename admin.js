@@ -190,6 +190,7 @@ function initializeAdmin() {
     setupRealtimeListeners();
     setupGlobalChatListener();
     loadDashboard();
+    startMaintenanceScheduler(); // FIX: scheduler otomatis jalan sejak login
 }
 
 // ============================================================
@@ -1703,31 +1704,71 @@ function loadMaintenancePage() {
     pageContainer.innerHTML = `
     <div class="fade-in">
         <div id="maintenanceBanner"></div>
+
+        <!-- Countdown Bar -->
+        <div id="maintenanceCountdown" style="margin-bottom:16px;"></div>
+
+        <!-- Scheduler Status -->
+        <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-xl);padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;gap:10px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px rgba(16,185,129,0.2);flex-shrink:0;animation:pulseDot 2s ease-in-out infinite;"></div>
+            <div>
+                <span style="font-size:0.82rem;font-weight:600;color:var(--gray-700);">Scheduler Otomatis Aktif</span>
+                <span style="font-size:0.78rem;color:var(--gray-400);margin-left:8px;">— Mengecek jadwal setiap 30 detik secara otomatis</span>
+            </div>
+        </div>
+
         <div class="settings-section">
             <div class="settings-section-head"><i class="fas fa-screwdriver-wrench"></i><h3>Konfigurasi Maintenance</h3></div>
             <div class="settings-section-body">
                 <form id="maintenanceForm">
+                    <!-- Info box penting -->
+                    <div style="background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.15);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;">
+                        <i class="fas fa-circle-info" style="color:var(--accent);margin-top:2px;flex-shrink:0;"></i>
+                        <div style="font-size:0.8rem;color:var(--gray-600);line-height:1.6;">
+                            <strong style="color:var(--gray-800);">Cara pakai jadwal otomatis:</strong><br>
+                            Set <strong>Mulai Otomatis</strong> & <strong>Selesai Otomatis</strong>, lalu klik Simpan.
+                            Sistem akan otomatis mengaktifkan maintenance di waktu mulai dan menonaktifkannya di waktu selesai —
+                            <strong>tanpa perlu buka admin panel lagi</strong>.
+                            Toggle "Status" manual hanya berlaku jika tidak ada jadwal terpasang.
+                        </div>
+                    </div>
+
                     <div class="form-row">
-                        <div class="form-group"><label><i class="fas fa-toggle-on"></i> Status</label>
+                        <div class="form-group">
+                            <label><i class="fas fa-toggle-on"></i> Status Manual</label>
                             <select id="maintenanceActive" class="form-input">
                                 <option value="false">Nonaktif</option>
                                 <option value="true">Aktif</option>
                             </select>
+                            <small style="font-size:0.72rem;color:var(--gray-400);margin-top:4px;display:block;">Diabaikan jika ada jadwal terpasang</small>
                         </div>
-                        <div class="form-group"><label><i class="fas fa-heading"></i> Judul</label>
+                        <div class="form-group">
+                            <label><i class="fas fa-heading"></i> Judul Halaman</label>
                             <input type="text" id="maintenanceTitle" class="form-input" placeholder="Website Sedang Dalam Pemeliharaan">
                         </div>
                     </div>
-                    <div class="form-group"><label><i class="fas fa-align-left"></i> Pesan</label>
+                    <div class="form-group">
+                        <label><i class="fas fa-align-left"></i> Pesan untuk Pengunjung</label>
                         <textarea id="maintenanceMessage" class="form-input" rows="3" placeholder="Pesan yang ditampilkan kepada pengunjung..."></textarea>
                     </div>
                     <div class="form-row">
-                        <div class="form-group"><label><i class="fas fa-calendar-plus"></i> Mulai Otomatis</label><input type="datetime-local" id="maintenanceStart" class="form-input"></div>
-                        <div class="form-group"><label><i class="fas fa-calendar-check"></i> Selesai Otomatis</label><input type="datetime-local" id="maintenanceEnd" class="form-input"></div>
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-plus" style="color:var(--warning);"></i> Mulai Otomatis <span style="color:var(--warning);font-size:0.75rem;">(wajib untuk auto-aktif)</span></label>
+                            <input type="datetime-local" id="maintenanceStart" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-check" style="color:var(--success);"></i> Selesai Otomatis <span style="color:var(--success);font-size:0.75rem;">(wajib untuk auto-nonaktif)</span></label>
+                            <input type="datetime-local" id="maintenanceEnd" class="form-input">
+                        </div>
                     </div>
+
+                    <!-- Preview jadwal -->
+                    <div id="maintenanceSchedulePreview" style="display:none;margin-bottom:16px;"></div>
+
                     <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-floppy-disk"></i> Simpan Pengaturan</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-floppy-disk"></i> Simpan & Terapkan Jadwal</button>
                         <button type="button" id="deactivateMaintenanceBtn" class="btn btn-danger"><i class="fas fa-power-off"></i> Nonaktifkan Sekarang</button>
+                        <button type="button" id="clearScheduleBtn" class="btn btn-secondary"><i class="fas fa-calendar-xmark"></i> Hapus Jadwal</button>
                     </div>
                 </form>
             </div>
@@ -1744,6 +1785,13 @@ function loadMaintenancePage() {
 
     $('maintenanceForm').addEventListener('submit', saveMaintenance);
     $('deactivateMaintenanceBtn').addEventListener('click', deactivateMaintenance);
+    $('clearScheduleBtn').addEventListener('click', clearMaintenanceSchedule);
+
+    // Live preview jadwal saat input berubah
+    const startInput = $('maintenanceStart');
+    const endInput   = $('maintenanceEnd');
+    [startInput, endInput].forEach(el => el?.addEventListener('change', updateSchedulePreview));
+
     loadMaintenanceSettings();
 }
 
@@ -1783,62 +1831,306 @@ function updateMaintenanceBanner(data) {
         </div>`;
 }
 
+// ============================================================
+// MAINTENANCE SCHEDULER — Background checker setiap 30 detik
+// Ini yang benar-benar menjalankan auto-aktif & auto-nonaktif
+// berdasarkan startTime & endTime yang disimpan di Firestore.
+//
+// Kenapa BUKAN setTimeout?
+//   setTimeout hanya jalan sekali & hilang kalau tab ditutup.
+//   Scheduler ini jalan terus selama admin panel dibuka,
+//   dan juga cek langsung saat halaman dimuat (catch up logic).
+// ============================================================
+
+let maintenanceSchedulerInterval = null;
+let maintenanceSchedulerLastState = null; // track biar tidak spam update
+
+function startMaintenanceScheduler() {
+    // Hentikan scheduler lama kalau ada
+    if (maintenanceSchedulerInterval) clearInterval(maintenanceSchedulerInterval);
+
+    // Langsung cek sekali saat dipanggil (catch up kalau browser baru buka)
+    checkAndApplyMaintenanceSchedule();
+
+    // Lalu cek setiap 30 detik
+    maintenanceSchedulerInterval = setInterval(checkAndApplyMaintenanceSchedule, 30_000);
+
+    console.log('✅ Maintenance scheduler aktif — cek setiap 30 detik');
+}
+
+async function checkAndApplyMaintenanceSchedule() {
+    try {
+        const doc = await db.collection('settings').doc('maintenance').get();
+        if (!doc.exists) return;
+
+        const data     = doc.data();
+        const now      = new Date();
+        const startTs  = data.startTime ? data.startTime.toDate() : null;
+        const endTs    = data.endTime   ? data.endTime.toDate()   : null;
+        const isActive = data.active === true;
+
+        // Kalau tidak ada jadwal sama sekali → tidak perlu scheduler
+        if (!startTs && !endTs) return;
+
+        let shouldBeActive = isActive;
+
+        // ── LOGIKA SCHEDULER ──────────────────────────────────────────────────
+        // KASUS 1: Ada startTime & endTime → jadwal penuh
+        //   now < start  → nonaktif
+        //   start ≤ now < end → AKTIF
+        //   now ≥ end    → nonaktif
+        //
+        // KASUS 2: Hanya startTime (tanpa endTime)
+        //   now ≥ start  → AKTIF (terus sampai admin matikan manual)
+        //   now < start  → nonaktif
+        //
+        // KASUS 3: Hanya endTime (tanpa startTime)
+        //   now ≥ end    → nonaktif
+        // ─────────────────────────────────────────────────────────────────────
+        if (startTs && endTs) {
+            shouldBeActive = (now >= startTs && now < endTs);
+        } else if (startTs && !endTs) {
+            shouldBeActive = (now >= startTs);
+        } else if (!startTs && endTs) {
+            if (now >= endTs) shouldBeActive = false;
+        }
+
+        // Tidak ada perubahan → tidak perlu write ke Firestore
+        if (shouldBeActive === isActive) return;
+
+        // Gunakan state key berdasarkan nilai & waktu sekarang (menit)
+        // bukan doc.updateTime (yang tidak tersedia di compat SDK)
+        const minuteBucket = Math.floor(now.getTime() / 60000); // berubah tiap menit
+        const newStateKey  = `${shouldBeActive}-${minuteBucket}`;
+        if (maintenanceSchedulerLastState === newStateKey) return;
+        maintenanceSchedulerLastState = newStateKey;
+
+        // ── TERAPKAN KE FIRESTORE ─────────────────────────────────────────
+        await db.collection('settings').doc('maintenance').update({
+            active:    shouldBeActive,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Log ke riwayat
+        await db.collection('maintenanceHistory').add({
+            action: shouldBeActive ? 'activated' : 'deactivated',
+            title:  data.title || 'Maintenance Terjadwal',
+            by:     'System (Scheduler Otomatis)',
+            at:     firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Perbarui UI kalau halaman maintenance sedang terbuka
+        updateMaintenanceBanner({ active: shouldBeActive });
+        const selEl = $('maintenanceActive');
+        if (selEl) selEl.value = shouldBeActive ? 'true' : 'false';
+
+        // Notifikasi ke admin
+        const msg = shouldBeActive
+            ? '⚠️ Maintenance otomatis DIAKTIFKAN sesuai jadwal!'
+            : '✅ Maintenance otomatis DINONAKTIFKAN sesuai jadwal!';
+        showToast(msg, shouldBeActive ? 'warning' : 'success');
+        addNotification('maintenance', msg, 'maintenance');
+
+        console.log(`[Scheduler] Maintenance → ${shouldBeActive ? 'AKTIF' : 'NONAKTIF'} pada ${now.toLocaleString('id-ID')}`);
+
+    } catch (err) {
+        console.warn('[Scheduler] Gagal cek:', err.message);
+    }
+}
+
+// ── UI Countdown & status realtime di halaman maintenance ──────────────────
+
+let countdownInterval = null;
+
+function startCountdownDisplay(startTs, endTs) {
+    const countdownEl = $('maintenanceCountdown');
+    if (!countdownEl) return;
+
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    countdownInterval = setInterval(() => {
+        const now  = new Date();
+        const data = doc => doc; // placeholder
+
+        // Tentukan target waktu & label
+        let target, label;
+        if (startTs && new Date() < startTs) {
+            target = startTs;
+            label  = 'Maintenance dimulai dalam';
+        } else if (endTs && new Date() < endTs) {
+            target = endTs;
+            label  = 'Maintenance selesai dalam';
+        } else {
+            countdownEl.innerHTML = '';
+            clearInterval(countdownInterval);
+            return;
+        }
+
+        const diff    = target - now;
+        const hours   = Math.floor(diff / 3_600_000);
+        const minutes = Math.floor((diff % 3_600_000) / 60_000);
+        const seconds = Math.floor((diff % 60_000) / 1_000);
+
+        countdownEl.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <i class="fas fa-hourglass-half" style="color:${startTs && now < startTs ? 'var(--warning)' : 'var(--danger)'};"></i>
+                <span style="font-size:0.82rem;color:var(--gray-600);">${label}:</span>
+                <div style="display:flex;gap:6px;">
+                    ${countdownBadge(String(hours).padStart(2,'0'), 'Jam')}
+                    ${countdownBadge(String(minutes).padStart(2,'0'), 'Menit')}
+                    ${countdownBadge(String(seconds).padStart(2,'0'), 'Detik')}
+                </div>
+            </div>`;
+    }, 1000);
+}
+
+function countdownBadge(val, label) {
+    return `<div style="background:var(--gray-900);color:white;border-radius:var(--r-sm);padding:4px 10px;text-align:center;min-width:48px;">
+        <div style="font-size:1.1rem;font-weight:800;font-family:monospace;letter-spacing:0.05em;">${val}</div>
+        <div style="font-size:0.58rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.1em;">${label}</div>
+    </div>`;
+}
+
+// ── saveMaintenance ────────────────────────────────────────────────────────
+
 async function saveMaintenance(e) {
     e.preventDefault();
+
     const active  = $('maintenanceActive').value === 'true';
     const title   = $('maintenanceTitle').value.trim();
     const message = $('maintenanceMessage').value.trim();
-    const start   = $('maintenanceStart').value;
-    const end     = $('maintenanceEnd').value;
+    const start   = $('maintenanceStart').value;   // string "2026-05-22T06:47"
+    const end     = $('maintenanceEnd').value;     // string "2026-05-22T13:00"
+
+    // ── Validasi jadwal ────────────────────────────────────────────────────
+    if (start && end && new Date(start) >= new Date(end)) {
+        showToast('Waktu mulai harus lebih awal dari waktu selesai!', 'error');
+        return;
+    }
 
     const btn = $('maintenanceForm').querySelector('button[type="submit"]');
     setButtonLoading(btn, true);
+
     try {
+        const now      = new Date();
+        const startTs  = start ? new Date(start) : null;
+        const endTs    = end   ? new Date(end)   : null;
+
+        // ── Tentukan apakah maintenance harus aktif saat ini ────────────────
+        // Kalau admin set jadwal di masa depan → nonaktif dulu, scheduler yang aktifkan
+        // Kalau startTime sudah lewat & belum endTime → langsung aktif
+        let computedActive = active;
+        if (startTs && endTs) {
+            computedActive = now >= startTs && now < endTs;
+        } else if (startTs && !endTs) {
+            computedActive = now >= startTs ? true : false;
+        } else if (!startTs && endTs) {
+            // Tidak ada start → ikut toggle manual, tapi pastikan nonaktif kalau end sudah lewat
+            if (now >= endTs) computedActive = false;
+        }
+
         const data = {
-            active,
-            title:   title   || 'Website Sedang Dalam Pemeliharaan',
-            message: message || 'Mohon maaf, website sedang dalam pemeliharaan. Silakan kunjungi kembali nanti.',
+            active:   computedActive,
+            title:    title   || 'Website Sedang Dalam Pemeliharaan',
+            message:  message || 'Mohon maaf, website sedang dalam pemeliharaan. Silakan kunjungi kembali nanti.',
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-        if (start) data.startTime = firebase.firestore.Timestamp.fromDate(new Date(start));
-        if (end)   data.endTime   = firebase.firestore.Timestamp.fromDate(new Date(end));
+
+        if (startTs) data.startTime = firebase.firestore.Timestamp.fromDate(startTs);
+        if (endTs)   data.endTime   = firebase.firestore.Timestamp.fromDate(endTs);
 
         await db.collection('settings').doc('maintenance').set(data);
 
-        // Log to history
+        // ── Log ke riwayat ────────────────────────────────────────────────
         await db.collection('maintenanceHistory').add({
-            action: active ? 'activated' : 'deactivated',
-            title: data.title,
-            by: currentUser?.email || 'Admin',
-            at: firebase.firestore.FieldValue.serverTimestamp()
+            action: computedActive ? 'activated' : 'scheduled',
+            title:  data.title,
+            by:     currentUser?.email || 'Admin',
+            note:   start ? `Jadwal: ${new Date(start).toLocaleString('id-ID')} — ${end ? new Date(end).toLocaleString('id-ID') : 'tanpa batas'}` : '',
+            at:     firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // Auto-deactivate timer
-        if (end) {
-            const delay = new Date(end).getTime() - Date.now();
-            if (delay > 0) {
-                clearTimeout(maintenanceTimer);
-                maintenanceTimer = setTimeout(async () => {
-                    await db.collection('settings').doc('maintenance').update({ active: false });
-                    showToast('Maintenance otomatis dinonaktifkan', 'info');
-                }, delay);
-            }
+        // ── Reset scheduler agar langsung cek jadwal baru ─────────────────
+        maintenanceSchedulerLastState = null;
+        startMaintenanceScheduler();
+
+        // ── Update UI ─────────────────────────────────────────────────────
+        updateMaintenanceBanner({ active: computedActive, startTime: startTs, endTime: endTs });
+
+        // Mulai countdown jika ada jadwal di masa depan
+        if (startTs || endTs) startCountdownDisplay(startTs, endTs);
+
+        // Feedback ke admin
+        if (!computedActive && startTs && now < startTs) {
+            showToast(`✅ Jadwal tersimpan! Maintenance akan otomatis aktif pada ${startTs.toLocaleString('id-ID')}`, 'info');
+            addNotification('maintenance',
+                `Maintenance dijadwalkan: ${startTs.toLocaleString('id-ID')}`,
+                'maintenance');
+        } else if (computedActive) {
+            showToast('⚠️ Maintenance sekarang AKTIF!', 'warning');
+        } else {
+            showToast('Pengaturan maintenance disimpan!', 'success');
         }
 
-        updateMaintenanceBanner({ active });
-        showToast('Pengaturan maintenance disimpan!', 'success');
-    } catch { showToast('Gagal menyimpan', 'error'); }
+        loadMaintenanceHistory();
+
+    } catch (err) {
+        console.error('saveMaintenance error:', err);
+        showToast('Gagal menyimpan: ' + err.message, 'error');
+    }
     finally { setButtonLoading(btn, false); }
 }
 
 async function deactivateMaintenance() {
     if (!confirm('Nonaktifkan maintenance sekarang?')) return;
     try {
-        await db.collection('settings').doc('maintenance').update({ active: false, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-        $('maintenanceActive').value = 'false';
+        await db.collection('settings').doc('maintenance').update({
+            active: false,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        const el = $('maintenanceActive');
+        if (el) el.value = 'false';
         updateMaintenanceBanner({ active: false });
+        maintenanceSchedulerLastState = null;
         showToast('Maintenance dinonaktifkan!', 'success');
-    } catch { showToast('Gagal', 'error'); }
+        loadMaintenanceHistory();
+    } catch { showToast('Gagal menonaktifkan maintenance', 'error'); }
+}
+
+// Hapus jadwal startTime & endTime dari Firestore
+async function clearMaintenanceSchedule() {
+    if (!confirm('Hapus jadwal otomatis?\nstartTime & endTime akan dihapus — maintenance hanya bisa diatur manual.')) return;
+    try {
+        await db.collection('settings').doc('maintenance').update({
+            startTime: firebase.firestore.FieldValue.delete(),
+            endTime:   firebase.firestore.FieldValue.delete(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        const startInput = $('maintenanceStart');
+        const endInput   = $('maintenanceEnd');
+        if (startInput) startInput.value = '';
+        if (endInput)   endInput.value   = '';
+
+        const preview = $('maintenanceSchedulePreview');
+        if (preview) preview.style.display = 'none';
+
+        // Reset scheduler — tidak ada jadwal, berhenti intervensi otomatis
+        maintenanceSchedulerLastState = null;
+
+        // Hentikan countdown display
+        if (typeof countdownInterval !== 'undefined' && countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+        const countdownEl = $('maintenanceCountdown');
+        if (countdownEl) countdownEl.innerHTML = '';
+
+        showToast('Jadwal otomatis dihapus. Gunakan toggle manual.', 'success');
+        loadMaintenanceHistory();
+    } catch (err) {
+        showToast('Gagal menghapus jadwal: ' + err.message, 'error');
+    }
 }
 
 async function loadMaintenanceHistory() {
