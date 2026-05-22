@@ -228,7 +228,7 @@
                 </div>
 
                 <div class="topbar-right">
-                    <!-- Notification Bell -->
+                        <!-- Notification Bell -->
                     <div class="notif-bell-wrap" id="notificationBell">
                         <button class="notif-bell-btn">
                             <i class="fas fa-bell"></i>
@@ -237,13 +237,21 @@
                         <div class="notif-dropdown" id="notificationDropdown">
                             <div class="notif-dropdown-head">
                                 <h4><i class="fas fa-bell"></i> Notifikasi</h4>
-                                <button id="clearNotifications" class="notif-clear-btn">Tandai Dibaca</button>
+                                <button id="clearNotifications" class="notif-clear-btn">
+                                    <i class="fas fa-check-double"></i> Tandai Dibaca
+                                </button>
                             </div>
                             <div class="notif-list" id="notificationList">
                                 <div class="notif-empty">
                                     <i class="fas fa-bell-slash"></i>
-                                    <p>Tidak ada notifikasi</p>
+                                    <p>Belum ada notifikasi</p>
+                                    <small>Aktivitas baru akan muncul di sini</small>
                                 </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <a href="#" onclick="document.getElementById('notificationBell').classList.remove('active');return false;">
+                                    <i class="fas fa-xmark"></i> Tutup Panel
+                                </a>
                             </div>
                         </div>
                     </div>
