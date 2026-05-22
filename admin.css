@@ -2188,3 +2188,62 @@ tbody td {
     0%, 100% { box-shadow: 0 0 0 0 rgba(5,150,105,0.4); }
     50% { box-shadow: 0 0 0 10px rgba(5,150,105,0); }
 }
+
+/* ============================
+   NOTIFICATION DROPDOWN PREMIUM
+============================ */
+.notif-group-label {
+    padding: 8px 18px 5px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-100);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.notif-item:hover { background: var(--gray-50) !important; }
+
+@keyframes bellRing {
+    0%   { transform: rotate(0); }
+    15%  { transform: rotate(15deg); }
+    30%  { transform: rotate(-13deg); }
+    45%  { transform: rotate(10deg); }
+    60%  { transform: rotate(-8deg); }
+    75%  { transform: rotate(5deg); }
+    90%  { transform: rotate(-3deg); }
+    100% { transform: rotate(0); }
+}
+
+.notif-bell-wrap.active .notif-bell-btn {
+    background: var(--green-50);
+    color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(5,150,105,0.12);
+}
+
+.notif-dropdown-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--gray-100);
+    text-align: center;
+}
+.notif-dropdown-footer a {
+    font-size: 0.78rem;
+    color: var(--primary);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color var(--t-fast);
+}
+.notif-dropdown-footer a:hover { color: var(--primary-hover); }
+
+.notif-empty small {
+    font-size: 0.75rem;
+    color: var(--gray-300);
+    display: block;
+    margin-top: 6px;
+}
