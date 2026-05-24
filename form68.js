@@ -52,6 +52,30 @@ function getOrCreateUserId() {
   return genUserId();
 }
 function getParam(name) { return new URLSearchParams(window.location.search).get(name); }
+
+// Hapus underscore dari nilai jawaban (misal: "pilihan_1" → "Pilihan 1" dari label asli)
+function cleanAnswerDisplay(ans, question) {
+  if (!ans && ans !== 0) return '';
+  if (Array.isArray(ans)) {
+    return ans.map(a => resolveLabel(String(a), question)).join(', ');
+  }
+  return resolveLabel(String(ans), question);
+}
+
+function resolveLabel(val, question) {
+  // Cari label dari options jika ada
+  if (question?.options?.length) {
+    const opt = question.options.find(o => o.value === val || o.label === val);
+    if (opt?.label) return opt.label;
+  }
+  // Hapus underscore dan kapitalkan
+  return val.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Navigasi kembali ke halaman utama
+function goHome() {
+  window.location.href = window.location.pathname;
+}
 function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 function escHtml(s)  { if (!s && s !== 0) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function escAttr(s)  { if (!s) return ''; return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
@@ -131,16 +155,26 @@ function hideSkeleton() {
    MODALS CLOSE
 ═══════════════════════════════════════════════════════════════ */
 function initModals() {
-  const imageModal = document.getElementById('imageModal');
-  const qrModal    = document.getElementById('qrModal');
+  const imageModal     = document.getElementById('imageModal');
+  const qrModal        = document.getElementById('qrModal');
+  const userInfoModal  = document.getElementById('userInfoModal');
 
-  const btnCloseImg = document.getElementById('btnCloseImg');
-  const btnCloseQR  = document.getElementById('btnCloseQR');
+  const btnCloseImg    = document.getElementById('btnCloseImg');
+  const btnCloseQR     = document.getElementById('btnCloseQR');
+  const btnCloseUser   = document.getElementById('btnCloseUserModal');
 
-  if (btnCloseImg) btnCloseImg.addEventListener('click', () => { imageModal.style.display='none'; });
-  if (imageModal)  imageModal.addEventListener('click', e => { if(e.target===imageModal) imageModal.style.display='none'; });
-  if (btnCloseQR)  btnCloseQR.addEventListener('click', () => { qrModal.style.display='none'; });
-  if (qrModal)     qrModal.addEventListener('click', e => { if(e.target===qrModal) qrModal.style.display='none'; });
+  if (btnCloseImg)   btnCloseImg.addEventListener('click', () => { imageModal.style.display='none'; });
+  if (imageModal)    imageModal.addEventListener('click', e => { if(e.target===imageModal) imageModal.style.display='none'; });
+  if (btnCloseQR)    btnCloseQR.addEventListener('click', () => { qrModal.style.display='none'; });
+  if (qrModal)       qrModal.addEventListener('click', e => { if(e.target===qrModal) qrModal.style.display='none'; });
+  // Tombol X di modal data diri
+  if (btnCloseUser)  btnCloseUser.addEventListener('click', () => {
+    if (userInfoModal) userInfoModal.style.display = 'none';
+  });
+  // Klik overlay untuk tutup modal data diri (jika belum mulai)
+  if (userInfoModal) userInfoModal.addEventListener('click', e => {
+    if (e.target === userInfoModal) userInfoModal.style.display = 'none';
+  });
 }
 
 function openImage(src) {
@@ -198,33 +232,53 @@ function initShare() {
 /* ═══════════════════════════════════════════════════════════════
    LOAD SURVEYS
 ═══════════════════════════════════════════════════════════════ */
-async function loadSurvey() {
-  try {
-    const paramId = getParam('id');
+/* ── Realtime listener handle ── */
+let _surveysUnsubscribe = null;
 
-    if (paramId) {
-      await loadSingleSurvey(paramId);
-    } else {
-      const snap = await db.collection('surveys')
-        .where('isPublished','==',true)
-        .orderBy('createdAt','desc')
-        .get();
-      state.allSurveys = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+function loadSurvey() {
+  const paramId = getParam('id');
+
+  if (paramId) {
+    // Single survey via URL param: tetap one-time load
+    loadSingleSurvey(paramId);
+    return;
+  }
+
+  // REALTIME: listen ke Firestore agar survey langsung muncul tanpa refresh
+  if (_surveysUnsubscribe) _surveysUnsubscribe(); // stop listener lama
+
+  _surveysUnsubscribe = db.collection('surveys')
+    .where('isPublished', '==', true)
+    .orderBy('createdAt', 'desc')
+    .onSnapshot(snap => {
+      state.allSurveys = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      // Jangan update UI kalau user sedang mengisi form
+      if (state.submitted || document.getElementById('formMain')?.style.display === 'block') return;
+
+      const noSurveyView = document.getElementById('noSurveyView');
 
       if (state.allSurveys.length === 0) {
+        // Hapus grid jika sebelumnya ada survey
+        if (noSurveyView) return; // sudah tampil
         showNoSurvey();
       } else if (state.allSurveys.length === 1) {
-        await loadSingleSurvey(state.allSurveys[0].id);
+        // Satu survey: jika noSurveyView tampil, remove dulu lalu load
+        if (noSurveyView) noSurveyView.remove();
+        loadSingleSurvey(state.allSurveys[0].id);
       } else {
+        // Multi survey: update grid secara realtime
+        if (noSurveyView) noSurveyView.remove();
+        const heroHeader = document.getElementById('heroHeader');
+        if (heroHeader) heroHeader.style.display = 'flex';
         renderSurveyGrid(state.allSurveys);
         hideSkeleton();
       }
-    }
-  } catch(err) {
-    console.error('[loadSurvey]', err);
-    Toast.show('Error','Gagal memuat kuisioner. Periksa koneksi.','error');
-    hideSkeleton();
-  }
+    }, err => {
+      console.error('[loadSurvey realtime]', err);
+      Toast.show('Error', 'Gagal memuat kuisioner. Periksa koneksi.', 'error');
+      hideSkeleton();
+    });
 }
 
 /** Render survey selection grid */
@@ -347,8 +401,28 @@ function renderHero() {
   const elDesc   = document.getElementById('surveyDesc');
   const elBadge  = document.getElementById('badgeLabel');
   if (elTitle) elTitle.textContent = s.title || 'Kuisioner';
-  if (elDesc)  elDesc.textContent  = s.description || '';
   if (elBadge) elBadge.textContent = s.schoolYear ? `T.A. ${s.schoolYear}` : 'Kuisioner Digital';
+
+  // Deskripsi terstruktur
+  const descWrap   = document.getElementById('surveyDescWrap');
+  const descSimple = document.getElementById('surveyDescSimple');
+  if (s.description) {
+    if (descWrap)   { descWrap.style.display = 'block'; }
+    if (elDesc)     elDesc.textContent = s.description;
+    if (descSimple) descSimple.style.display = 'none';
+  } else {
+    if (descWrap)   descWrap.style.display = 'none';
+    if (descSimple) { descSimple.textContent = ''; descSimple.style.display = 'none'; }
+  }
+
+  // Tampilkan jumlah pertanyaan di pill
+  const nonSectionQs = state.questions.filter(q => q.type !== 'section');
+  const chipQCount   = document.getElementById('chipQCount');
+  const qCountText   = document.getElementById('qCountText');
+  if (chipQCount && qCountText && nonSectionQs.length > 0) {
+    qCountText.textContent = `${nonSectionQs.length} Pertanyaan`;
+    chipQCount.style.display = 'inline-flex';
+  }
 
   // Banner
   if (s.bannerImage) {
@@ -385,7 +459,17 @@ function renderHero() {
 
   if (state.allSurveys.length > 1) {
     const btnBack = document.getElementById('btnBackToList');
-    if (btnBack) btnBack.style.display = 'flex';
+    if (btnBack) {
+      btnBack.style.display = 'flex';
+      btnBack.title = 'Kembali ke daftar survey';
+    }
+  } else {
+    // Single survey: tampilkan back button yang mengarah ke hero halaman ini
+    const btnBack = document.getElementById('btnBackToList');
+    if (btnBack) {
+      btnBack.style.display = 'flex';
+      btnBack.title = 'Kembali ke halaman awal survey';
+    }
   }
 
   initShare();
@@ -471,10 +555,13 @@ function confirmUser() {
 }
 
 function proceedAfterConfirm() {
-  const modal  = document.getElementById('userInfoModal');
-  const hero   = document.getElementById('heroHeader');
-  if (modal) modal.style.display = 'none';
-  if (hero)  hero.style.display  = 'none';
+  const modal    = document.getElementById('userInfoModal');
+  const hero     = document.getElementById('heroHeader');
+  if (modal)   modal.style.display   = 'none';
+  if (hero)    hero.style.display    = 'none';
+
+  // Generate fresh userId per pengisian
+  state.userId = genUserId();
 
   loadDraft().then(() => startForm());
 }
@@ -564,6 +651,7 @@ function buildSections() {
    FORM RENDERER
 ═══════════════════════════════════════════════════════════════ */
 function startForm() {
+  document.body.classList.add('form-active');
   const formMain = document.getElementById('formMain');
   if (formMain) formMain.style.display = 'block';
   renderAllSections();
@@ -947,15 +1035,32 @@ document.getElementById('btnNext')?.addEventListener('click',()=>{ if(validateSe
 
 // Back to survey list
 document.getElementById('btnBackToList')?.addEventListener('click',()=>{
+  document.body.classList.remove('form-active');
   const formMain   = document.getElementById('formMain');
   const heroHeader = document.getElementById('heroHeader');
   const singleView = document.getElementById('singleSurveyView');
   const listView   = document.getElementById('surveysListView');
   if(formMain)   formMain.style.display   = 'none';
-  if(heroHeader) heroHeader.style.display = 'block';
-  if(singleView) singleView.style.display = 'none';
-  if(listView)   listView.style.display   = 'block';
-  window.history.pushState({},'','form68.html');
+  if(heroHeader) heroHeader.style.display = 'flex';
+
+  if(state.allSurveys.length > 1) {
+    // Kembali ke daftar survey
+    if(singleView) singleView.style.display = 'none';
+    if(listView)   listView.style.display   = 'block';
+    window.history.pushState({},'','form68.html');
+  } else {
+    // Kembali ke hero single survey
+    if(singleView) singleView.style.display = 'block';
+    if(listView)   listView.style.display   = 'none';
+    // Reset URL jika ada id param
+    const paramId = getParam('id');
+    if(paramId) {
+      window.history.pushState({},'',`?id=${paramId}`);
+    } else {
+      window.history.pushState({},'','form68.html');
+    }
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
 });
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1053,17 +1158,50 @@ function showSuccess() {
 
 /* ─── Empty/Error states ── */
 function showNoSurvey() {
+  // Tampilkan hero header dengan tampilan "survey belum tersedia" yang lengkap
   const hero = document.getElementById('heroHeader');
-  if(hero) hero.style.display='none';
-  const existing = document.querySelector('.empty-state');
-  if(existing) existing.remove();
-  document.body.insertAdjacentHTML('beforeend',`
-    <div class="empty-state glass-card">
-      <i data-lucide="file-question"></i>
-      <h3>Survey Tidak Tersedia</h3>
-      <p>Belum ada survey yang dipublikasikan. Hubungi operator sekolah.</p>
-    </div>`);
-  if(typeof lucide!=='undefined') lucide.createIcons();
+  if (hero) hero.style.display = 'flex';
+
+  // Sembunyikan singleSurveyView dan surveysListView
+  const singleView = document.getElementById('singleSurveyView');
+  const listView   = document.getElementById('surveysListView');
+  if (singleView) singleView.style.display = 'none';
+  if (listView)   listView.style.display   = 'none';
+
+  // Hapus konten no-survey sebelumnya jika ada
+  const existing = document.getElementById('noSurveyView');
+  if (existing) existing.remove();
+
+  // Sisipkan tampilan "belum tersedia" di dalam hero-content
+  const heroContent = document.getElementById('heroContent');
+  if (!heroContent) return;
+
+  const noSurveyEl = document.createElement('div');
+  noSurveyEl.id = 'noSurveyView';
+  noSurveyEl.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:1rem;animation:fadeSlideUp .9s var(--t-slow) both;';
+  noSurveyEl.innerHTML = `
+    <div class="hero-badge">
+      <i data-lucide="clock"></i>
+      <span>Belum Tersedia</span>
+    </div>
+    <h1 class="hero-title" style="font-size:clamp(1.5rem,4.5vw,2.6rem);">Selamat Datang di Form Survey<br>SMAN 68 Jakarta</h1>
+    <p class="hero-desc" style="text-align:center;max-width:480px;line-height:1.75;">
+      Saat ini survey belum tersedia atau belum diterbitkan.<br>
+      Silakan tunggu informasi lebih lanjut dari pihak sekolah.
+    </p>
+    <div style="display:flex;align-items:center;gap:0.6rem;background:rgba(249,168,37,0.15);border:1px solid rgba(249,168,37,0.35);border-radius:14px;padding:0.85rem 1.4rem;backdrop-filter:blur(8px);max-width:420px;text-align:center;">
+      <i data-lucide="info" style="width:18px;height:18px;color:var(--gold-300);flex-shrink:0;"></i>
+      <span style="font-size:0.84rem;color:rgba(255,255,255,0.85);line-height:1.6;">
+        Hubungi operator sekolah atau pantau terus halaman ini untuk update survey terbaru.
+      </span>
+    </div>
+    <a href="./sman68.html" class="btn-start" style="margin-top:0.5rem;text-decoration:none;">
+      <i data-lucide="arrow-left"></i><span>Kembali ke Beranda</span>
+    </a>
+  `;
+  heroContent.appendChild(noSurveyEl);
+  hideSkeleton();
+  if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [noSurveyEl] });
 }
 
 function showDeadlinePassed() {
@@ -1133,5 +1271,25 @@ document.addEventListener('DOMContentLoaded', () => {
   if(typeof lucide!=='undefined') lucide.createIcons();
   initModals();
   initQR();
+
+  // Set label & href tombol back/home sesuai konteks
+  const homeBtn   = document.getElementById('btnHomeFloat');
+  const homeLabel = document.getElementById('btnHomeLabel');
+  const paramId   = getParam('id');
+  if (homeBtn) {
+    if (paramId) {
+      // Buka survey langsung via ?id= → Back ke halaman utama form68
+      homeBtn.href = './form68.html';
+      if (homeLabel) homeLabel.textContent = 'Kembali';
+    } else {
+      // Halaman utama form68 → Home ke sman68
+      homeBtn.href = './sman68.html';
+      if (homeLabel) homeLabel.textContent = 'Home';
+      // Ganti icon ke home
+      const icon = homeBtn.querySelector('[data-lucide]');
+      if (icon) { icon.setAttribute('data-lucide', 'home'); lucide.createIcons({nodes:[homeBtn]}); }
+    }
+  }
+
   loadSurvey();
 });
