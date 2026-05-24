@@ -15,6 +15,7 @@
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -38,7 +39,40 @@
 <!-- TOASTS -->
 <div class="op-toasts" id="opToasts"></div>
 
-<div class="layout">
+<!-- ═══════════════════════════════
+     LOGIN GATE
+═══════════════════════════════ -->
+<div class="login-gate" id="loginGate">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo SMAN 68"
+           onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><text y=%2232%22 font-size=%2228%22>🏫</text></svg>'"/>
+    </div>
+    <div class="login-title">Operator Dashboard</div>
+    <div class="login-sub">SMAN 68 Jakarta · Kuisioner Digital<br/>Masuk untuk mengakses panel operator.</div>
+    <div id="loginError" class="login-error"></div>
+    <div class="login-fields" id="loginForm">
+      <div class="login-field-wrap">
+        <span class="login-field-ico"><i data-lucide="mail"></i></span>
+        <input type="email" id="loginEmail" class="login-inp" placeholder="Email operator" autocomplete="email"/>
+      </div>
+      <div class="login-field-wrap">
+        <span class="login-field-ico"><i data-lucide="lock"></i></span>
+        <input type="password" id="loginPassword" class="login-inp" placeholder="Password" autocomplete="current-password"/>
+      </div>
+    </div>
+    <button class="login-btn" id="loginSubmitBtn">
+      <i data-lucide="loader-2" class="login-spinner"></i>
+      <span class="login-btn-text"><i data-lucide="log-in" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:6px"></i>Masuk</span>
+    </button>
+    <div class="login-footer">
+      Buat akun lewat Firebase Console ›<br/>
+      Authentication → Add user
+    </div>
+  </div>
+</div>
+
+<div class="layout" id="appLayout" style="display:none">
 <!-- ═══════════════════════════════
      SIDEBAR
 ═══════════════════════════════ -->
@@ -94,6 +128,9 @@
         Live
       </div>
       <button class="btn btn-icon" id="btnTheme" title="Ganti tema"><i data-lucide="sun" id="themeIco"></i></button>
+      <button class="btn btn-ghost btn-sm" id="btnLogout" title="Logout" style="display:flex;align-items:center;gap:.35rem">
+        <i data-lucide="log-out"></i><span style="font-size:.75rem">Keluar</span>
+      </button>
     </div>
   </header>
 
