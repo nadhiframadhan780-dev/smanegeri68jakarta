@@ -654,3 +654,244 @@ input[type="date"]:focus,input[type="time"]:focus{border-color:var(--gold-500);b
 @media(min-height:640px){
   .modal-overlay { align-items: center; }
 }
+
+/* ════════════════════════════════════════════════
+   PERBAIKAN v2 — Back Button, Home, Modal X,
+   Dark/Light Proper, Deskripsi Terstruktur
+════════════════════════════════════════════════ */
+
+/* ── Back / Home button di progress bar ── */
+.progress-back-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.progress-back-btn:hover {
+  border-color: var(--gold-500);
+  color: var(--gold-500);
+  background: rgba(249,168,37,0.08);
+}
+.progress-back-btn svg { width: 15px; height: 15px; }
+
+/* Home button (selalu tampil) */
+.btn-home-float {
+  position: fixed;
+  top: 1rem; left: 1rem;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+  text-decoration: none;
+  font-family: var(--font-body);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.btn-home-float:hover {
+  border-color: var(--gold-400);
+  color: var(--gold-300);
+  background: rgba(255,255,255,0.22);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.btn-home-float svg { width: 14px; height: 14px; }
+
+/* Saat berada di form (background putih/light), sesuaikan warna */
+.form-active .btn-home-float {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-card);
+}
+.form-active .btn-home-float:hover {
+  border-color: var(--gold-500);
+  color: var(--gold-500);
+  background: var(--bg-card-hover);
+}
+
+/* ── Modal: tombol X tutup ── */
+.modal-card {
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  z-index: 2;
+  flex-shrink: 0;
+}
+.modal-close:hover {
+  background: rgba(229,57,53,0.1);
+  border-color: rgba(229,57,53,0.35);
+  color: var(--red-500);
+}
+.modal-close svg { width: 15px; height: 15px; }
+
+/* Pastikan modal-header punya ruang untuk tombol X */
+.modal-header {
+  padding-right: 2.5rem;
+  position: relative;
+}
+
+/* ── Deskripsi survey terstruktur ── */
+.hero-desc-structured {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 0.85rem 1.4rem;
+  max-width: 540px;
+  width: 100%;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  align-self: center;
+}
+.hero-desc-structured p {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.65;
+  margin: 0;
+  white-space: pre-line;
+  text-align: center;
+}
+.survey-info-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+.survey-info-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px;
+  padding: 0.28rem 0.75rem;
+  font-size: 0.74rem;
+  color: rgba(255,255,255,0.88);
+  font-weight: 500;
+}
+.survey-info-pill svg { width: 12px; height: 12px; }
+.survey-info-pill.pill-deadline { border-color: rgba(249,168,37,0.45); color: #ffd54f; }
+.survey-info-pill.pill-year { border-color: rgba(91,126,197,0.45); color: #a0c4ff; }
+
+/* ── Dark mode text muted fix ── */
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .field-label,
+[data-theme="dark"] .hero-desc { color: rgba(200,215,240,0.8); }
+
+[data-theme="dark"] .hero-title { color: #ffffff; }
+[data-theme="dark"] .school-label { color: #ffd54f; }
+
+/* ── Light mode hero teks ── */
+[data-theme="light"] .hero-title { color: #ffffff; }
+[data-theme="light"] .hero-desc { color: rgba(255,255,255,0.82); }
+[data-theme="light"] .school-label { color: #ffd54f; }
+
+/* ── Toast dark/light fix ── */
+.toast-container { z-index: 9999; }
+
+/* ── Jawaban tanpa underscore — ditangani di JS tapi tambah CSS ── */
+.resp-atext { word-break: break-word; hyphens: auto; }
+
+/* ── Dark mode form controls ── */
+[data-theme="dark"] .field-input,
+[data-theme="dark"] .field-textarea,
+[data-theme="dark"] .field-select,
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] input[type="time"] {
+  background: rgba(15,33,72,0.9);
+  border-color: rgba(91,126,197,0.25);
+  color: #e8edf8;
+}
+[data-theme="dark"] .field-input::placeholder,
+[data-theme="dark"] .field-textarea::placeholder { color: #5b7ec5; }
+
+[data-theme="dark"] .option-item {
+  background: rgba(15,33,72,0.7);
+  border-color: rgba(91,126,197,0.22);
+}
+[data-theme="dark"] .option-item:hover { background: rgba(26,58,110,0.8); }
+[data-theme="dark"] .option-item.selected { background: rgba(249,168,37,0.1); }
+
+[data-theme="dark"] .question-card {
+  background: rgba(15,33,72,0.72);
+  border-color: rgba(91,126,197,0.2);
+}
+[data-theme="dark"] .section-header {
+  background: rgba(15,33,72,0.72);
+  border-color: rgba(91,126,197,0.2);
+}
+
+[data-theme="dark"] .progress-sticky {
+  background: rgba(9,17,41,0.92);
+  border-color: rgba(91,126,197,0.18);
+}
+
+[data-theme="dark"] .glass-card {
+  background: rgba(15,33,72,0.85);
+  border-color: rgba(91,126,197,0.22);
+}
+
+/* ── Role grid dark fix ── */
+[data-theme="dark"] .role-option {
+  background: rgba(15,33,72,0.7);
+  border-color: rgba(91,126,197,0.22);
+  color: #a0b0d4;
+}
+[data-theme="dark"] .role-option:hover { border-color: var(--gold-500); }
+[data-theme="dark"] .role-option.selected { background: rgba(249,168,37,0.12); border-color: var(--gold-500); color: #ffd54f; }
+
+/* ── Scale btn dark fix ── */
+[data-theme="dark"] .scale-btn {
+  background: rgba(15,33,72,0.7);
+  border-color: rgba(91,126,197,0.22);
+  color: #e8edf8;
+}
+[data-theme="dark"] .scale-btn:hover { border-color: var(--gold-500); }
+
+/* ── Modal dark fix ── */
+[data-theme="dark"] .modal-card {
+  background: rgba(10,20,52,0.97);
+  border-color: rgba(91,126,197,0.25);
+}
+[data-theme="dark"] .modal-header h3,
+[data-theme="dark"] .modal-header p,
+[data-theme="dark"] #modalTitle { color: #e8edf8; }
+[data-theme="dark"] .modal-header p { color: #a0b0d4; }
+
+/* ── Success page dark fix ── */
+[data-theme="dark"] .success-page {
+  background: rgba(6,14,36,0.97);
+}
+[data-theme="dark"] .success-card {
+  background: rgba(15,33,72,0.92);
+  border-color: rgba(91,126,197,0.25);
+}
+[data-theme="dark"] .success-card h2,
+[data-theme="dark"] .success-card p { color: #e8edf8; }
+[data-theme="dark"] .success-card .success-sub { color: #a0b0d4; }
