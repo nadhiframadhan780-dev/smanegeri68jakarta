@@ -74,7 +74,7 @@ const linkUrls = {
     penmurmut:     './countdown-pendaftaran-murid-mutasi-sman-68-jakarta.html',
     pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
     topJurusan:    './jurusan-kuliah-terbaik-2026.html',
-    kelulusan:     './unduh-kartu-peserta.html',
+    kelulusan:     './cek-pengumuman-snbt-2026.html',
     hukum:         './hukum.html'
 };
 
@@ -505,14 +505,14 @@ function initLinks() {
 // KELULUSAN LINK — TIME-LOCKED
 // ============================================
 function initKelulusanLink() {
-    const target = new Date('2026-05-18T08:00:00+07:00');
+    const target = new Date('2026-05-24T15:00:00+07:00');
     const now    = new Date();
     const el     = $('navKelulusan');
     if (!el) return;
 
     if (now >= target) {
         el.classList.remove('nav-disabled', 'nav-special');
-        el.textContent   = 'Unduh Kartu Peserta';
+        el.textContent   = 'Pengumuman SNBT 2026';
         el.style.cssText = 'pointer-events:auto;opacity:1;cursor:pointer;';
     }
 }
