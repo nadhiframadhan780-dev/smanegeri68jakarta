@@ -7,6 +7,79 @@
  */
 'use strict';
 
+/* ══════════════════════════════════════════
+   LOGIN GATE — Firebase Auth (Email/Password)
+   Operator wajib login dulu lewat Firebase Console
+══════════════════════════════════════════ */
+function initLoginGate() {
+  // Tampilkan login gate, sembunyikan layout utama
+  const gate   = document.getElementById('loginGate');
+  const layout = document.getElementById('appLayout');
+  if (!gate || !layout) return;
+
+  const auth     = firebase.auth();
+  const form     = document.getElementById('loginForm');
+  const emailInp = document.getElementById('loginEmail');
+  const passInp  = document.getElementById('loginPassword');
+  const loginBtn = document.getElementById('loginSubmitBtn');
+  const errEl    = document.getElementById('loginError');
+
+  // Cek sesi aktif
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      gate.style.display   = 'none';
+      layout.style.display = 'flex';
+      lucide.createIcons();
+      loadSurveys();
+    } else {
+      gate.style.display   = 'flex';
+      layout.style.display = 'none';
+    }
+  });
+
+  // Submit login
+  if (loginBtn) {
+    loginBtn.addEventListener('click', async () => {
+      const email    = emailInp?.value.trim() || '';
+      const password = passInp?.value || '';
+      if (!email || !password) {
+        showLoginError('Email dan password wajib diisi.');
+        return;
+      }
+      loginBtn.classList.add('loading');
+      if (errEl) errEl.classList.remove('show');
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        // onAuthStateChanged akan handle redirect
+      } catch(e) {
+        let msg = 'Login gagal. Periksa email dan password.';
+        if (e.code === 'auth/user-not-found') msg = 'Akun tidak ditemukan.';
+        if (e.code === 'auth/wrong-password')  msg = 'Password salah.';
+        if (e.code === 'auth/invalid-email')   msg = 'Format email tidak valid.';
+        if (e.code === 'auth/too-many-requests') msg = 'Terlalu banyak percobaan. Coba lagi nanti.';
+        showLoginError(msg);
+        loginBtn.classList.remove('loading');
+      }
+    });
+  }
+
+  // Enter key
+  [emailInp, passInp].forEach(inp => {
+    if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') loginBtn?.click(); });
+  });
+
+  // Logout button
+  document.getElementById('btnLogout')?.addEventListener('click', async () => {
+    await auth.signOut();
+  });
+
+  function showLoginError(msg) {
+    if (!errEl) return;
+    errEl.textContent = msg;
+    errEl.classList.add('show');
+  }
+}
+
 /* ── Firebase Config ── */
 const firebaseConfig = {
   apiKey:            "AIzaSyDAcKcg3alPOTH3FFGelYmsW7jcMMe2PLI",
@@ -1024,6 +1097,23 @@ function goRespPage(p) {
   document.getElementById('page-responses')?.scrollTo({ top:0, behavior:'smooth' });
 }
 
+/* Konversi nilai jawaban: hilangkan underscore, cari label asli */
+function resolveAnswerLabel(val, question) {
+  if (!val || val === 'undefined' || val === 'null') return '';
+  // Cari label dari options jika ada
+  if (question?.options?.length) {
+    const opt = question.options.find(o => o.value === val || o.label === val);
+    if (opt?.label) return opt.label;
+  }
+  // Hapus underscore, kapitalkan kata pertama
+  const cleaned = val.replace(/_/g, ' ').trim();
+  // Jika semua huruf kecil, kapitalkan pertama
+  if (cleaned === cleaned.toLowerCase()) {
+    return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+  }
+  return cleaned;
+}
+
 /**
  * Build satu kartu responden.
  * FIX UTAMA: Tampilkan SEMUA jawaban (bukan hanya 5).
@@ -1044,7 +1134,13 @@ function buildRespCard(r, num) {
     : answerEntries.map(([qid, ans], i) => {
         const q       = questions.find(q => q.id === qid);
         const qTitle  = q ? q.title : qid;
-        const ansText = Array.isArray(ans) ? ans.join(', ') : String(ans ?? '');
+        // Hilangkan underscore & cari label asli dari options
+        let ansText;
+        if (Array.isArray(ans)) {
+          ansText = ans.map(a => resolveAnswerLabel(String(a), q)).join(', ');
+        } else {
+          ansText = resolveAnswerLabel(String(ans ?? ''), q);
+        }
         const isEmpty = !ansText || ansText === '–';
         return `
         <div class="resp-ans">
@@ -1259,5 +1355,5 @@ function addBar(grid, title, labels, data) {
 ══════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
-  loadSurveys();
+  initLoginGate();
 });
