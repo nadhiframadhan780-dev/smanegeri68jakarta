@@ -210,6 +210,8 @@ function enterPortal() {
   fillUserUI();
   initPortal();
   goTo('dashboard');
+  // Muat foto profil dari Firestore (async, tidak blokir UI)
+  loadFotoProfile();
 }
 
 function fillUserUI() {
@@ -1120,18 +1122,86 @@ document.getElementById('profileForm')?.addEventListener('submit', async e => {
 
 document.getElementById('avatarInput')?.addEventListener('change', function(){
   const f = this.files?.[0];
-  if(!f||!f.type.startsWith('image/')) return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    const src=ev.target.result;
-    ['profileAvatarDiv','sidebarAvatar','topbarAvatar'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el) el.innerHTML=`<img src="${src}" alt="foto">`;
-    });
-    toast('success','Foto Diperbarui','Foto profil berhasil diubah.');
+  if (!f) return;
+  if (!f.type.startsWith('image/')) { toast('error','File Salah','Pilih file gambar (JPG/PNG/dll)!'); return; }
+  // Batas ukuran file: 3MB sebelum kompresi
+  if (f.size > 3 * 1024 * 1024) { toast('error','File Terlalu Besar','Ukuran foto maksimal 3MB!'); return; }
+
+  // Tampilkan loading
+  ['profileAvatarDiv','sidebarAvatar','topbarAvatar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="font-size:1.2rem;color:#006633;"></i>';
+  });
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    // Kompres gambar via Canvas sebelum simpan ke Firestore
+    const img = new Image();
+    img.onload = async () => {
+      // Target max 200x200px, kualitas 0.75
+      const MAX = 200;
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
+      else        { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const base64 = canvas.toDataURL('image/jpeg', 0.75); // compressed JPEG
+
+      // Tampilkan di UI dulu (instan)
+      applyAvatarToUI(base64);
+
+      // Simpan ke Firestore field 'fotoUrl'
+      try {
+        if (!guru?.id) throw new Error('Tidak ada sesi guru');
+        await db.collection('guru').doc(guru.id).update({ fotoUrl: base64 });
+        // Update state lokal
+        guru.fotoUrl = base64;
+        // Update session di localStorage juga
+        const sess = JSON.parse(localStorage.getItem('pgSession') || '{}');
+        if (sess.id) {
+          sess.fotoUrl = base64;
+          localStorage.setItem('pgSession', JSON.stringify(sess));
+        }
+        toast('success','Foto Tersimpan!','Foto profil berhasil disimpan dan akan muncul di semua perangkat.');
+      } catch(err) {
+        console.error('Gagal simpan foto:', err);
+        toast('error','Gagal Menyimpan','Foto tampil sementara tapi gagal disimpan ke server. Coba lagi.');
+      }
+    };
+    img.src = ev.target.result;
   };
-  r.readAsDataURL(f);
+  reader.readAsDataURL(f);
 });
+
+// Fungsi terapkan foto ke semua elemen avatar di UI
+function applyAvatarToUI(src) {
+  ['profileAvatarDiv','sidebarAvatar','topbarAvatar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<img src="${src}" alt="foto profil" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  });
+}
+
+// Muat foto profil dari Firestore saat masuk portal
+async function loadFotoProfile() {
+  if (!guru?.id) return;
+  try {
+    // Cek di state lokal dulu (dari session)
+    if (guru.fotoUrl) { applyAvatarToUI(guru.fotoUrl); return; }
+    // Kalau belum ada, ambil dari Firestore
+    const doc = await db.collection('guru').doc(guru.id).get();
+    if (doc.exists && doc.data().fotoUrl) {
+      const src = doc.data().fotoUrl;
+      guru.fotoUrl = src;
+      applyAvatarToUI(src);
+      // Simpan ke session
+      const sess = JSON.parse(localStorage.getItem('pgSession') || '{}');
+      if (sess.id) { sess.fotoUrl = src; localStorage.setItem('pgSession', JSON.stringify(sess)); }
+    }
+  } catch(e) {
+    console.warn('Gagal muat foto profil:', e);
+  }
+}
 
 // ============================================================
 //  SESSION AUTO-LOGIN
