@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengumuman Hasil Seleksi Murid Mutasi | SMAN 68 Jakarta T.A 2026/2027</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome v6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="hasil-pengumuman-penmurmut-2026.css">
+</head>
+<body>
+    <!-- ============================================ -->
+    <!-- HEADER SECTION - SIMPLE & CLEAN -->
+    <!-- ============================================ -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-logo">
+                <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" 
+                     alt="Logo SMAN 68 Jakarta" 
+                     class="logo-img">
+                <div class="header-text">
+                    <h1 class="school-name">SMAN 68 JAKARTA</h1>
+                    <p class="school-subtitle">Seleksi Murid Mutasi T.A 2026/2027</p>
+                </div>
+            </div>
+            <div class="header-clock">
+                <span id="liveClock" class="live-clock">00:00</span>
+                <span id="liveDate" class="live-date">Senin, 1 Januari 2026</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================ -->
+    <main class="main-wrapper">
+        <div class="content-container">
+            
+            <!-- Countdown Container -->
+            <div id="countdownContainer" class="countdown-container hidden">
+                <div class="countdown-card">
+                    <div class="countdown-icon">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <h2 class="countdown-title">
+                        Pintu Gerbang Pengumuman Hasil Seleksi<br>
+                        Murid Mutasi SMAN 68 Jakarta<br>
+                        T.A 2026/2027 Belum Dibuka
+                    </h2>
+                    <div class="countdown-timer">
+                        <div class="timer-block">
+                            <span id="days" class="timer-number">00</span>
+                            <span class="timer-label">Hari</span>
+                        </div>
+                        <div class="timer-block">
+                            <span id="hours" class="timer-number">00</span>
+                            <span class="timer-label">Jam</span>
+                        </div>
+                        <div class="timer-block">
+                            <span id="minutes" class="timer-number">00</span>
+                            <span class="timer-label">Menit</span>
+                        </div>
+                        <div class="timer-block">
+                            <span id="seconds" class="timer-number">00</span>
+                            <span class="timer-label">Detik</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Pengecekan Container -->
+            <div id="formContainer" class="form-container hidden">
+                <div class="form-card">
+                    <div class="form-header">
+                        <h2>Cek Hasil Seleksi</h2>
+                        <p>Masukkan nomor pendaftaran dan tanggal lahir Anda</p>
+                    </div>
+                    
+                    <form id="checkForm" class="check-form">
+                        <!-- Nomor Pendaftaran -->
+                        <div class="form-group">
+                            <label for="noDaftar">
+                                <i class="fas fa-id-card"></i> Nomor Pendaftaran
+                            </label>
+                            <input type="text" 
+                                   id="noDaftar" 
+                                   name="noDaftar" 
+                                   placeholder="19816820260001" 
+                                   required 
+                                   pattern="[0-9]{14}"
+                                   maxlength="14"
+                                   minlength="14"
+                                   inputmode="numeric"
+                                   autocomplete="off"
+                                   class="no-daftar-input">
+                            <div id="charCounter" class="char-counter">Masukkan 14 digit nomor pendaftaran</div>
+                        </div>
+                        
+                        <!-- Tanggal Lahir -->
+                        <div class="form-group">
+                            <label for="tglLahir">
+                                <i class="fas fa-calendar-alt"></i> Tanggal Lahir
+                            </label>
+                            <input type="date" 
+                                   id="tglLahir" 
+                                   name="tglLahir" 
+                                   required>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn-check" id="btnCheck">
+                            <i class="fas fa-search"></i>
+                            <span>Cek Hasil Seleksi</span>
+                            <div class="spinner hidden" id="spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Result Container -->
+            <div id="resultContainer" class="result-container hidden"></div>
+            
+        </div>
+    </main>
+
+    <!-- ============================================ -->
+    <!-- TOAST NOTIFICATION -->
+    <!-- ============================================ -->
+    <div id="toast" class="toast hidden">
+        <i id="toastIcon" class="toast-icon"></i>
+        <span id="toastMessage" class="toast-message"></span>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- FOOTER -->
+    <!-- ============================================ -->
+    <footer class="footer">
+        <p>&copy; 2026 SMAN 68 Jakarta - Panitia Seleksi Murid Mutasi</p>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="hasil-pengumuman-penmurmut-2026.js"></script>
+</body>
+</html>
