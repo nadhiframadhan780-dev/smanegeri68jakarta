@@ -13,6 +13,125 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // ============================================================
+// STATUS PENDAFTARAN GATE (Realtime dari Firestore)
+// ============================================================
+let countdownInterval = null;
+let pendaftaranUnsubscribe = null;
+let gateOpen = false;
+
+function showGate(state, targetDate) {
+  const gate = document.getElementById('registrationGate');
+  const loading = document.getElementById('gateLoading');
+  const closed = document.getElementById('gateClosed');
+  const countdown = document.getElementById('gateCountdown');
+
+  loading.style.display = 'none';
+  closed.style.display = 'none';
+  countdown.style.display = 'none';
+
+  if (state === 'open') {
+    // Sembunyikan gate, tampilkan konten pendaftaran
+    gate.classList.remove('active');
+    document.body.style.overflow = '';
+    gateOpen = true;
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    return;
+  }
+
+  // Tampilkan gate, sembunyikan konten
+  gate.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  gateOpen = false;
+
+  if (state === 'closed') {
+    closed.style.display = 'block';
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+
+  } else if (state === 'countdown' && targetDate) {
+    countdown.style.display = 'block';
+    const target = new Date(targetDate);
+    // Tampilkan tanggal pembukaan
+    const dateStr = target.toLocaleString('id-ID', {
+      weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    }) + ' WIB';
+    document.getElementById('gateOpenDateText').innerHTML = 'Pembukaan: <strong>' + dateStr + '</strong>';
+
+    // Mulai countdown
+    if (countdownInterval) clearInterval(countdownInterval);
+    function tickCountdown() {
+      const now = new Date();
+      const diff = target - now;
+      if (diff <= 0) {
+        // Waktunya tiba — buka otomatis tanpa reload
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+        setCountdownDisplay(0, 0, 0, 0);
+        showGate('open');
+        return;
+      }
+      const days    = Math.floor(diff / 86400000);
+      const hours   = Math.floor((diff % 86400000) / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      setCountdownDisplay(days, hours, minutes, seconds);
+    }
+    tickCountdown();
+    countdownInterval = setInterval(tickCountdown, 1000);
+  }
+}
+
+function setCountdownDisplay(d, h, m, s) {
+  function update(id, val) {
+    const el = document.getElementById(id);
+    const str = String(val).padStart(2, '0');
+    if (el.textContent !== str) {
+      el.classList.remove('flip');
+      void el.offsetWidth; // reflow
+      el.classList.add('flip');
+      el.textContent = str;
+    }
+  }
+  update('cdDays', d);
+  update('cdHours', h);
+  update('cdMinutes', m);
+  update('cdSeconds', s);
+}
+
+function initPendaftaranGate() {
+  // Realtime listener ke Firestore settings/pendaftaran
+  pendaftaranUnsubscribe = db.collection('settings').doc('pendaftaran')
+    .onSnapshot(snap => {
+      if (!snap.exists) {
+        showGate('closed');
+        return;
+      }
+      const data = snap.data();
+      const isOpen = data.isOpen === true;
+      const countdownActive = data.countdownActive === true;
+      const countdownTarget = data.countdownTarget || null;
+
+      if (isOpen) {
+        showGate('open');
+      } else if (countdownActive && countdownTarget) {
+        // Cek apakah waktu countdown sudah lewat
+        const target = new Date(countdownTarget);
+        if (new Date() >= target) {
+          showGate('open');
+        } else {
+          showGate('countdown', countdownTarget);
+        }
+      } else {
+        showGate('closed');
+      }
+    }, err => {
+      console.error('Gate listener error:', err);
+      // Jika gagal listen, default tampilkan form (fail-open)
+      showGate('open');
+    });
+}
+
+// ============================================================
 // CLOCK
 // ============================================================
 function updateClock() {
@@ -563,3 +682,6 @@ document.getElementById('downloadSuratBtn').addEventListener('click', e => {
 });
 
 console.log('✅ Pendaftaran Murid Mutasi SMAN 68 Jakarta — Loaded');
+
+// Init gate saat DOM siap
+document.addEventListener('DOMContentLoaded', initPendaftaranGate);
