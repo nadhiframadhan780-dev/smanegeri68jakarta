@@ -715,3 +715,182 @@ select.form-input { cursor: pointer; background-image: url("data:image/svg+xml,%
 /* ===== LOADING SPINNER ===== */
 .spinner { animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
+/* ===== STATUS PENDAFTARAN OVERLAY ===== */
+#registrationGate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  background: var(--bg-base);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0;
+  padding: 20px;
+  overflow-y: auto;
+}
+#registrationGate.active {
+  display: flex;
+}
+
+/* Gate: loading awal */
+.gate-loading {
+  text-align: center;
+  color: var(--text-muted);
+}
+.gate-loading .gate-spinner {
+  width: 48px; height: 48px;
+  border: 4px solid var(--border);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+.gate-loading p { font-size: 0.95rem; font-weight: 500; }
+
+/* Gate card shared */
+.gate-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-xl);
+  animation: gateIn 0.4s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes gateIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* CLOSED */
+.gate-closed .gate-icon-wrap {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: var(--danger-bg);
+  border: 2px solid var(--danger-border);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 36px;
+  color: var(--danger-text);
+}
+.gate-closed h2 {
+  font-size: 1.6rem; font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.gate-closed p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.gate-closed .gate-school-logo {
+  width: 60px; height: 60px;
+  object-fit: contain;
+  margin: 0 auto 20px;
+  display: block;
+  opacity: 0.7;
+}
+
+/* COUNTDOWN */
+.gate-countdown .gate-icon-wrap {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: var(--warn-bg);
+  border: 2px solid var(--warn-border);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 36px;
+  color: var(--warn-text);
+}
+.gate-countdown h2 {
+  font-size: 1.5rem; font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.gate-countdown .gate-open-date {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+.gate-countdown .gate-open-date strong {
+  color: var(--warn-text);
+  font-weight: 700;
+}
+
+/* Countdown tiles */
+.countdown-tiles {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+.cd-tile {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 0;
+  width: 72px;
+  flex: 0 0 72px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cd-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--grad-soft);
+  pointer-events: none;
+}
+.cd-num {
+  font-family: var(--font-mono);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  display: block;
+  position: relative;
+}
+.cd-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 5px;
+  position: relative;
+}
+.cd-sep {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  flex: 0 0 auto;
+  line-height: 1;
+  margin-bottom: 18px;
+  font-family: var(--font-mono);
+  align-self: center;
+}
+
+.gate-countdown .gate-note {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* Flip animation for number change */
+.cd-num.flip {
+  animation: cdFlip 0.3s ease both;
+}
+@keyframes cdFlip {
+  0%   { transform: scaleY(1); opacity: 1; }
+  50%  { transform: scaleY(0); opacity: 0; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
