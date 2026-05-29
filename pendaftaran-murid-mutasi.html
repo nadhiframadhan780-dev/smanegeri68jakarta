@@ -422,6 +422,39 @@
   </div>
 </div>
 
+
+<!-- ==============================
+     GATE: STATUS PENDAFTARAN
+============================== -->
+<div id="registrationGate" class="active">
+  <div class="gate-loading" id="gateLoading">
+    <div class="gate-spinner"></div>
+    <p>Memeriksa status pendaftaran...</p>
+  </div>
+  <div class="gate-card gate-closed" id="gateClosed" style="display:none;">
+    <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68" class="gate-school-logo"/>
+    <div class="gate-icon-wrap"><i class="fas fa-door-closed"></i></div>
+    <h2>Pendaftaran Ditutup</h2>
+    <p>Saat ini pendaftaran murid mutasi <strong>SMAN 68 Jakarta</strong> sedang ditutup.<br>Pantau terus informasi pembukaan pendaftaran melalui website resmi sekolah.</p>
+  </div>
+  <div class="gate-card gate-countdown" id="gateCountdown" style="display:none;">
+    <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68" style="width:56px;height:56px;object-fit:contain;display:block;margin:0 auto 20px;"/>
+    <div class="gate-icon-wrap"><i class="fas fa-clock"></i></div>
+    <h2>Pendaftaran Akan Segera Dibuka</h2>
+    <p class="gate-open-date" id="gateOpenDateText">Pembukaan: <strong>–</strong></p>
+    <div class="countdown-tiles">
+      <div class="cd-tile"><span class="cd-num" id="cdDays">00</span><span class="cd-label">Hari</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-tile"><span class="cd-num" id="cdHours">00</span><span class="cd-label">Jam</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-tile"><span class="cd-num" id="cdMinutes">00</span><span class="cd-label">Menit</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-tile"><span class="cd-num" id="cdSeconds">00</span><span class="cd-label">Detik</span></div>
+    </div>
+    <p class="gate-note"><i class="fas fa-circle-info" style="color:var(--blue);margin-right:6px;"></i>Form pendaftaran akan terbuka otomatis ketika countdown mencapai 0. Tidak perlu refresh halaman.</p>
+  </div>
+</div>
+
 <script src="pendaftaran-murid-mutasi.js"></script>
 </body>
 </html>
