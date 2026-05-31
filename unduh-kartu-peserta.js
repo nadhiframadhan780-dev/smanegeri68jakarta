@@ -24,6 +24,196 @@ let fotoBase64      = null;   // foto yang baru dipilih tapi belum disimpan
 let fotoTersimpan   = null;   // foto yang sudah tersimpan di Firestore
 let stampBase64     = null;   // stempel sekolah (dari file yang diupload)
 
+/* ══════════════════════════════════════════════════════
+   JADWAL MASA UNDUH KARTU — ATUR DI SINI
+   Format: 'YYYY-MM-DDTHH:MM:SS' (waktu lokal server/Jakarta)
+
+   Skenario yang didukung:
+   1. downloadOpen = null, downloadClose = null  → tidak ada banner
+   2. downloadOpen = null, downloadClose = tgl   → langsung buka, hitung mundur penutupan
+   3. downloadOpen = tgl,  downloadClose = null  → hitung mundur pembukaan, setelah buka tidak ada batas
+   4. downloadOpen = tgl,  downloadClose = tgl   → hitung mundur pembukaan, lalu hitung mundur penutupan
+══════════════════════════════════════════════════════ */
+const JADWAL_UNDUH = {
+  downloadOpen:  null,                   // contoh: '2025-07-15T08:00:00'
+  downloadClose: '2026-06-08T15:00:00',  // contoh: '2025-08-01T23:59:59'
+};
+/* ─────────────────────────────────────────────────── */
+
+// ── State countdown ───────────────────────────────
+let _cdInterval = null;
+
+/* ══════════════════════════════════════════════════════
+   MASA UNDUH — ENGINE (GATE FULLSCREEN)
+══════════════════════════════════════════════════════ */
+
+/** Hitung status masa unduh berdasarkan waktu sekarang */
+function getMasaUnduhStatus() {
+  const now   = new Date();
+  const open  = JADWAL_UNDUH.downloadOpen  ? new Date(JADWAL_UNDUH.downloadOpen)  : null;
+  const close = JADWAL_UNDUH.downloadClose ? new Date(JADWAL_UNDUH.downloadClose) : null;
+
+  if (!open && !close)          return { mode: 'open' };
+  if (close && now >= close)    return { mode: 'closed' };
+  if (open  && now <  open)     return { mode: 'opening', target: open };
+  if (close && now <  close)    return { mode: 'open' };
+  return { mode: 'open' };
+}
+
+const LOGO_URL = 'https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png';
+
+function _schoolHeader() {
+  return `
+    <div class="gate-school-header">
+      <img src="${LOGO_URL}" alt="Logo SMAN 68" />
+      <div class="gate-school-text">
+        <h1>SMAN 68 Jakarta</h1>
+        <p>Sistem Penerimaan Murid Mutasi</p>
+      </div>
+    </div>
+    <div class="gate-divider"></div>`;
+}
+
+function _cdHTML(target) {
+  const diff = Math.max(0, target - new Date());
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000)   / 1000);
+  const pad = n => String(n).padStart(2, '0');
+  return `
+    <div class="cd-unit"><span class="cd-num" id="cdH">${pad(h)}</span><span class="cd-label">JAM</span></div>
+    <span class="cd-sep">:</span>
+    <div class="cd-unit"><span class="cd-num" id="cdM">${pad(m)}</span><span class="cd-label">MENIT</span></div>
+    <span class="cd-sep">:</span>
+    <div class="cd-unit"><span class="cd-num" id="cdS">${pad(s)}</span><span class="cd-label">DETIK</span></div>`;
+}
+
+function _tickCD(target) {
+  const diff = Math.max(0, target - new Date());
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000)   / 1000);
+  const pad = n => String(n).padStart(2, '0');
+  const q = id => document.getElementById(id);
+  if (q('cdH')) q('cdH').textContent = pad(h);
+  if (q('cdM')) q('cdM').textContent = pad(m);
+  if (q('cdS')) q('cdS').textContent = pad(s);
+}
+
+/** Render konten di dalam gate-card sesuai mode */
+function _gateCardHTML(status) {
+  if (status.mode === 'closed') {
+    return `
+      <div class="gate-card">
+        ${_schoolHeader()}
+        <div class="gate-icon-wrap closed-icon"><i class="fa-solid fa-lock"></i></div>
+        <h2 class="gate-title closed">Masa Unduh Kartu Calon Siswa Mutasi Telah Ditutup</h2>
+        <p class="gate-subtitle">Terima kasih telah mendaftar. Hubungi operator sekolah untuk informasi lebih lanjut.</p>
+        <div class="gate-footer"><i class="fa-solid fa-shield-check"></i> Portal Resmi – SMAN 68 Jakarta</div>
+      </div>`;
+  }
+
+  if (status.mode === 'opening') {
+    return `
+      <div class="gate-card">
+        ${_schoolHeader()}
+        <div class="gate-icon-wrap opening-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <h2 class="gate-title">Masa Unduh Kartu Peserta</h2>
+        <p class="gate-subtitle">Silakan menunggu. Unduh kartu peserta akan segera dibuka.</p>
+        <p class="gate-countdown-label">Masa Unduh Dibuka Dalam</p>
+        <div class="countdown-units">${_cdHTML(status.target)}</div>
+        <div class="gate-footer"><i class="fa-solid fa-shield-check"></i> Portal Resmi – SMAN 68 Jakarta</div>
+      </div>`;
+  }
+
+  return ''; // mode 'open' → tidak perlu gate
+}
+
+/**
+ * Buat HTML bar countdown untuk banner atas (login & dashboard).
+ * Hanya muncul saat mode 'open' DAN ada jadwal downloadClose.
+ */
+function _bannerBarHTML(target) {
+  return `
+    <div class="banner-countdown-bar">
+      <div class="bcb-label">
+        <i class="fa-solid fa-hourglass-half"></i>
+        <span>Masa Unduh Kartu Ditutup Dalam</span>
+      </div>
+      <div class="countdown-units">
+        ${_cdHTML(target)}
+      </div>
+    </div>`;
+}
+
+/**
+ * Init gate masa unduh + banner countdown atas.
+ *
+ * mode closed / opening → gate fullscreen, form login hidden, banner hidden
+ * mode open + ada close → form login tampil, banner countdown tampil di atas
+ * mode open + tdk ada close → form login tampil, tidak ada banner
+ */
+function initMasaUnduhBanner() {
+  if (_cdInterval) { clearInterval(_cdInterval); _cdInterval = null; }
+
+  const status  = getMasaUnduhStatus();
+  const gate    = document.getElementById('masaUnduhGate');
+  const inner   = document.getElementById('loginPageInner');
+  const gCont   = document.getElementById('gateContent');
+  const bannerLogin  = document.getElementById('bannerLogin');
+  const bannerDash   = document.getElementById('bannerDashboard');
+
+  const blockLogin   = (status.mode === 'closed' || status.mode === 'opening');
+  const showCountBar = (status.mode === 'open' && !!JADWAL_UNDUH.downloadClose);
+
+  // ── Gate fullscreen ──────────────────────────────
+  if (blockLogin) {
+    gCont.innerHTML = _gateCardHTML(status);
+    gate.classList.remove('hidden');
+    if (inner) inner.style.display = 'none';
+  } else {
+    gate.classList.add('hidden');
+    if (inner) inner.style.display = '';
+  }
+
+  // ── Banner countdown atas (login & dashboard) ──
+  const closeTarget = JADWAL_UNDUH.downloadClose ? new Date(JADWAL_UNDUH.downloadClose) : null;
+  const barHTML = showCountBar ? _bannerBarHTML(closeTarget) : '';
+
+  if (bannerLogin)  bannerLogin.innerHTML  = barHTML;
+  if (bannerDash)   bannerDash.innerHTML   = barHTML;
+
+  // Geser form login bawah jika ada banner
+  if (inner) {
+    if (showCountBar) inner.classList.add('with-banner');
+    else              inner.classList.remove('with-banner');
+  }
+
+  // ── Tick countdown ───────────────────────────────
+  if (status.mode === 'opening') {
+    // Countdown pembukaan — saat 0 switch ke open
+    _cdInterval = setInterval(() => {
+      if (status.target - new Date() <= 0) {
+        clearInterval(_cdInterval); _cdInterval = null;
+        initMasaUnduhBanner();
+        return;
+      }
+      _tickCD(status.target);
+    }, 1000);
+
+  } else if (showCountBar && closeTarget) {
+    // Countdown penutupan — tick angka di banner atas
+    _cdInterval = setInterval(() => {
+      if (closeTarget - new Date() <= 0) {
+        clearInterval(_cdInterval); _cdInterval = null;
+        initMasaUnduhBanner(); // switch ke closed
+        return;
+      }
+      _tickCD(closeTarget);
+    }, 1000);
+  }
+}
+
 // ── Daftar Berkas ────────────────────────────────
 const BERKAS_LIST = [
   { key: 'nilaiRapor',         label: 'Nilai Rapor',                icon: 'fa-file-lines' },
@@ -138,6 +328,9 @@ function clearSession() { localStorage.removeItem('sman68_peserta'); }
    INIT
 ═══════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
+  // Init banner masa unduh
+  initMasaUnduhBanner();
+
   // Load stempel di background
   loadStampImage();
 
@@ -155,6 +348,7 @@ window.addEventListener('DOMContentLoaded', async () => {
           currentPeserta = data;
           renderDashboard(data);
           showPage('dashboardPage');
+          initMasaUnduhBanner(); // refresh banner di dashboard
           showToast('Selamat datang kembali, ' + data.nama + '!', 'success');
           hideLoading();
           return;
@@ -227,6 +421,7 @@ async function handleLogin() {
     saveSession({ noDaftar: data.noDaftar });
     renderDashboard(data);
     showPage('dashboardPage');
+    initMasaUnduhBanner(); // refresh banner di dashboard
     showToast('Login berhasil! Selamat datang, ' + data.nama + '.', 'success');
 
   } catch (err) {
