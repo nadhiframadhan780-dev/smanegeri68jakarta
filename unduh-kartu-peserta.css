@@ -133,7 +133,7 @@ body {
 .btn-home-float {
   position: fixed;
   top: 20px; left: 20px;
-  z-index: 200;
+  z-index: 600;          /* di atas gate (500) dan banner (400) */
   display: inline-flex; align-items: center; gap: 8px;
   padding: 10px 20px;
   background: rgba(255,255,255,.18);
@@ -153,6 +153,29 @@ body {
   box-shadow: 0 8px 24px rgba(0,0,0,.2);
 }
 .btn-home-float i { font-size: .9rem; }
+
+/* HOME BUTTON DI FOOTER LOGIN (mobile only) */
+.btn-home-footer {
+  display: none; /* default hidden, tampil hanya di mobile via media query */
+  align-items: center; justify-content: center; gap: 8px;
+  margin-top: 14px;
+  padding: 10px 20px;
+  background: var(--green-pale);
+  color: var(--green-dark);
+  border: 1px solid rgba(26,156,84,.3);
+  border-radius: 100px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .85rem; font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  width: 100%;
+}
+.btn-home-footer:hover {
+  background: var(--green-main);
+  color: #fff;
+  border-color: var(--green-main);
+}
+.btn-home-footer i { font-size: .85rem; }
 
 /* HOME BUTTON IN NAV BAR */
 .btn-home-nav {
@@ -1038,7 +1061,12 @@ body {
   .nav-sub    { font-size: .65rem; }
   .nav-nama   { display: none; }          /* sembunyikan nama di mobile */
   .nav-right  { gap: 6px; flex-shrink: 0; }
-  .btn-home-nav { display: none; }        /* sembunyikan tombol Beranda */
+  .btn-home-nav {
+    padding: 6px 10px;
+    font-size: .75rem;
+    gap: 4px;
+    white-space: nowrap;
+  }
   .btn-logout {
     padding: 7px 12px;
     font-size: .78rem;
@@ -1165,7 +1193,9 @@ body {
   .btn-simpan-permanen { width: 100%; justify-content: center; }
 
   /* HOME FLOAT */
-  .btn-home-float { top: 10px; left: 10px; padding: 7px 12px; font-size: .78rem; }
+  /* Sembunyikan float button di mobile, ganti dgn footer button */
+  #btnHomeLogin { display: none !important; }
+  .btn-home-footer { display: flex !important; }
 
   /* KARTU MODAL — kartu peserta */
   .kartu-body { flex-direction: column; align-items: center; }
@@ -1178,8 +1208,10 @@ body {
 /* ── Small phone (≤ 420px) ── */
 @media (max-width: 420px) {
   .glass-nav { padding: 9px 12px; }
-  .nav-school { max-width: 100px; font-size: .78rem; }
-  .btn-logout { padding: 6px 10px; font-size: .74rem; }
+  .nav-school { max-width: 90px; font-size: .75rem; }
+  .btn-home-nav { padding: 5px 8px; font-size: .7rem; gap: 3px; }
+  .btn-home-nav i { font-size: .75rem; }
+  .btn-logout { padding: 6px 10px; font-size: .72rem; }
   .dashboard-wrapper { padding: 10px 10px 56px; gap: 12px; }
   .dash-section { padding: 16px 12px; }
   .welcome-banner { padding: 16px 14px; }
@@ -1334,6 +1366,17 @@ body {
   display: flex; align-items: center; justify-content: center; gap: 6px;
 }
 
+/* Tombol Beranda di dalam gate card (mobile) */
+.gate-home-btn {
+  display: none; /* hanya tampil di mobile */
+  margin-top: 16px;
+  border-color: rgba(255,255,255,.25);
+  color: rgba(255,255,255,.8);
+}
+@media (max-width: 768px) {
+  .gate-home-btn { display: flex !important; }
+}
+
 /* Gate responsive */
 @media (max-width: 600px) {
   .gate-content { padding: 16px; }
@@ -1430,6 +1473,11 @@ body {
 /* Geser form login agar tidak tertutup banner fixed */
 #loginPageInner.with-banner .login-container {
   padding-top: 56px;
+}
+
+/* Geser tombol Beranda ke bawah banner saat ada countdown */
+#loginPageInner.with-banner .btn-home-float {
+  top: 60px;
 }
 
 /* ── Responsive banner ── */
