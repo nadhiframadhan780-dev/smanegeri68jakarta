@@ -512,7 +512,7 @@ function initKelulusanLink() {
 
     if (now >= target) {
         el.classList.remove('nav-disabled', 'nav-special');
-        el.textContent   = 'Unduh Kartu Peserta H-4';
+        el.textContent   = 'Unduh Kartu Peserta H-9';
         el.style.cssText = 'pointer-events:auto;opacity:1;cursor:pointer;';
     }
 }
