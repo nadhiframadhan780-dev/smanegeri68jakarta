@@ -36,7 +36,7 @@ let stampBase64     = null;   // stempel sekolah (dari file yang diupload)
 ══════════════════════════════════════════════════════ */
 const JADWAL_UNDUH = {
   downloadOpen:  null,                   // contoh: '2025-07-15T08:00:00'
-  downloadClose: '2026-06-08T15:00:00',  // contoh: '2025-08-01T23:59:59'
+  downloadClose: '2026-06-06T15:00:00',  // contoh: '2025-08-01T23:59:59'
 };
 /* ─────────────────────────────────────────────────── */
 
@@ -500,6 +500,8 @@ function renderDataSiswa(data) {
     { label: 'Jenis Kelamin',     value: jkMap[data.jk] || data.jk || '-' },
     { label: 'Agama',             value: data.agama || '-' },
     { label: 'Sekolah Asal',      value: data.sekolahAsal || '-', wide: true },
+    { label: 'Kelas Saat Ini',    value: data.kelasSaatIni || '-' },
+    { label: 'Mutasi ke Kelas',   value: data.mutasiKe || '-' },
     { label: 'NISN',              value: data.nisn || '-' },
     { label: 'NPSN Sekolah Asal', value: data.npsn || '-' },
     { label: 'Email',             value: data.email || '-' },
@@ -986,6 +988,8 @@ function bukaModalEdit() {
   document.getElementById('editAgama').value        = d.agama || 'Islam';
   document.getElementById('editSekolahAsal').value  = d.sekolahAsal || '';
   document.getElementById('editNisn').value         = d.nisn || '';
+  document.getElementById('editKelasSaatIni').value = d.kelasSaatIni || '-';
+  document.getElementById('editMutasiKe').value     = d.mutasiKe || '-';
   document.getElementById('editEmail').value        = d.email || '';
   document.getElementById('editTelpMurid').value    = d.telpMurid || '';
   document.getElementById('editTelpOrtu').value     = d.telpOrtu || '';
