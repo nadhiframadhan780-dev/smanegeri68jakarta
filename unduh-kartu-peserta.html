@@ -26,6 +26,24 @@
 
   <!-- ═══════════════════════════════════ LOGIN PAGE ═══════════════════════════════════ -->
   <div id="loginPage" class="page active">
+
+    <!-- ═══ GATE: Tampilan penuh saat ditutup / belum dibuka ═══ -->
+    <div id="masaUnduhGate" class="masa-gate hidden">
+      <div class="gate-bg">
+        <div class="bg-blob blob1"></div>
+        <div class="bg-blob blob2"></div>
+        <div class="bg-blob blob3"></div>
+      </div>
+      <a href="./sman68.html" class="btn-home-float"><i class="fa-solid fa-house"></i> Beranda</a>
+      <div class="gate-content" id="gateContent">
+        <!-- diisi oleh JS -->
+      </div>
+    </div>
+
+    <!-- ═══ INNER: Form login normal (disembunyikan saat gate aktif) ═══ -->
+    <div id="loginPageInner">
+    <!-- Banner countdown masa unduh (hanya saat masa aktif ada jadwal tutup) -->
+    <div id="bannerLogin" class="masa-unduh-banner-top"></div>
     <div class="login-bg">
       <div class="bg-blob blob1"></div>
       <div class="bg-blob blob2"></div>
@@ -80,6 +98,7 @@
         </div>
       </div>
     </div>
+    </div><!-- /loginPageInner -->
   </div>
 
   <!-- ═══════════════════════════════════ DASHBOARD PAGE ═══════════════════════════════════ -->
@@ -103,6 +122,8 @@
 
     <!-- Dashboard Content -->
     <div class="dashboard-wrapper">
+      <!-- Banner Masa Unduh (sticky di bawah navbar) -->
+      <div id="bannerDashboard" class="masa-unduh-banner"></div>
 
       <!-- Welcome Banner -->
       <div class="welcome-banner glass-card">
@@ -269,7 +290,7 @@
 
           <div class="kartu-title-bar">
             <h3>KARTU PESERTA SELEKSI MURID MUTASI</h3>
-            <p id="kartuTahunAjaran" class="kartu-tahun">TAHUN AJARAN 2026/2027</p>
+            <p id="kartuTahunAjaran" class="kartu-tahun">TAHUN AJARAN 2024/2025</p>
           </div>
 
           <!-- Body -->
