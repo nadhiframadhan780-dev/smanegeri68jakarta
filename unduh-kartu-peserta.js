@@ -110,6 +110,9 @@ function _gateCardHTML(status) {
         <h2 class="gate-title closed">Masa Unduh Kartu Calon Siswa Mutasi Telah Ditutup</h2>
         <p class="gate-subtitle">Terima kasih telah mendaftar. Hubungi operator sekolah untuk informasi lebih lanjut.</p>
         <div class="gate-footer"><i class="fa-solid fa-shield-check"></i> Portal Resmi – SMAN 68 Jakarta</div>
+        <a href="./sman68.html" class="btn-home-footer gate-home-btn">
+          <i class="fa-solid fa-house"></i> Kembali ke Beranda
+        </a>
       </div>`;
   }
 
@@ -123,6 +126,9 @@ function _gateCardHTML(status) {
         <p class="gate-countdown-label">Masa Unduh Dibuka Dalam</p>
         <div class="countdown-units">${_cdHTML(status.target)}</div>
         <div class="gate-footer"><i class="fa-solid fa-shield-check"></i> Portal Resmi – SMAN 68 Jakarta</div>
+        <a href="./sman68.html" class="btn-home-footer gate-home-btn">
+          <i class="fa-solid fa-house"></i> Kembali ke Beranda
+        </a>
       </div>`;
   }
 
