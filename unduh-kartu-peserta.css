@@ -129,11 +129,12 @@ body {
 
 /* ══════════════════════════════════
    HOME BUTTON FLOATING (LOGIN PAGE)
+   Tampil di SEMUA device
 ══════════════════════════════════ */
 .btn-home-float {
-  position: fixed;
+  position: absolute;
   top: 20px; left: 20px;
-  z-index: 600;          /* di atas gate (500) dan banner (400) */
+  z-index: 600;
   display: inline-flex; align-items: center; gap: 8px;
   padding: 10px 20px;
   background: rgba(255,255,255,.18);
@@ -204,6 +205,14 @@ body {
   display: flex; align-items: center; justify-content: center;
   position: relative;
   background: linear-gradient(135deg, #0a4a28 0%, #0d3d6c 50%, #0a4a28 100%);
+}
+/* loginPageInner — wrapper yang menampung banner + card + tombol beranda */
+#loginPageInner {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
 }
 .login-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .bg-blob {
@@ -362,37 +371,34 @@ body {
    DASHBOARD
 ══════════════════════════════════ */
 .dashboard-wrapper {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 32px 24px 64px;
-  display: flex; flex-direction: column; gap: 24px;
 }
 
+/* Welcome banner - handled in new responsive CSS below */
 .welcome-banner {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 28px 36px;
-  background: linear-gradient(135deg, var(--green-dark) 0%, var(--blue-dark) 100%);
-  color: #fff;
-  border: none;
+  display: flex; align-items: center;
+  padding: 20px 28px; gap: 16px;
+  background: linear-gradient(135deg, #f0fdf7 0%, #eff6ff 100%);
+  border-left: 4px solid var(--green-main);
+  margin: 12px 16px 0;
+  border-radius: var(--radius-md);
 }
-.welcome-banner h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; }
-.welcome-banner p  { font-size: .9rem; opacity: .85; }
+.welcome-banner h2 { font-size: 1.1rem; font-weight: 800; color: var(--gray-900); margin-bottom: 4px; }
+.welcome-banner p  { font-size: .82rem; color: var(--gray-500); }
+.welcome-banner .welcome-icon { font-size: 1.8rem; color: var(--green-main); flex-shrink: 0; }
 .badge-diterima {
   display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(52,213,120,.25);
-  border: 1px solid rgba(52,213,120,.5);
-  color: var(--green-light);
-  padding: 4px 14px; border-radius: 100px;
-  font-size: .82rem; font-weight: 700;
+  background: var(--green-pale);
+  border: 1px solid rgba(26,156,84,.3);
+  color: var(--green-dark);
+  padding: 3px 12px; border-radius: 100px;
+  font-size: .8rem; font-weight: 700;
 }
-.welcome-icon { font-size: 3rem; opacity: .3; }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
-.full-width { grid-column: 1 / -1; }
+/* Old grid — kept for compatibility */
+.dashboard-grid { display: contents; }
+.full-width { }
 .dash-section { padding: 28px; }
 
 .section-icon {
@@ -404,6 +410,7 @@ body {
 .section-icon.blue   { background: var(--blue-pale);   color: var(--blue-main); }
 .section-icon.purple { background: var(--purple-pale); color: var(--purple-main); }
 .section-icon.red    { background: var(--red-pale);    color: var(--red-main); }
+.section-icon.gold   { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
 
 .data-grid {
   display: grid;
@@ -796,21 +803,24 @@ body {
   animation: fadeSlideUp .4s ease;
 }
 .modal-actions {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: center; gap: 10px;
   margin-bottom: 16px; flex-wrap: wrap;
 }
-.btn-modal-download, .btn-modal-print {
+.btn-modal-download, .btn-modal-png, .btn-modal-jpg {
   display: flex; align-items: center; gap: 8px;
-  padding: 10px 20px;
+  padding: 10px 18px;
   border-radius: var(--radius-sm);
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: .88rem; font-weight: 700;
+  font-size: .85rem; font-weight: 700;
   cursor: pointer; border: none; transition: var(--transition);
+  white-space: nowrap;
 }
 .btn-modal-download { background: var(--green-main); color: #fff; box-shadow: 0 4px 12px rgba(26,156,84,.3); }
 .btn-modal-download:hover { background: var(--green-dark); }
-.btn-modal-print { background: var(--blue-main); color: #fff; box-shadow: 0 4px 12px rgba(26,108,204,.3); }
-.btn-modal-print:hover { background: var(--blue-dark); }
+.btn-modal-png { background: var(--blue-main); color: #fff; box-shadow: 0 4px 12px rgba(26,108,204,.3); }
+.btn-modal-png:hover { background: var(--blue-dark); }
+.btn-modal-jpg { background: var(--purple-main); color: #fff; box-shadow: 0 4px 12px rgba(124,58,237,.3); }
+.btn-modal-jpg:hover { background: #5b21b6; }
 .btn-modal-close {
   margin-left: auto;
   width: 40px; height: 40px; border-radius: 50%;
@@ -1070,139 +1080,37 @@ body {
 /* ── Mobile & Tablet umum (≤ 768px) ── */
 @media (max-width: 768px) {
 
-  /* NAVBAR — susun ketat, tidak overflow */
-  .glass-nav {
-    padding: 10px 14px;
-    gap: 8px;
-  }
-  .nav-left { gap: 8px; flex-shrink: 0; min-width: 0; }
-  .nav-logo  { width: 36px; height: 36px; flex-shrink: 0; }
+  /* NAVBAR */
+  .glass-nav { padding: 10px 14px; gap: 8px; }
   .nav-school { font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
   .nav-sub    { font-size: .65rem; }
-  .nav-nama   { display: none; }          /* sembunyikan nama di mobile */
+  .nav-nama   { display: none; }
   .nav-right  { gap: 6px; flex-shrink: 0; }
+
+  /* Tombol Beranda SELALU tampil lengkap dengan teks di semua device */
   .btn-home-nav {
-    padding: 6px 10px;
-    font-size: .75rem;
-    gap: 4px;
+    display: inline-flex !important;
+    padding: 7px 13px;
+    font-size: .8rem;
+    gap: 6px;
     white-space: nowrap;
+    background: var(--green-main) !important;
+    color: #fff !important;
+    border-color: var(--green-main) !important;
   }
+  .btn-home-nav .nav-btn-label { display: inline !important; }
   .btn-logout {
     padding: 7px 12px;
     font-size: .78rem;
     gap: 5px;
     white-space: nowrap;
   }
+  .btn-logout .nav-btn-label { display: none; }
 
-  /* DASHBOARD WRAPPER */
-  .dashboard-wrapper { padding: 12px 12px 56px; gap: 14px; }
-
-  /* WELCOME BANNER */
-  .welcome-banner {
-    flex-direction: column;
-    gap: 10px;
-    text-align: center;
-    padding: 20px 18px;
-  }
-  .welcome-banner h2 { font-size: 1.1rem; }
-  .welcome-banner p  { font-size: .82rem; }
-  .welcome-icon { display: none; }
-
-  /* SECTION CARDS — padding lebih kecil */
-  .dash-section { padding: 18px 14px; }
-
-  /* SECTION HEADER — wrap supaya tidak overflow */
-  .section-header {
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: flex-start;
-  }
-  .section-header h3 { font-size: .95rem; flex: 1; min-width: 0; }
-  .btn-edit-biodata {
-    font-size: .72rem;
-    padding: 6px 10px;
-    gap: 4px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  /* DATA SISWA GRID */
-  .data-grid { grid-template-columns: 1fr; gap: 8px; }
-  .data-item { padding: 10px 12px; }
-  .data-item.wide { grid-column: 1; }
-  .data-item .di-value { font-size: .88rem; }
-
-  /* STATUS BERKAS */
-  .berkas-grid { grid-template-columns: 1fr; gap: 8px; }
-  .berkas-item { padding: 10px 12px; }
-
-  /* PAS FOTO — stack vertikal */
-  .foto-section { padding: 18px 14px; }
-  .foto-upload-wrapper {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-  }
-  .foto-preview-area {
-    width: 100%;
-    max-width: 240px;
-    height: 240px;
-    align-self: center;
-  }
-  .foto-info-panel {
-    width: 100%;
-    padding: 0;
-  }
-  /* Ketentuan foto — list inline rapi */
-  .foto-ketentuan { padding: 12px 14px; }
-  .foto-ketentuan h4 { font-size: .82rem; }
-  .foto-ketentuan ul li {
-    font-size: .8rem;
-    flex-wrap: nowrap;
-    align-items: flex-start;
-    gap: 6px;
-  }
-  .foto-ketentuan ul li i { margin-top: 3px; }
-  /* Tombol foto full width */
-  .foto-buttons {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .btn-pilih-foto,
-  .btn-simpan-foto {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* KARTU PESERTA SECTION */
-  .kartu-section {
-    flex-direction: column;
-    gap: 16px;
-    padding: 20px 16px;
-    text-align: center;
-  }
-  .kartu-info { flex-direction: column; gap: 10px; text-align: center; }
-  .kartu-buttons {
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .btn-download, .btn-print {
-    flex: 1;
-    min-width: 130px;
-    justify-content: center;
-  }
-
-  /* LOGIN CARD */
-  .login-card { padding: 24px 18px; }
-  .login-title { font-size: 1.1rem; }
-  .login-desc  { font-size: .82rem; }
-
-  /* MODAL */
-  .modal-overlay { padding: 10px; }
-  .modal-content { padding: 0; border-radius: var(--radius-md); }
-  .modal-actions { gap: 8px; padding: 12px; }
-  .btn-modal-download, .btn-modal-print { padding: 8px 12px; font-size: .78rem; }
+  /* HOME FLOAT di login — tetap tampil, posisi menyesuaikan */
+  #loginPageInner { padding-top: 0; }
+  .btn-home-float { top: 12px; left: 12px; padding: 8px 14px; font-size: .8rem; }
+  .btn-home-footer { display: none !important; } /* cukup floating button */
 
   /* EDIT BIODATA MODAL */
   .edit-form-grid { grid-template-columns: 1fr; padding: 16px; }
@@ -1212,12 +1120,7 @@ body {
   .edit-modal-actions { padding: 14px 16px 18px; flex-wrap: wrap; gap: 8px; }
   .btn-simpan-permanen { width: 100%; justify-content: center; }
 
-  /* HOME FLOAT */
-  /* Sembunyikan float button di mobile, ganti dgn footer button */
-  #btnHomeLogin { display: none !important; }
-  .btn-home-footer { display: flex !important; }
-
-  /* KARTU MODAL — kartu peserta */
+  /* KARTU MODAL */
   .kartu-body { flex-direction: column; align-items: center; }
   .kartu-data-section { width: 100%; }
   .kartu-ttd-row { gap: 12px; flex-wrap: wrap; }
@@ -1228,15 +1131,16 @@ body {
 /* ── Small phone (≤ 420px) ── */
 @media (max-width: 420px) {
   .glass-nav { padding: 9px 12px; }
-  .nav-school { max-width: 90px; font-size: .75rem; }
-  .btn-home-nav { padding: 5px 8px; font-size: .7rem; gap: 3px; }
-  .btn-home-nav i { font-size: .75rem; }
-  .btn-logout { padding: 6px 10px; font-size: .72rem; }
-  .dashboard-wrapper { padding: 10px 10px 56px; gap: 12px; }
-  .dash-section { padding: 16px 12px; }
-  .welcome-banner { padding: 16px 14px; }
+  .nav-school { max-width: 80px; font-size: .72rem; }
+  .btn-home-nav {
+    display: inline-flex !important;
+    padding: 6px 10px; font-size: .72rem; gap: 4px;
+    background: var(--green-main) !important; color: #fff !important;
+  }
+  .btn-home-nav .nav-btn-label { display: inline !important; }
+  .btn-home-nav i { font-size: .72rem; }
+  .btn-logout { padding: 6px 9px; font-size: .7rem; }
   .foto-preview-area { max-width: 200px; height: 200px; }
-  .kartu-section { padding: 16px 12px; }
 }
 
 
@@ -1494,33 +1398,375 @@ body {
 #loginPageInner.with-banner .login-container {
   padding-top: 56px;
 }
-
-/* Geser tombol Beranda ke bawah banner saat ada countdown */
 #loginPageInner.with-banner .btn-home-float {
   top: 60px;
 }
 
 /* ── Responsive banner ── */
 @media (max-width: 768px) {
-  .banner-countdown-bar {
-    padding: 8px 12px;
-    gap: 10px;
-    flex-wrap: nowrap;  /* paksa 1 baris */
-    overflow: hidden;
-  }
-  .banner-countdown-bar .bcb-label {
-    font-size: .72rem;
-    flex-shrink: 1;
-    min-width: 0;
-  }
+  .banner-countdown-bar { padding: 8px 12px; gap: 10px; flex-wrap: nowrap; overflow: hidden; }
+  .banner-countdown-bar .bcb-label { font-size: .72rem; flex-shrink: 1; min-width: 0; }
   .banner-countdown-bar .countdown-units { gap: 4px; }
   .banner-countdown-bar .cd-unit { min-width: 38px; padding: 3px 6px; }
   .banner-countdown-bar .cd-num  { font-size: 1rem; }
   .banner-countdown-bar .cd-sep  { font-size: 1rem; margin-bottom: 12px; }
 }
-
 @media (max-width: 380px) {
-  .banner-countdown-bar .bcb-label span { display: none; } /* sembunyikan teks, sisakan ikon */
+  .banner-countdown-bar .bcb-label span { display: none; }
   .banner-countdown-bar .cd-unit { min-width: 34px; padding: 3px 5px; }
   .banner-countdown-bar .cd-num  { font-size: .9rem; }
+}
+
+/* ══════════════════════════════════════════════════
+   TAB NAVIGATION SYSTEM
+══════════════════════════════════════════════════ */
+
+/* Welcome banner di atas dashboard */
+.welcome-banner {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px 28px;
+  background: linear-gradient(135deg, #f0fdf7 0%, #eff6ff 100%);
+  border-left: 4px solid var(--green-main);
+  margin: 16px 16px 0;
+  border-radius: var(--radius-md);
+}
+.welcome-banner .welcome-icon {
+  font-size: 2rem; color: var(--green-main); flex-shrink: 0;
+}
+.welcome-banner h2 { font-size: 1.1rem; font-weight: 800; color: var(--gray-900); margin-bottom: 4px; }
+.welcome-banner p  { font-size: .82rem; color: var(--gray-500); }
+
+/* Tab Nav Strip */
+.dash-tab-nav {
+  display: flex;
+  gap: 0;
+  padding: 12px 16px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  background: transparent;
+  position: sticky;
+  top: 64px; /* below navbar */
+  z-index: 90;
+}
+.dash-tab-nav::-webkit-scrollbar { display: none; }
+
+.dash-tab {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 18px;
+  background: #fff;
+  color: var(--gray-500);
+  border: 1.5px solid var(--gray-200);
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .83rem; font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+  position: relative;
+  margin-right: 3px;
+}
+.dash-tab i { font-size: .85rem; }
+.dash-tab:hover { color: var(--blue-main); background: var(--blue-pale); }
+.dash-tab.active {
+  color: var(--green-dark);
+  background: #fff;
+  border-color: var(--gray-200);
+  font-weight: 800;
+  box-shadow: 0 -3px 0 0 var(--green-main) inset;
+}
+
+/* Tab Content Wrapper */
+.dash-tab-wrapper {
+  padding: 0 16px 40px;
+}
+
+/* Each Tab Pane */
+.dash-tab-pane {
+  padding: 28px 32px;
+  border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+  border: 1.5px solid var(--gray-200);
+  display: none;
+  animation: fadeSlideUp .3s ease;
+}
+.dash-tab-pane.active { display: block; }
+.dash-tab-pane.hidden { display: none !important; }
+
+/* Gold section icon for kartu tab */
+.section-icon.gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+/* ══════════════════════════════════════════════════
+   SIZE PICKER — A4 / A5
+══════════════════════════════════════════════════ */
+.kartu-tab-size-picker, .modal-size-picker {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: var(--gray-50);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  width: fit-content;
+}
+.modal-size-picker {
+  margin-bottom: 0;
+  background: rgba(255,255,255,.12);
+  border-color: rgba(255,255,255,.25);
+}
+.size-label {
+  font-size: .82rem; font-weight: 700; color: var(--gray-500);
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.modal-size-picker .size-label { color: rgba(255,255,255,.8); }
+.size-radio {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: .85rem; font-weight: 600; color: var(--gray-700);
+  cursor: pointer; user-select: none;
+}
+.modal-size-picker .size-radio { color: rgba(255,255,255,.9); }
+.size-radio input[type="radio"] { accent-color: var(--green-main); width: 15px; height: 15px; cursor: pointer; }
+
+/* Kartu Tab Desc + Buttons */
+.kartu-tab-desc {
+  font-size: .88rem; color: var(--gray-500);
+  margin-bottom: 16px; line-height: 1.6;
+}
+.kartu-tab-buttons {
+  display: flex; gap: 12px; flex-wrap: wrap;
+}
+
+.btn-download {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 22px;
+  border-radius: var(--radius-sm);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .9rem; font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  background: linear-gradient(135deg, var(--green-main), var(--blue-main));
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(26,156,84,.3);
+}
+.btn-download:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,156,84,.4); }
+
+.btn-download-img {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 22px;
+  border-radius: var(--radius-sm);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .9rem; font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 2px solid;
+}
+.btn-dl-png {
+  background: var(--blue-pale);
+  color: var(--blue-dark);
+  border-color: rgba(26,108,204,.3);
+}
+.btn-dl-png:hover { background: var(--blue-main); color: #fff; border-color: var(--blue-main); transform: translateY(-2px); }
+.btn-dl-jpg {
+  background: var(--purple-pale);
+  color: var(--purple-main);
+  border-color: rgba(124,58,237,.3);
+}
+.btn-dl-jpg:hover { background: var(--purple-main); color: #fff; border-color: var(--purple-main); transform: translateY(-2px); }
+
+/* ══════════════════════════════════════════════════
+   FORCED LOGOUT OVERLAY (1 device)
+══════════════════════════════════════════════════ */
+.forced-logout-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(15,23,42,.85);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  animation: fadeIn .4s ease;
+}
+.forced-logout-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 40px 36px;
+  max-width: 420px; width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  animation: fadeSlideUp .5s ease;
+}
+.forced-logout-icon {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; color: var(--red-main);
+  margin: 0 auto 20px;
+}
+.forced-logout-card h3 { font-size: 1.2rem; font-weight: 800; color: var(--gray-900); margin-bottom: 10px; }
+.forced-logout-card p  { font-size: .88rem; color: var(--gray-500); line-height: 1.6; margin-bottom: 24px; }
+.btn-forced-ok {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 32px;
+  background: linear-gradient(135deg, var(--green-main), var(--blue-main));
+  color: #fff; border: none; border-radius: var(--radius-sm);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .92rem; font-weight: 700;
+  cursor: pointer; transition: var(--transition);
+  width: 100%;
+}
+.btn-forced-ok:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26,156,84,.35); }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — TABLET (≤ 1024px)
+══════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .dash-tab span { font-size: .8rem; }
+  .dash-tab { padding: 10px 14px; }
+  .dash-tab-pane { padding: 24px; }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — MOBILE (≤ 768px)
+══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Navbar */
+  .glass-nav { padding: 10px 14px; }
+  .nav-school { font-size: .85rem; }
+  .nav-sub { display: none; }
+  .nav-nama { display: none; }
+  /* Tombol Beranda & Keluar di mobile — TETAP tampil dengan label */
+  .btn-home-nav {
+    padding: 7px 12px; font-size: .78rem; gap: 5px;
+    background: var(--green-main) !important; color: #fff !important;
+    border-color: var(--green-main) !important;
+    display: inline-flex !important;
+  }
+  .btn-home-nav .nav-btn-label { display: inline !important; }
+  .btn-logout {
+    padding: 7px 10px; font-size: .78rem;
+  }
+
+  /* Welcome */
+  .welcome-banner { padding: 16px 18px; gap: 12px; margin: 10px 10px 0; }
+  .welcome-banner .welcome-icon { font-size: 1.4rem; }
+  .welcome-banner h2 { font-size: .95rem; }
+
+  /* Tab nav */
+  .dash-tab-nav { padding: 10px 10px 0; top: 56px; gap: 0; }
+  .dash-tab { padding: 9px 11px; font-size: .75rem; margin-right: 2px; }
+  .dash-tab span { display: none; } /* hanya icon di mobile kecil */
+  .dash-tab i { font-size: .9rem; }
+  .dash-tab-wrapper { padding: 0 10px 32px; }
+  .dash-tab-pane { padding: 18px 16px; border-radius: 0 var(--radius-sm) var(--radius-sm) var(--radius-sm); }
+
+  /* Section header */
+  .section-header { margin-bottom: 16px; gap: 10px; }
+  .section-header h3 { font-size: .95rem; }
+  .section-icon { width: 36px; height: 36px; font-size: .9rem; }
+
+  /* Data siswa grid */
+  .data-grid { grid-template-columns: 1fr; }
+  .data-item.wide { grid-column: 1; }
+
+  /* Berkas */
+  .berkas-grid { grid-template-columns: 1fr; }
+
+  /* Foto */
+  .foto-upload-wrapper { flex-direction: column; align-items: center; }
+  .foto-preview-area { width: 140px; height: 175px; }
+  .foto-info-panel { width: 100%; }
+  .foto-buttons { flex-wrap: wrap; }
+  .btn-pilih-foto, .btn-simpan-foto { width: 100%; justify-content: center; }
+
+  /* Kartu tab buttons */
+  .kartu-tab-buttons { flex-direction: column; }
+  .btn-download, .btn-download-img { width: 100%; justify-content: center; }
+
+  /* Edit modal */
+  .edit-form-grid { grid-template-columns: 1fr; padding: 16px; }
+  .edit-modal-header { padding: 16px; }
+  .edit-warning-box { margin: 12px 16px 0; font-size: .8rem; }
+  .edit-modal-actions { padding: 14px 16px; flex-direction: column; }
+  .btn-simpan-permanen, .btn-batal-edit { width: 100%; justify-content: center; }
+
+  /* Edit biodata button */
+  .btn-edit-biodata span { display: none; }
+  .btn-edit-biodata { padding: 8px 10px; }
+
+  /* Kartu modal */
+  .modal-overlay { padding: 8px; }
+  .modal-content { border-radius: var(--radius-md); }
+  .modal-actions { padding: 10px 12px; gap: 6px; }
+  .btn-modal-download, .btn-modal-png, .btn-modal-jpg { padding: 8px 12px; font-size: .78rem; }
+
+  /* Jadwal */
+  .jadwal-row { flex-direction: column; gap: 4px; }
+
+  /* Forced logout card */
+  .forced-logout-card { padding: 28px 20px; }
+
+  /* Login card */
+  .login-card { padding: 24px 20px; }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — SMALL PHONE (≤ 480px)
+══════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .dash-tab { padding: 8px 10px; }
+  .dash-tab i { font-size: .82rem; }
+  .dash-tab-pane { padding: 14px 12px; }
+  .welcome-banner { padding: 12px 14px; margin: 8px 8px 0; }
+  .dash-tab-nav { padding: 8px 8px 0; }
+  .dash-tab-wrapper { padding: 0 8px 28px; }
+
+  .kartu-foto-wrap { width: 90px; height: 115px; }
+  .kartu-foto { width: 90px; height: 115px; }
+  .kartu-table td { font-size: .7rem; }
+
+  /* Login card on small phone */
+  .login-card { padding: 20px 14px; }
+  .login-container { padding: 12px; }
+  .btn-home-float { top: 12px; left: 12px; padding: 8px 14px; font-size: .78rem; }
+
+  /* Size picker on small phone */
+  .kartu-tab-size-picker { width: 100%; }
+  .modal-size-picker { flex-wrap: wrap; gap: 8px; }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — TABLET / IPAD (481px – 1024px)
+══════════════════════════════════════════════════ */
+@media (min-width: 481px) and (max-width: 1024px) {
+  /* Login — kartu sedikit lebih lebar di tablet */
+  .login-container { max-width: 560px; }
+  .login-card { padding: 36px 32px; }
+  .btn-home-float { top: 20px; left: 24px; }
+
+  /* Size picker di tablet tetap horizontal */
+  .kartu-tab-size-picker { flex-wrap: nowrap; }
+
+  /* Modal size picker di tablet */
+  .modal-actions { flex-wrap: wrap; gap: 8px; }
+  .modal-size-picker { width: 100%; order: -1; margin-bottom: 0; }
+
+  /* Kartu tab buttons di tablet — 2 kolom */
+  .kartu-tab-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .btn-download { grid-column: 1 / -1; }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — LAPTOP/DESKTOP (≥ 1025px)
+══════════════════════════════════════════════════ */
+@media (min-width: 1025px) {
+  .login-container { max-width: 520px; }
+  .kartu-tab-buttons { flex-direction: row; }
+  .btn-download, .btn-download-img { width: auto; }
 }
