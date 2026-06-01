@@ -36,7 +36,7 @@ let stampBase64     = null;   // stempel sekolah (dari file yang diupload)
 ══════════════════════════════════════════════════════ */
 const JADWAL_UNDUH = {
   downloadOpen:  null,                   // contoh: '2025-07-15T08:00:00'
-  downloadClose: '2026-06-06T15:00:00',  // contoh: '2025-08-01T23:59:59'
+  downloadClose: '2026-06-08T15:00:59',  // contoh: '2025-08-01T23:59:59'
 };
 /* ─────────────────────────────────────────────────── */
 
@@ -76,11 +76,14 @@ function _schoolHeader() {
 
 function _cdHTML(target) {
   const diff = Math.max(0, target - new Date());
-  const h = Math.floor(diff / 3600000);
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   const s = Math.floor((diff % 60000)   / 1000);
   const pad = n => String(n).padStart(2, '0');
   return `
+    <div class="cd-unit"><span class="cd-num" id="cdD">${pad(d)}</span><span class="cd-label">HARI</span></div>
+    <span class="cd-sep">:</span>
     <div class="cd-unit"><span class="cd-num" id="cdH">${pad(h)}</span><span class="cd-label">JAM</span></div>
     <span class="cd-sep">:</span>
     <div class="cd-unit"><span class="cd-num" id="cdM">${pad(m)}</span><span class="cd-label">MENIT</span></div>
@@ -90,11 +93,13 @@ function _cdHTML(target) {
 
 function _tickCD(target) {
   const diff = Math.max(0, target - new Date());
-  const h = Math.floor(diff / 3600000);
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   const s = Math.floor((diff % 60000)   / 1000);
   const pad = n => String(n).padStart(2, '0');
   const q = id => document.getElementById(id);
+  if (q('cdD')) q('cdD').textContent = pad(d);
   if (q('cdH')) q('cdH').textContent = pad(h);
   if (q('cdM')) q('cdM').textContent = pad(m);
   if (q('cdS')) q('cdS').textContent = pad(s);
@@ -324,29 +329,136 @@ function formatTglInput(val) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   SESSION
+   SESSION + DEVICE TOKEN (1 device enforcement)
 ═══════════════════════════════════════════════════════ */
+function generateDeviceToken() {
+  let t = localStorage.getItem('sman68_device_token');
+  if (!t) {
+    t = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('sman68_device_token', t);
+  }
+  return t;
+}
+const DEVICE_TOKEN = generateDeviceToken();
+
 function saveSession(data) { localStorage.setItem('sman68_peserta', JSON.stringify(data)); }
 function getSession() { try { return JSON.parse(localStorage.getItem('sman68_peserta')); } catch { return null; } }
 function clearSession() { localStorage.removeItem('sman68_peserta'); }
+
+// Listener Firestore untuk deteksi logout paksa (1 device)
+let deviceListener = null;
+
+async function registerDevice(noDaftar) {
+  // Tulis token device ke Firestore
+  await db.collection('sesiAktif').doc(noDaftar).set({
+    deviceToken: DEVICE_TOKEN,
+    loginAt: new Date().toISOString(),
+    userAgent: navigator.userAgent.slice(0, 120)
+  });
+}
+
+function startDeviceListener(noDaftar) {
+  if (deviceListener) deviceListener(); // unsubscribe lama
+  deviceListener = db.collection('sesiAktif').doc(noDaftar)
+    .onSnapshot(snap => {
+      if (!snap.exists) return;
+      const token = snap.data()?.deviceToken;
+      // Jika token di Firestore beda = device lain login → paksa logout
+      if (token && token !== DEVICE_TOKEN && currentPeserta) {
+        stopDeviceListener();
+        clearSession();
+        currentPeserta = null;
+        fotoBase64 = null;
+        fotoTersimpan = null;
+        showForcedLogoutOverlay('device');
+      }
+    }, err => console.warn('device listener:', err));
+}
+
+function stopDeviceListener() {
+  if (deviceListener) { deviceListener(); deviceListener = null; }
+}
+
+function showForcedLogoutOverlay(reason) {
+  // Hapus overlay lama kalau ada
+  const existing = document.getElementById('forcedLogoutOverlay');
+  if (existing) existing.remove();
+
+  const msg = reason === 'masa'
+    ? 'Masa unduh kartu peserta telah ditutup. Anda telah dikeluarkan secara otomatis.'
+    : 'Akun Anda telah masuk dari perangkat lain. Sesi di perangkat ini diakhiri.';
+  const icon = reason === 'masa' ? 'fa-clock' : 'fa-mobile-screen-button';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'forcedLogoutOverlay';
+  overlay.className = 'forced-logout-overlay';
+  overlay.innerHTML = `
+    <div class="forced-logout-card">
+      <div class="forced-logout-icon"><i class="fa-solid ${icon}"></i></div>
+      <h3>${reason === 'masa' ? 'Masa Unduh Ditutup' : 'Sesi Berakhir'}</h3>
+      <p>${msg}</p>
+      <button class="btn-forced-ok" onclick="
+        document.getElementById('forcedLogoutOverlay').remove();
+        fotoBase64 = null; fotoTersimpan = null;
+        var imgP = document.getElementById('fotoPreviewImg');
+        if(imgP){ imgP.removeAttribute('src'); imgP.src=''; imgP.classList.add('hidden'); }
+        var fpHolder = document.getElementById('fotoPreviewPlaceholder');
+        if(fpHolder) fpHolder.classList.remove('hidden');
+        var inpF = document.getElementById('inputFoto');
+        if(inpF) inpF.value='';
+        document.getElementById('inputNoDaftar').value='';
+        document.getElementById('inputTglLahir').value='';
+        document.getElementById('statusCard').className='status-card hidden';
+        showPage('loginPage');
+        initMasaUnduhBanner();
+      ">
+        <i class="fa-solid fa-right-to-bracket"></i> Kembali ke Halaman Login
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+/* ═══════════════════════════════════════════════════════
+   TAB SYSTEM
+═══════════════════════════════════════════════════════ */
+function switchTab(btn, tabId) {
+  // Deactivate all tabs
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dash-tab-pane').forEach(p => {
+    p.classList.remove('active');
+    p.classList.add('hidden');
+  });
+  // Activate chosen
+  btn.classList.add('active');
+  const pane = document.getElementById(tabId);
+  pane.classList.remove('hidden');
+  pane.classList.add('active');
+  // Scroll tab into view on mobile
+  btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
 
 /* ═══════════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
-  // Init banner masa unduh
   initMasaUnduhBanner();
-
-  // Load stempel di background
   loadStampImage();
 
   const session = getSession();
   if (session?.noDaftar) {
     showLoading('Memuat sesi...');
     try {
+      // Cek masa unduh dulu — jika tutup, jangan restore sesi
+      const masaStatus = getMasaUnduhStatus();
+      if (masaStatus.mode === 'closed') {
+        clearSession();
+        hideLoading();
+        showPage('loginPage');
+        return;
+      }
+
       const snap = await db.collection('pendaftaranMutasi')
-        .where('noDaftar', '==', session.noDaftar)
-        .limit(1).get();
+        .where('noDaftar', '==', session.noDaftar).limit(1).get();
 
       if (!snap.empty) {
         const data = snap.docs[0].data();
@@ -354,7 +466,12 @@ window.addEventListener('DOMContentLoaded', async () => {
           currentPeserta = data;
           renderDashboard(data);
           showPage('dashboardPage');
-          initMasaUnduhBanner(); // refresh banner di dashboard
+          initMasaUnduhBanner();
+          // Register device + start listener
+          await registerDevice(data.noDaftar);
+          startDeviceListener(data.noDaftar);
+          // Auto-logout watcher jika masa tutup
+          startMasaTutupWatcher();
           showToast('Selamat datang kembali, ' + data.nama + '!', 'success');
           hideLoading();
           return;
@@ -368,6 +485,27 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ═══════════════════════════════════════════════════════
+   MASA TUTUP WATCHER — auto-logout saat masa unduh tutup
+═══════════════════════════════════════════════════════ */
+let _masaTutupWatcher = null;
+function startMasaTutupWatcher() {
+  if (_masaTutupWatcher) clearInterval(_masaTutupWatcher);
+  _masaTutupWatcher = setInterval(() => {
+    if (!currentPeserta) { clearInterval(_masaTutupWatcher); return; }
+    const st = getMasaUnduhStatus();
+    if (st.mode === 'closed') {
+      clearInterval(_masaTutupWatcher);
+      stopDeviceListener();
+      clearSession();
+      currentPeserta = null;
+      fotoBase64 = null;
+      fotoTersimpan = null;
+      showForcedLogoutOverlay('masa');
+    }
+  }, 5000); // cek setiap 5 detik
+}
+
+/* ═══════════════════════════════════════════════════════
    LOGIN
 ═══════════════════════════════════════════════════════ */
 async function handleLogin() {
@@ -379,14 +517,20 @@ async function handleLogin() {
     return;
   }
 
+  // Cek masa unduh sebelum proses login
+  const masaStatus = getMasaUnduhStatus();
+  if (masaStatus.mode === 'closed') {
+    showToast('Masa unduh kartu peserta telah ditutup.', 'error');
+    return;
+  }
+
   document.getElementById('btnLoginText').classList.add('hidden');
   document.getElementById('btnLoginLoader').classList.remove('hidden');
   document.getElementById('statusCard').className = 'status-card hidden';
 
   try {
     const snap = await db.collection('pendaftaranMutasi')
-      .where('noDaftar', '==', noDaftar)
-      .limit(1).get();
+      .where('noDaftar', '==', noDaftar).limit(1).get();
 
     if (snap.empty) {
       showStatusCard('error', 'fa-circle-xmark', 'Nomor pendaftaran tidak ditemukan. Periksa kembali nomor Anda.');
@@ -405,29 +549,22 @@ async function handleLogin() {
     }
 
     const status = (data.status || '').toLowerCase();
-
-    if (status === 'pending') {
-      showStatusCard('pending', 'fa-clock', 'Pendaftaran Anda masih menunggu verifikasi operator.', data.catatanOperator);
-      resetLoginBtn(); return;
-    }
-    if (status === 'proses') {
-      showStatusCard('proses', 'fa-spinner', 'Berkas Anda sedang diproses operator.', data.catatanOperator);
-      resetLoginBtn(); return;
-    }
-    if (status === 'ditolak') {
-      showStatusCard('ditolak', 'fa-circle-xmark', 'Pendaftaran Anda tidak disetujui.', data.catatanOperator);
-      resetLoginBtn(); return;
-    }
-    if (status !== 'diterima') {
-      showStatusCard('error', 'fa-circle-xmark', 'Status pendaftaran tidak dikenali. Hubungi operator.');
-      resetLoginBtn(); return;
-    }
+    if (status === 'pending') { showStatusCard('pending', 'fa-clock', 'Pendaftaran Anda masih menunggu verifikasi operator.', data.catatanOperator); resetLoginBtn(); return; }
+    if (status === 'proses')  { showStatusCard('proses', 'fa-spinner', 'Berkas Anda sedang diproses operator.', data.catatanOperator); resetLoginBtn(); return; }
+    if (status === 'ditolak') { showStatusCard('ditolak', 'fa-circle-xmark', 'Pendaftaran Anda tidak disetujui.', data.catatanOperator); resetLoginBtn(); return; }
+    if (status !== 'diterima') { showStatusCard('error', 'fa-circle-xmark', 'Status pendaftaran tidak dikenali. Hubungi operator.'); resetLoginBtn(); return; }
 
     currentPeserta = data;
     saveSession({ noDaftar: data.noDaftar });
+
+    // Register device (ini akan memicu logout di device lain)
+    await registerDevice(data.noDaftar);
+    startDeviceListener(data.noDaftar);
+    startMasaTutupWatcher();
+
     renderDashboard(data);
     showPage('dashboardPage');
-    initMasaUnduhBanner(); // refresh banner di dashboard
+    initMasaUnduhBanner();
     showToast('Login berhasil! Selamat datang, ' + data.nama + '.', 'success');
 
   } catch (err) {
@@ -456,23 +593,38 @@ function showStatusCard(type, icon, msg, catatan) {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('loginPage').classList.contains('active')) {
-    handleLogin();
-  }
+  if (e.key === 'Enter' && document.getElementById('loginPage').classList.contains('active')) handleLogin();
 });
 
 /* ═══════════════════════════════════════════════════════
    LOGOUT
 ═══════════════════════════════════════════════════════ */
-function handleLogout() {
+async function handleLogout() {
+  stopDeviceListener();
+  if (_masaTutupWatcher) { clearInterval(_masaTutupWatcher); _masaTutupWatcher = null; }
+  try {
+    if (currentPeserta?.noDaftar) await db.collection('sesiAktif').doc(currentPeserta.noDaftar).delete();
+  } catch(e) {}
   clearSession();
   currentPeserta = null;
   fotoBase64     = null;
   fotoTersimpan  = null;
+
+  // Hard reset elemen foto agar tidak ada sisa foto siswa lain
+  const imgPreview = document.getElementById('fotoPreviewImg');
+  if (imgPreview) { imgPreview.removeAttribute('src'); imgPreview.src = ''; imgPreview.classList.add('hidden'); }
+  const fotoPlaceholder = document.getElementById('fotoPreviewPlaceholder');
+  if (fotoPlaceholder) fotoPlaceholder.classList.remove('hidden');
+  const inputFoto = document.getElementById('inputFoto');
+  if (inputFoto) inputFoto.value = '';
+  const btnSimpan = document.getElementById('btnSimpanFoto');
+  if (btnSimpan) btnSimpan.disabled = true;
+
   document.getElementById('inputNoDaftar').value = '';
   document.getElementById('inputTglLahir').value = '';
   document.getElementById('statusCard').className = 'status-card hidden';
   showPage('loginPage');
+  initMasaUnduhBanner();
   showToast('Anda telah keluar dari sistem.', 'info');
 }
 
@@ -480,7 +632,7 @@ function handleLogout() {
    RENDER DASHBOARD
 ═══════════════════════════════════════════════════════ */
 function renderDashboard(data) {
-  document.getElementById('navNama').textContent    = data.nama || '';
+  document.getElementById('navNama').textContent     = data.nama || '';
   document.getElementById('welcomeName').textContent = 'Selamat datang, ' + (data.nama || '') + '!';
 
   renderDataSiswa(data);
@@ -613,17 +765,36 @@ function buildJadwalItem(title, tanggal, lokasi, icon) {
 ═══════════════════════════════════════════════════════ */
 
 function renderFotoSection(data) {
-  // Cek apakah sudah ada foto tersimpan di Firestore
-  const fotoUrl = data.pasFotoKartu || (data.dokumen && data.dokumen.pasFotoKartu) || '';
+  // ── Hard reset semua state foto ──
+  fotoTersimpan = null;
+  fotoBase64    = null;
 
+  // Reset elemen preview — paksa clear src agar tidak ada cache foto siswa lain
+  const img = document.getElementById('fotoPreviewImg');
+  if (img) {
+    img.removeAttribute('src');
+    img.src = '';
+    img.classList.add('hidden');
+  }
+  const placeholder = document.getElementById('fotoPreviewPlaceholder');
+  if (placeholder) placeholder.classList.remove('hidden');
+
+  // Reset input file
+  const inputFoto = document.getElementById('inputFoto');
+  if (inputFoto) inputFoto.value = '';
+
+  // Disable tombol simpan
+  const btnSimpan = document.getElementById('btnSimpanFoto');
+  if (btnSimpan) btnSimpan.disabled = true;
+
+  setFotoStatus(false);
+
+  // Cek apakah ada foto tersimpan di Firestore milik siswa INI
+  const fotoUrl = data.pasFotoKartu || (data.dokumen && data.dokumen.pasFotoKartu) || '';
   if (fotoUrl && fotoUrl.startsWith('data:image')) {
-    // Ada foto tersimpan
     fotoTersimpan = fotoUrl;
     tampilkanFotoPreview(fotoUrl);
     setFotoStatus(true);
-  } else {
-    fotoTersimpan = null;
-    setFotoStatus(false);
   }
 }
 
@@ -744,9 +915,8 @@ function generateKartu(mode) {
   // Cek foto
   const fotoAktif = fotoTersimpan || currentPeserta.pasFotoKartu || '';
   if (!fotoAktif) {
-    showToast('Anda tidak dapat melakukan ' + (mode === 'print' ? 'cetak' : 'simpan PDF') + ' karena belum menambahkan pas foto.', 'error');
-    // Scroll ke seksi foto
-    document.getElementById('fotoSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast('Anda tidak dapat mengunduh kartu karena belum menambahkan pas foto.', 'error');
+    switchTab(document.querySelector('[data-tab="tabFoto"]'), 'tabFoto');
     return;
   }
 
@@ -781,7 +951,6 @@ function generateKartu(mode) {
     stempelHeaderEl.src = stampBase64;
     stempelTTDEl.src    = stampBase64;
   } else {
-    // Coba load ulang
     loadStampImage().then(() => {
       if (stampBase64) {
         stempelHeaderEl.src = stampBase64;
@@ -800,16 +969,30 @@ function generateKartu(mode) {
     correctLevel: QRCode.CorrectLevel.M
   });
 
+  // Sync ukuran dari tab ke modal
+  const tabSizeEl = document.querySelector('input[name="kartuSize"]:checked');
+  if (tabSizeEl) {
+    const modalSizeEl = document.querySelector(`input[name="kartuSizeModal"][value="${tabSizeEl.value}"]`);
+    if (modalSizeEl) modalSizeEl.checked = true;
+  }
+
   // Tampilkan modal
   document.getElementById('kartuModal').classList.remove('hidden');
 
-  if (mode === 'download') {
-    setTimeout(() => downloadKartuPDF(), 800);
-  }
+  if (mode === 'pdf')  setTimeout(() => downloadKartuPDF(),        800);
+  if (mode === 'png')  setTimeout(() => downloadKartuImage('png'),  800);
+  if (mode === 'jpeg') setTimeout(() => downloadKartuImage('jpeg'), 800);
 }
 
 function closeModal() {
   document.getElementById('kartuModal').classList.add('hidden');
+}
+
+function _getSelectedSize() {
+  const modalEl = document.querySelector('input[name="kartuSizeModal"]:checked');
+  if (modalEl) return modalEl.value;
+  const tabEl = document.querySelector('input[name="kartuSize"]:checked');
+  return tabEl ? tabEl.value : 'a4';
 }
 
 async function downloadKartuPDF() {
@@ -817,59 +1000,35 @@ async function downloadKartuPDF() {
   if (!fotoAktif) {
     showToast('Belum ada pas foto. Unggah pas foto terlebih dahulu.', 'error');
     closeModal();
-    document.getElementById('fotoSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
 
-  showLoading('Membuat PDF berkualitas tinggi...');
+  const size = _getSelectedSize();
+  showLoading(`Membuat PDF ${size.toUpperCase()} berkualitas tinggi...`);
   try {
-    // Tunggu semua gambar dalam kartu benar-benar termuat
     await new Promise(r => setTimeout(r, 600));
-
     const el = document.getElementById('kartuPrint');
-
-    // Deteksi DPR perangkat, minimum 3 untuk kualitas tajam di HP
     const deviceDPR = window.devicePixelRatio || 1;
     const renderScale = Math.max(3, deviceDPR * 2);
-
     const canvas = await html2canvas(el, {
       scale: renderScale,
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      imageTimeout: 15000,
-      removeContainer: true,
-      // Paksa render ukuran penuh agar tidak terpotong
-      windowWidth: el.scrollWidth,
-      windowHeight: el.scrollHeight,
+      useCORS: true, allowTaint: true, logging: false,
+      backgroundColor: '#ffffff', imageTimeout: 15000, removeContainer: true,
+      windowWidth: el.scrollWidth, windowHeight: el.scrollHeight,
     });
-
-    // Gunakan JPEG kualitas 1.0 (lossless) agar tidak buram
     const imgData = canvas.toDataURL('image/jpeg', 1.0);
-
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: false,   // jangan kompres agar kualitas terjaga
-    });
-
-    const pdfW = pdf.internal.pageSize.getWidth();   // 210mm
-    const pdfH = pdf.internal.pageSize.getHeight();  // 297mm
-
-    // Hitung tinggi gambar proporsional, jangan melebihi 1 halaman A4
+    const formats = { a4: [210, 297], a5: [148, 210] };
+    const fmt = formats[size] || formats.a4;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: fmt, compress: false });
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
     const imgRatio = canvas.height / canvas.width;
     const imgH = Math.min(pdfW * imgRatio, pdfH);
-
-    // Posisikan di tengah atas halaman
-    const marginTop = 0;
-    pdf.addImage(imgData, 'JPEG', 0, marginTop, pdfW, imgH);
-
+    pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, imgH);
     const nama = (currentPeserta?.nama || 'peserta').replace(/\s+/g, '_');
-    pdf.save(`Kartu_Peserta_${nama}_${currentPeserta?.noDaftar || ''}.pdf`);
-    showToast('PDF berhasil diunduh dengan kualitas tinggi!', 'success');
+    pdf.save(`Kartu_Peserta_${nama}_${currentPeserta?.noDaftar || ''}_${size.toUpperCase()}.pdf`);
+    showToast(`PDF ${size.toUpperCase()} berhasil diunduh!`, 'success');
   } catch (err) {
     console.error('PDF error:', err);
     showToast('Gagal membuat PDF. Coba lagi.', 'error');
@@ -877,81 +1036,45 @@ async function downloadKartuPDF() {
   hideLoading();
 }
 
-function printKartu() {
+async function downloadKartuImage(format) {
   const fotoAktif = fotoTersimpan || currentPeserta?.pasFotoKartu || '';
   if (!fotoAktif) {
     showToast('Belum ada pas foto. Unggah pas foto terlebih dahulu.', 'error');
     closeModal();
-    document.getElementById('fotoSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
-
-  // Ambil HTML kartu
-  const kartuEl  = document.getElementById('kartuPrint');
-  const kartuHTML = kartuEl.outerHTML;
-
-  // Kumpulkan semua CSS dari halaman ini
-  const allCSS = Array.from(document.styleSheets).map(sheet => {
-    try {
-      return Array.from(sheet.cssRules).map(r => r.cssText).join('\n');
-    } catch { return ''; }
-  }).join('\n');
-
-  // Buka popup window bersih — hanya berisi kartu, 1 halaman
-  const popup = window.open('', '_blank', 'width=850,height=1100');
-  popup.document.write(`<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Kartu Peserta – ${currentPeserta?.nama || ''}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <style>
-    ${allCSS}
-    /* Override khusus print popup */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      margin: 0; padding: 0;
-      background: #fff;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    #kartuPrint {
-      width: 210mm;
-      max-width: 100%;
-      margin: 0 auto;
-      box-shadow: none !important;
-      border-radius: 0 !important;
-    }
-    @media print {
-      @page { size: A4 portrait; margin: 0; }
-      html, body { width: 210mm; }
-      #kartuPrint {
-        width: 210mm;
-        page-break-after: avoid;
-        break-after: avoid;
-      }
-    }
-  </style>
-</head>
-<body>
-  ${kartuHTML}
-  <script>
-    // Tunggu semua resource termuat lalu print otomatis
-    window.onload = function() {
-      // Tunggu font & gambar benar-benar render
-      setTimeout(function() {
-        window.focus();
-        window.print();
-        // Tutup popup setelah print dialog selesai
-        setTimeout(function() { window.close(); }, 1000);
-      }, 800);
-    };
-  <\/script>
-</body>
-</html>`);
-  popup.document.close();
+  const size = _getSelectedSize();
+  const ext  = format === 'png' ? 'PNG' : 'JPEG';
+  showLoading(`Membuat gambar ${ext} ${size.toUpperCase()}...`);
+  try {
+    await new Promise(r => setTimeout(r, 400));
+    const el = document.getElementById('kartuPrint');
+    const deviceDPR = window.devicePixelRatio || 1;
+    const scaleBoost = size === 'a5' ? 1.4 : 1;
+    const renderScale = Math.max(3, deviceDPR * 2) * scaleBoost;
+    const canvas = await html2canvas(el, {
+      scale: renderScale,
+      useCORS: true, allowTaint: true, logging: false,
+      backgroundColor: '#ffffff', imageTimeout: 15000, removeContainer: true,
+      windowWidth: el.scrollWidth, windowHeight: el.scrollHeight,
+    });
+    const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+    const quality  = format === 'png' ? undefined : 1.0;
+    const dataUrl  = canvas.toDataURL(mimeType, quality);
+    const nama = (currentPeserta?.nama || 'peserta').replace(/\s+/g, '_');
+    const link = document.createElement('a');
+    link.href     = dataUrl;
+    link.download = `Kartu_Peserta_${nama}_${currentPeserta?.noDaftar || ''}_${size.toUpperCase()}.${format === 'png' ? 'png' : 'jpg'}`;
+    link.click();
+    showToast(`Gambar ${ext} ${size.toUpperCase()} berhasil diunduh!`, 'success');
+  } catch (err) {
+    console.error('Image error:', err);
+    showToast(`Gagal membuat gambar ${ext}. Coba lagi.`, 'error');
+  }
+  hideLoading();
 }
+
+
 
 /* ═══════════════════════════════════════════════════════
    EDIT BIODATA – 1x KESEMPATAN
