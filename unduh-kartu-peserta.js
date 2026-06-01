@@ -272,7 +272,7 @@ async function loadStampFromLocal() {
       resolve();
     };
     img.onerror = () => { stampBase64 = null; resolve(); };
-    img.src = './1780197522531_image.png';
+    img.src = './TTD Kepala SMAN 68 Jakarta.png';
   });
 }
 
