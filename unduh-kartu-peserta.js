@@ -272,7 +272,7 @@ async function loadStampFromLocal() {
       resolve();
     };
     img.onerror = () => { stampBase64 = null; resolve(); };
-    img.src = './TTD Kepala SMAN 68 Jakarta.png';
+    img.src = './1780197522531_image.png';
   });
 }
 
@@ -909,6 +909,32 @@ async function simpanFoto() {
 /* ═══════════════════════════════════════════════════════
    KARTU PESERTA
 ═══════════════════════════════════════════════════════ */
+function handleModalBackdropClick(e) {
+  if (e.target.id === 'kartuModal') closeModal();
+}
+
+function updatePreviewSize() {
+  const size = _getSelectedSize();
+  const paper = document.getElementById('previewPaper');
+  if (!paper) return;
+  paper.classList.toggle('size-a5', size === 'a5');
+  // Sync tab size picker
+  const tabEl = document.querySelector(`input[name="kartuSize"][value="${size}"]`);
+  if (tabEl) tabEl.checked = true;
+}
+
+function bukaPreviewKartu() {
+  if (!currentPeserta) { showToast('Data peserta tidak tersedia.', 'error'); return; }
+  const fotoAktif = fotoTersimpan || currentPeserta.pasFotoKartu || '';
+  if (!fotoAktif) {
+    showToast('Anda belum menambahkan pas foto. Unggah pas foto terlebih dahulu.', 'error');
+    switchTab(document.querySelector('[data-tab="tabFoto"]'), 'tabFoto');
+    return;
+  }
+  // Gunakan generateKartu tanpa mode download
+  generateKartu('preview');
+}
+
 function generateKartu(mode) {
   if (!currentPeserta) { showToast('Data peserta tidak tersedia.', 'error'); return; }
 
@@ -1085,11 +1111,13 @@ function updateEditButton(data) {
   if (!btn) return;
   const sudahEdit = data.sudahEdit === true;
   if (sudahEdit) {
-    btn.innerHTML = '<i class="fa-solid fa-lock"></i> Batas Perbaikan Sudah Terpakai';
+    btn.innerHTML = '<i class="fa-solid fa-lock"></i><span class="btn-edit-text"> Terpakai</span>';
+    btn.title = 'Batas Perbaikan Sudah Terpakai';
     btn.classList.add('used');
     btn.disabled = true;
   } else {
-    btn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Biodata';
+    btn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i><span class="btn-edit-text"> Edit Biodata</span>';
+    btn.title = '';
     btn.classList.remove('used');
     btn.disabled = false;
   }
