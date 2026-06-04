@@ -129,12 +129,12 @@ body {
 
 /* ══════════════════════════════════
    HOME BUTTON FLOATING (LOGIN PAGE)
-   Tampil di SEMUA device
+   Tampil di SEMUA device — fixed pojok kiri atas
 ══════════════════════════════════ */
 .btn-home-float {
-  position: absolute;
+  position: fixed;
   top: 20px; left: 20px;
-  z-index: 600;
+  z-index: 601;
   display: inline-flex; align-items: center; gap: 8px;
   padding: 10px 20px;
   background: rgba(255,255,255,.18);
@@ -155,28 +155,25 @@ body {
 }
 .btn-home-float i { font-size: .9rem; }
 
-/* HOME BUTTON DI FOOTER LOGIN (mobile only) */
+/* HOME BUTTON DI FOOTER LOGIN — hijau, tampil di mobile sebagai tombol bawah card */
 .btn-home-footer {
-  display: none; /* default hidden, tampil hanya di mobile via media query */
+  display: none; /* hidden by default, shown on mobile via media query */
   align-items: center; justify-content: center; gap: 8px;
   margin-top: 14px;
-  padding: 10px 20px;
-  background: rgba(255,255,255,.12);
-  backdrop-filter: blur(8px);
-  color: rgba(255,255,255,.85);
-  border: 1px solid rgba(255,255,255,.25);
-  border-radius: 100px;
+  padding: 12px 24px;
+  background: var(--green-main);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: .85rem; font-weight: 600;
+  font-size: .9rem; font-weight: 700;
   text-decoration: none;
   transition: var(--transition);
   width: 100%;
+  box-shadow: 0 4px 14px rgba(26,156,84,.35);
 }
-.btn-home-footer:hover {
-  background: rgba(255,255,255,.22);
-  color: #fff;
-}
-.btn-home-footer i { font-size: .85rem; }
+.btn-home-footer:hover { background: var(--green-dark); color: #fff; transform: translateY(-2px); }
+.btn-home-footer i { font-size: .88rem; }
 
 /* HOME BUTTON IN NAV BAR */
 .btn-home-nav {
@@ -678,6 +675,12 @@ body {
   border-color: var(--gray-300);
   cursor: not-allowed;
   transform: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .76rem;
+  padding: 8px 10px;
 }
 
 .form-input-readonly {
@@ -787,25 +790,93 @@ body {
 }
 
 /* ══════════════════════════════════
-   MODAL
+   MODAL — PREVIEW KARTU
 ══════════════════════════════════ */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,.65);
-  backdrop-filter: blur(8px);
+  background: rgba(10,20,40,.75);
+  backdrop-filter: blur(10px);
   z-index: 5000;
   display: flex; align-items: flex-start; justify-content: center;
+  padding: 0;
+  overflow: hidden;
+}
+/* Edit modal pakai padding dan bisa scroll */
+.modal-overlay:has(.edit-modal-content) {
+  align-items: center;
   padding: 24px;
   overflow-y: auto;
 }
-.modal-content {
-  width: 100%; max-width: 820px;
-  animation: fadeSlideUp .4s ease;
+
+/* Preview modal — full height container */
+.modal-preview-content {
+  width: 100%; max-width: 900px;
+  height: 100vh;
+  display: flex; flex-direction: column;
+  animation: fadeSlideUp .35s ease;
+  background: #1a1f2e;
 }
-.modal-actions {
+
+/* Header bar */
+.modal-preview-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  background: #242938;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  flex-shrink: 0;
+  gap: 12px;
+}
+.modal-preview-title {
   display: flex; align-items: center; gap: 10px;
-  margin-bottom: 16px; flex-wrap: wrap;
+  color: #fff; font-size: .95rem; font-weight: 700;
 }
+.modal-preview-title i { color: var(--gold); font-size: 1.1rem; }
+.modal-preview-controls {
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+
+/* Preview scrollable area */
+.modal-preview-area {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 24px 16px;
+  background: #12161f;
+}
+.modal-preview-area::-webkit-scrollbar { width: 6px; }
+.modal-preview-area::-webkit-scrollbar-track { background: transparent; }
+.modal-preview-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 3px; }
+
+/* Paper container — ukuran menyesuaikan A4/A5 */
+.preview-paper {
+  background: #fff;
+  box-shadow: 0 8px 48px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.05);
+  border-radius: 4px;
+  transition: width .35s cubic-bezier(.4,0,.2,1), transform .35s cubic-bezier(.4,0,.2,1);
+  /* Default A4 — lebar penuh kontainer, max 820px */
+  width: 100%;
+  max-width: 820px;
+  transform-origin: top center;
+}
+/* A5 — sedikit lebih kecil */
+.preview-paper.size-a5 {
+  max-width: 580px;
+}
+
+/* Download bar bawah */
+.modal-download-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 20px;
+  background: #242938;
+  border-top: 1px solid rgba(255,255,255,.08);
+  flex-shrink: 0;
+}
+.modal-dl-label {
+  font-size: .82rem; font-weight: 600; color: rgba(255,255,255,.6);
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap; margin-right: 4px;
+}
+
+/* Buttons in modal */
 .btn-modal-download, .btn-modal-png, .btn-modal-jpg {
   display: flex; align-items: center; gap: 8px;
   padding: 10px 18px;
@@ -815,22 +886,72 @@ body {
   cursor: pointer; border: none; transition: var(--transition);
   white-space: nowrap;
 }
-.btn-modal-download { background: var(--green-main); color: #fff; box-shadow: 0 4px 12px rgba(26,156,84,.3); }
-.btn-modal-download:hover { background: var(--green-dark); }
+.btn-modal-download { background: var(--green-main); color: #fff; box-shadow: 0 4px 12px rgba(26,156,84,.35); }
+.btn-modal-download:hover { background: var(--green-dark); transform: translateY(-1px); }
 .btn-modal-png { background: var(--blue-main); color: #fff; box-shadow: 0 4px 12px rgba(26,108,204,.3); }
-.btn-modal-png:hover { background: var(--blue-dark); }
+.btn-modal-png:hover { background: var(--blue-dark); transform: translateY(-1px); }
 .btn-modal-jpg { background: var(--purple-main); color: #fff; box-shadow: 0 4px 12px rgba(124,58,237,.3); }
-.btn-modal-jpg:hover { background: #5b21b6; }
+.btn-modal-jpg:hover { background: #5b21b6; transform: translateY(-1px); }
+
+/* Close button */
 .btn-modal-close {
-  margin-left: auto;
-  width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(255,255,255,.15);
-  color: #fff; border: 1px solid rgba(255,255,255,.3);
-  font-size: 1.1rem; cursor: pointer;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,.1);
+  color: rgba(255,255,255,.8);
+  border: 1px solid rgba(255,255,255,.2);
+  font-size: 1rem; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: var(--transition);
+  flex-shrink: 0;
 }
-.btn-modal-close:hover { background: rgba(255,255,255,.3); }
+.btn-modal-close:hover { background: rgba(255,255,255,.2); color: #fff; }
+
+/* Size picker inside modal */
+.modal-size-picker {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+}
+.modal-size-picker .size-label { color: rgba(255,255,255,.7); font-size: .8rem; font-weight: 700; }
+.modal-size-picker .size-radio { color: rgba(255,255,255,.9); font-size: .85rem; font-weight: 600; }
+.modal-size-picker .size-radio input { accent-color: var(--green-light); }
+
+/* Preview button in tab */
+.btn-preview-kartu {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 22px;
+  border-radius: var(--radius-sm);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .9rem; font-weight: 700;
+  cursor: pointer; transition: var(--transition);
+  background: var(--gold-pale);
+  color: #92400e;
+  border: 2px solid rgba(245,158,11,.35);
+}
+.btn-preview-kartu:hover {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245,158,11,.3);
+}
+
+/* Responsive modal — mobile */
+@media (max-width: 768px) {
+  .modal-preview-header { padding: 10px 14px; gap: 8px; }
+  .modal-preview-title { font-size: .85rem; }
+  .modal-preview-title i { font-size: .95rem; }
+  .modal-preview-controls { gap: 8px; }
+  .modal-size-picker { padding: 5px 10px; gap: 8px; }
+  .modal-size-picker .size-label { font-size: .72rem; }
+  .modal-size-picker .size-radio { font-size: .78rem; }
+  .modal-preview-area { padding: 12px 8px; }
+  .modal-download-bar { padding: 10px 12px; gap: 8px; flex-wrap: nowrap; overflow-x: auto; }
+  .btn-modal-download, .btn-modal-png, .btn-modal-jpg { padding: 9px 14px; font-size: .8rem; }
+  .modal-dl-label { display: none; }
+}
 
 /* ══════════════════════════════════
    KARTU PESERTA (PRINTABLE)
@@ -1107,10 +1228,12 @@ body {
   }
   .btn-logout .nav-btn-label { display: none; }
 
-  /* HOME FLOAT di login — tetap tampil, posisi menyesuaikan */
-  #loginPageInner { padding-top: 0; }
-  .btn-home-float { top: 12px; left: 12px; padding: 8px 14px; font-size: .8rem; }
-  .btn-home-footer { display: none !important; } /* cukup floating button */
+  /* HOME FLOAT di login — sembunyikan di mobile, ganti dengan footer button */
+  #btnHomeLogin { display: none !important; }
+  /* btn-home-footer di footer login (mobile) — hijau, teks jelas */
+  .btn-home-footer {
+    display: flex !important;
+  }
 
   /* EDIT BIODATA MODAL */
   .edit-form-grid { grid-template-columns: 1fr; padding: 16px; }
@@ -1396,25 +1519,41 @@ body {
 
 /* Geser form login agar tidak tertutup banner fixed */
 #loginPageInner.with-banner .login-container {
-  padding-top: 56px;
+  padding-top: 70px;  /* cukup untuk banner ~60px tinggi */
 }
-#loginPageInner.with-banner .btn-home-float {
-  top: 60px;
+/* btn-home-float naik sedikit agar tidak tumpuk banner */
+#loginPageInner.with-banner #btnHomeLogin {
+  top: 72px;
+}
+@media (max-width: 768px) {
+  /* Di mobile: login card punya top padding = tinggi banner (~56px) */
+  #loginPageInner.with-banner .login-container {
+    padding-top: 64px;
+  }
 }
 
 /* ── Responsive banner ── */
 @media (max-width: 768px) {
-  .banner-countdown-bar { padding: 8px 12px; gap: 10px; flex-wrap: nowrap; overflow: hidden; }
-  .banner-countdown-bar .bcb-label { font-size: .72rem; flex-shrink: 1; min-width: 0; }
-  .banner-countdown-bar .countdown-units { gap: 4px; }
-  .banner-countdown-bar .cd-unit { min-width: 38px; padding: 3px 6px; }
-  .banner-countdown-bar .cd-num  { font-size: 1rem; }
-  .banner-countdown-bar .cd-sep  { font-size: 1rem; margin-bottom: 12px; }
+  /* 2 baris: label atas, countdown bawah — agar TIDAK terpotong */
+  .banner-countdown-bar {
+    padding: 6px 8px; gap: 4px;
+    flex-direction: column; align-items: center;
+  }
+  .banner-countdown-bar .bcb-label {
+    font-size: .7rem; white-space: normal; text-align: center;
+    justify-content: center;
+  }
+  .banner-countdown-bar .bcb-label span { display: block; }
+  .banner-countdown-bar .countdown-units { gap: 3px; }
+  .banner-countdown-bar .cd-unit { min-width: 36px; padding: 3px 5px; }
+  .banner-countdown-bar .cd-num  { font-size: .95rem; }
+  .banner-countdown-bar .cd-sep  { font-size: .95rem; margin-bottom: 12px; }
 }
 @media (max-width: 380px) {
-  .banner-countdown-bar .bcb-label span { display: none; }
-  .banner-countdown-bar .cd-unit { min-width: 34px; padding: 3px 5px; }
-  .banner-countdown-bar .cd-num  { font-size: .9rem; }
+  .banner-countdown-bar .cd-unit { min-width: 30px; padding: 2px 4px; }
+  .banner-countdown-bar .cd-num  { font-size: .82rem; }
+  .banner-countdown-bar .cd-label { font-size: .42rem; }
+  .banner-countdown-bar .bcb-label { font-size: .64rem; }
 }
 
 /* ══════════════════════════════════════════════════
@@ -1684,7 +1823,8 @@ body {
 
   /* Kartu tab buttons */
   .kartu-tab-buttons { flex-direction: column; }
-  .btn-download, .btn-download-img { width: 100%; justify-content: center; }
+  .btn-download, .btn-download-img, .btn-preview-kartu { width: 100%; justify-content: center; }
+  .kartu-tab-size-picker { width: 100%; }
 
   /* Edit modal */
   .edit-form-grid { grid-template-columns: 1fr; padding: 16px; }
@@ -1693,15 +1833,9 @@ body {
   .edit-modal-actions { padding: 14px 16px; flex-direction: column; }
   .btn-simpan-permanen, .btn-batal-edit { width: 100%; justify-content: center; }
 
-  /* Edit biodata button */
-  .btn-edit-biodata span { display: none; }
-  .btn-edit-biodata { padding: 8px 10px; }
-
-  /* Kartu modal */
-  .modal-overlay { padding: 8px; }
-  .modal-content { border-radius: var(--radius-md); }
-  .modal-actions { padding: 10px 12px; gap: 6px; }
-  .btn-modal-download, .btn-modal-png, .btn-modal-jpg { padding: 8px 12px; font-size: .78rem; }
+  /* Edit biodata button — icon only di mobile */
+  .btn-edit-biodata .btn-edit-text { display: none; }
+  .btn-edit-biodata { padding: 8px 10px; min-width: 36px; justify-content: center; }
 
   /* Jadwal */
   .jadwal-row { flex-direction: column; gap: 4px; }
