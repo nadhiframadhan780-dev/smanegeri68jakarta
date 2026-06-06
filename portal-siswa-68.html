@@ -291,6 +291,8 @@
         .btn-update-data.locked { background:#e2e8f0; color:#94a3b8; cursor:not-allowed; }
         .btn-update-data.unlocked { background:linear-gradient(135deg,#10b981,#059669); color:white; box-shadow:0 6px 16px rgba(16,185,129,.25); }
         .btn-update-data.unlocked:hover { transform:translateY(-2px); box-shadow:0 10px 25px rgba(16,185,129,.35); }
+        .btn-update-data.saved { background:#cbd5e1; color:#64748b; cursor:default; box-shadow:none; flex-direction:column; gap:2px; padding:9px 22px; line-height:1.2; }
+        .btn-update-data.saved .btn-saved-sub { font-size:.72rem; font-weight:500; opacity:.8; }
         .update-data-status { display:flex; align-items:center; gap:8px; font-size:.82rem; font-weight:600; margin-top:8px; }
         .update-data-status.locked { color:#94a3b8; }
         .update-data-status.unlocked { color:#059669; }
@@ -314,10 +316,15 @@
         .pass-toggle:hover { color:var(--primary); }
 
         /* Upload Foto Modal */
-        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(8px); z-index:20000; display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; visibility:hidden; transition:var(--transition); }
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(8px); z-index:20000; display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; visibility:hidden; transition:var(--transition); overflow-y:auto; -webkit-overflow-scrolling:touch; }
         .modal-overlay.open { opacity:1; visibility:visible; }
-        .modal-box { background:white; border-radius:var(--radius-lg); padding:40px; max-width:480px; width:100%; box-shadow:var(--shadow-float); transform:translateY(30px); transition:var(--transition); }
+        .modal-box { background:white; border-radius:var(--radius-lg); padding:40px; max-width:480px; width:100%; box-shadow:var(--shadow-float); transform:translateY(30px); transition:var(--transition); max-height:88vh; max-height:88dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
         .modal-overlay.open .modal-box { transform:translateY(0); }
+        @media(max-width:600px) {
+            .modal-overlay { align-items:flex-start; padding:16px 12px 32px; }
+            .modal-box { max-height:none !important; overflow-y:visible !important; padding:24px 18px; border-radius:16px; margin:auto 0; }
+            .modal-lg { max-width:100% !important; }
+        }
         .modal-title { font-size:1.5rem; font-weight:800; color:var(--primary-dark); margin-bottom:8px; }
         .modal-sub { color:var(--text-muted); font-size:.9rem; margin-bottom:24px; }
 
@@ -695,8 +702,32 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             showToast('error', 'Akun Ditolak', 'Pendaftaran ditolak. Hubungi bagian Tata Usaha.');
             btn.innerHTML = 'Masuk ke Portal <i class="fas fa-arrow-right"></i>';
             btn.disabled = false;
+
+        // ── FIX #2: Cek akunStatus (diblokir operator) ──
+        } else if (data.akunStatus === 'nonaktif_sementara') {
+            const alasan = data.akunAlasan ? ` Alasan: ${data.akunAlasan}` : '';
+            showToast('error', 'Akun Dinonaktifkan Sementara', 'Akun Anda diblokir sementara oleh operator.' + alasan + ' Hubungi bagian Tata Usaha.');
+            btn.innerHTML = 'Masuk ke Portal <i class="fas fa-arrow-right"></i>';
+            btn.disabled = false;
+        } else if (data.akunStatus === 'nonaktif_permanen') {
+            const alasan = data.akunAlasan ? ` Alasan: ${data.akunAlasan}` : '';
+            showToast('error', 'Akun Dinonaktifkan Permanen', 'Akun Anda diblokir permanen oleh operator.' + alasan + ' Hubungi bagian Tata Usaha.');
+            btn.innerHTML = 'Masuk ke Portal <i class="fas fa-arrow-right"></i>';
+            btn.disabled = false;
+
         } else if (data.status === 'approved') {
-            currentSiswa = { id: doc.id, ...data };
+            // ── FIX #1: Baca editDataEnabled dari settings/portalSiswa Firestore ──
+            // Operator menyimpan ke: db.collection('settings').doc('portalSiswa') => { editDataEnabled: true/false }
+            // Portal siswa harus baca dari sini, bukan dari field 'editDataAktif' di dokumen siswa
+            let editDataAktif = false;
+            try {
+                const settingDoc = await db.collection('settings').doc('portalSiswa').get();
+                if (settingDoc.exists) {
+                    editDataAktif = settingDoc.data().editDataEnabled === true;
+                }
+            } catch (_) { /* gagal baca setting, anggap nonaktif */ }
+
+            currentSiswa = { id: doc.id, ...data, editDataAktif };
             masukPortal();
         } else {
             btn.innerHTML = 'Masuk ke Portal <i class="fas fa-arrow-right"></i>';
@@ -730,6 +761,7 @@ function updateTopbarAvatar() {
 
 document.getElementById('logoutBtn').addEventListener('click', (e) => {
     e.preventDefault();
+    if (_editSettingUnsub) { _editSettingUnsub(); _editSettingUnsub = null; }
     currentSiswa = null;
     tempFotoBase64 = null;
     document.getElementById('loginOverlay').style.display = 'grid';
@@ -745,11 +777,58 @@ document.getElementById('logoutBtn').addEventListener('click', (e) => {
 // ==========================================
 // INIT & NAVIGASI
 // ==========================================
+// Simpan unsubscribe listener agar bisa dibersihkan saat logout
+let _editSettingUnsub = null;
+
 function initPortal() {
     updateDateTime();
     setInterval(updateDateTime, 1000);
     setupSidebar();
     loadPage('dashboard');
+
+    // ── Realtime listener: langsung update tombol edit saat operator ubah setting ──
+    if (_editSettingUnsub) _editSettingUnsub();
+    _editSettingUnsub = db.collection('settings').doc('portalSiswa')
+        .onSnapshot(doc => {
+            const enabled = doc.exists ? (doc.data().editDataEnabled === true) : false;
+            if (!currentSiswa) return;
+            const changed = currentSiswa.editDataAktif !== enabled;
+            currentSiswa.editDataAktif = enabled;
+            if (changed) {
+                // Update tombol & status tanpa reload halaman penuh
+                const btnEl = document.querySelector('.btn-update-data');
+                const statusEl = document.querySelector('.update-data-status');
+                if (btnEl) {
+                    if (enabled) {
+                        btnEl.className = 'btn-update-data unlocked';
+                        btnEl.disabled = false;
+                        btnEl.setAttribute('onclick', 'bukaModalEditData()');
+                        btnEl.innerHTML = '<i class="fas fa-unlock-alt"></i> Update Data Siswa';
+                    } else {
+                        const tgl = currentSiswa.terakhirUpdateData;
+                        if (tgl) {
+                            const d = new Date(tgl);
+                            const fmt = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+                            btnEl.className = 'btn-update-data saved';
+                            btnEl.disabled = true;
+                            btnEl.removeAttribute('onclick');
+                            btnEl.innerHTML = `<span><i class="fas fa-check-circle"></i> Perubahan Tersimpan</span><span class="btn-saved-sub">Terakhir disimpan: ${fmt}</span>`;
+                        } else {
+                            btnEl.className = 'btn-update-data locked';
+                            btnEl.disabled = true;
+                            btnEl.removeAttribute('onclick');
+                            btnEl.innerHTML = '<i class="fas fa-lock"></i> Update Data Siswa';
+                        }
+                    }
+                }
+                if (statusEl) {
+                    statusEl.className = 'update-data-status ' + (enabled ? 'unlocked' : 'locked');
+                    statusEl.innerHTML = enabled
+                        ? '<i class="fas fa-check-circle"></i> Fitur edit data telah diaktifkan oleh operator'
+                        : '<i class="fas fa-lock"></i> Edit data belum diaktifkan — hubungi operator/TU';
+                }
+            }
+        }, err => console.warn('Listener setting gagal:', err));
 }
 
 function updateDateTime() {
@@ -1331,7 +1410,12 @@ async function loadRiwayat(container) {
 // ==========================================
 // 6. PROFIL — LENGKAP + FOTO PROFIL
 // ==========================================
-function loadProfil(container) {
+async function loadProfil(container) {
+    // Selalu re-fetch setting editDataEnabled agar perubahan operator langsung terlihat
+    try {
+        const settingDoc = await db.collection('settings').doc('portalSiswa').get();
+        currentSiswa.editDataAktif = settingDoc.exists ? (settingDoc.data().editDataEnabled === true) : false;
+    } catch (_) { /* biarkan nilai sebelumnya jika gagal */ }
     const d = currentSiswa;
 
     // Format tampilan data
@@ -1439,9 +1523,20 @@ function loadProfil(container) {
 // ==========================================
 function renderUpdateDataBtn(d) {
     const editAktif = d.editDataAktif === true;
+    const tgl = d.terakhirUpdateData;
+    let tglFmt = '';
+    if (tgl) {
+        const obj = new Date(tgl);
+        tglFmt = `${String(obj.getDate()).padStart(2,'0')}/${String(obj.getMonth()+1).padStart(2,'0')}/${obj.getFullYear()}`;
+    }
     if (editAktif) {
         return `<button class="btn-update-data unlocked" onclick="bukaModalEditData()">
             <i class="fas fa-unlock-alt"></i> Update Data Siswa
+        </button>`;
+    } else if (tglFmt) {
+        return `<button class="btn-update-data saved" disabled>
+            <span><i class="fas fa-check-circle"></i> Perubahan Tersimpan</span>
+            <span class="btn-saved-sub">Terakhir disimpan: ${tglFmt}</span>
         </button>`;
     } else {
         return `<button class="btn-update-data locked" disabled title="Operator belum mengaktifkan fitur ini">
@@ -1464,23 +1559,54 @@ function renderUpdateDataStatus(d) {
 window.bukaModalEditData = function() {
     if (!currentSiswa.editDataAktif) return;
     const d = currentSiswa;
-    const fields = [
-        { key:'nama', label:'Nama Lengkap', type:'text', full:false },
-        { key:'nisn', label:'NISN', type:'text', full:false },
-        { key:'tempatLahir', label:'Tempat Lahir', type:'text', full:false },
-        { key:'tanggalLahir', label:'Tanggal Lahir', type:'date', full:false },
-        { key:'noHp', label:'Nomor HP / WhatsApp', type:'tel', full:false },
-        { key:'email', label:'Email', type:'email', full:false },
-        { key:'alamat', label:'Alamat Lengkap', type:'textarea', full:true },
+
+    const personalFields = [
+        { key:'nama',         label:'Nama Lengkap',        type:'text',     full:false },
+        { key:'nisn',         label:'NISN',                type:'text',     full:false },
+        { key:'tempatLahir',  label:'Tempat Lahir',        type:'text',     full:false },
+        { key:'tanggalLahir', label:'Tanggal Lahir',       type:'date',     full:false },
+        { key:'noHp',         label:'Nomor Telepon / WA',  type:'tel',      full:false },
+        { key:'email',        label:'Email',               type:'email',    full:false },
+        { key:'alamat',       label:'Alamat Lengkap',      type:'textarea', full:true  },
     ];
-    document.getElementById('editDataForm').innerHTML = fields.map(f => `
+
+    const personalHtml = personalFields.map(f => `
         <div class="form-group${f.full ? ' full' : ''}">
             <label style="display:block; font-weight:700; margin-bottom:8px; font-size:.95rem; color:var(--primary-dark);">${f.label}</label>
             ${f.type === 'textarea'
                 ? `<textarea id="edit_${f.key}" class="form-input" rows="3" style="resize:vertical;">${d[f.key] || ''}</textarea>`
-                : `<input type="${f.type}" id="edit_${f.key}" class="form-input" value="${d[f.key] || ''}">`
-            }
+                : `<input type="${f.type}" id="edit_${f.key}" class="form-input" value="${d[f.key] || ''}">` }
         </div>`).join('');
+
+    const jurusanOptions = [
+        { val:'', label:'-- Pilih Jurusan --' },
+        { val:'Kurikulum Merdeka (Umum)', label:'Kurikulum Merdeka (Umum)' },
+        { val:'IPA', label:'IPA' },
+        { val:'IPS', label:'IPS' },
+    ];
+
+    const sekolahHtml = `
+        <div class="full" style="margin-top:8px; padding-top:16px; border-top:1px solid var(--border-light);">
+            <div style="font-size:.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; font-weight:700; margin-bottom:16px;">
+                <i class="fas fa-school" style="margin-right:6px; color:var(--primary);"></i> Data Sekolah
+            </div>
+        </div>
+        <div class="form-group">
+            <label style="display:block; font-weight:700; margin-bottom:8px; font-size:.95rem; color:var(--primary-dark);">NIS (Nomor Induk Sekolah)</label>
+            <input type="text" id="edit_nis" class="form-input" value="${d.nis || ''}" placeholder="Nomor Induk Sekolah">
+        </div>
+        <div class="form-group">
+            <label style="display:block; font-weight:700; margin-bottom:8px; font-size:.95rem; color:var(--primary-dark);">Kelas Saat Ini</label>
+            <input type="text" id="edit_kelas" class="form-input" value="${d.kelas || ''}" placeholder="Contoh: 10.1, 11.3">
+        </div>
+        <div class="form-group full">
+            <label style="display:block; font-weight:700; margin-bottom:8px; font-size:.95rem; color:var(--primary-dark);">Jurusan / Peminatan</label>
+            <select id="edit_jurusan" class="form-input" style="appearance:auto; -webkit-appearance:auto;">
+                ${jurusanOptions.map(o => `<option value="${o.val}" ${d.jurusan === o.val ? 'selected' : ''}>${o.label}</option>`).join('')}
+            </select>
+        </div>`;
+
+    document.getElementById('editDataForm').innerHTML = personalHtml + sekolahHtml;
     document.getElementById('editDataModal').classList.add('open');
 };
 
@@ -1496,6 +1622,7 @@ window.simpanEditData = async function() {
     const btn = document.getElementById('btnSimpanEditData');
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
     btn.disabled = true;
+    const now = new Date().toISOString();
     const updates = {
         nama: document.getElementById('edit_nama').value.trim(),
         nisn: document.getElementById('edit_nisn').value.trim(),
@@ -1504,13 +1631,17 @@ window.simpanEditData = async function() {
         noHp: document.getElementById('edit_noHp').value.trim(),
         email: document.getElementById('edit_email').value.trim(),
         alamat: document.getElementById('edit_alamat').value.trim(),
+        nis: document.getElementById('edit_nis').value.trim(),
+        kelas: document.getElementById('edit_kelas').value.trim(),
+        jurusan: document.getElementById('edit_jurusan').value,
+        terakhirUpdateData: now,
     };
     if (!updates.nama) { showToast('warning', 'Perhatian', 'Nama lengkap wajib diisi!'); btn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan'; btn.disabled = false; return; }
     try {
         await db.collection('siswa').doc(currentSiswa.id).update(updates);
         Object.assign(currentSiswa, updates);
         tutupModalEditData();
-        showToast('success', 'Data Diperbarui!', 'Data siswa berhasil diperbarui.');
+        showToast('success', 'Berhasil Disimpan!', 'Perubahan data siswa berhasil tersimpan.');
         loadProfil(document.getElementById('pageContainer'));
         document.getElementById('topNama').textContent = updates.nama.split(' ')[0];
     } catch (e) {
