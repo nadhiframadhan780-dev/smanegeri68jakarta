@@ -2012,7 +2012,7 @@ function closeCookieBanner() {
 function initDownloadAPK() {
     $('btnDownloadAPK')?.addEventListener('click', e => {
         e.preventDefault();
-        const url = 'https://github.com/nadhiframadhan780-dev/smanegeri68jakarta/raw/refs/heads/main/SMAN%2068%20JAKARTA%202.5.0.apk';
+        const url = 'https://github.com/nadhiframadhan780-dev/smanegeri68jakarta/raw/refs/heads/main/SMAN%2068%20JAKARTA.apk';
         window.open(url, '_blank');
     });
 }
