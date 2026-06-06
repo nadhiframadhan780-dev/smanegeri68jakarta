@@ -139,22 +139,33 @@ function initCursor() {
 
     let mouseX = 0, mouseY = 0;
     let ringX = 0, ringY = 0;
+    let cursorMoving = false, cursorRAF = null;
 
     document.addEventListener('mousemove', e => {
         mouseX = e.clientX;
         mouseY = e.clientY;
         dot.style.left  = mouseX + 'px';
         dot.style.top   = mouseY + 'px';
-    });
+        if (!cursorMoving) {
+            cursorMoving = true;
+            animateRing();
+        }
+    }, { passive: true });
 
-    // Smooth ring follow
-    (function animateRing() {
-        ringX += (mouseX - ringX) * 0.12;
-        ringY += (mouseY - ringY) * 0.12;
+    // Smooth ring follow — only runs while mouse is moving
+    function animateRing() {
+        const dx = mouseX - ringX;
+        const dy = mouseY - ringY;
+        ringX += dx * 0.12;
+        ringY += dy * 0.12;
         ring.style.left = ringX + 'px';
         ring.style.top  = ringY + 'px';
-        requestAnimationFrame(animateRing);
-    })();
+        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+            cursorRAF = requestAnimationFrame(animateRing);
+        } else {
+            cursorMoving = false;
+        }
+    }
 
     // Hover effects
     document.addEventListener('mouseover', e => {
@@ -321,7 +332,7 @@ function initHeroParticles() {
     const container = $('heroParticles');
     if (!container) return;
 
-    const count = window.innerWidth < 768 ? 12 : 28;
+    const count = window.innerWidth < 768 ? 6 : 15;
     for (let i = 0; i < count; i++) {
         const p = document.createElement('div');
         p.className = 'hero-particle';
@@ -771,10 +782,10 @@ function openNewsModal(data, dateStr) {
     if (html.includes('\n')) {
         html = html.split('\n\n')
             .map(p => p.trim()).filter(Boolean)
-            .map(p => `<p style="margin-bottom:18px;line-height:1.9;text-indent:2em;">${p.replace(/\n/g,'<br>')}</p>`)
+            .map(p => `<p style="margin-bottom:18px;line-height:1.9;">${p.replace(/\n/g,'<br>')}</p>`)
             .join('');
     } else {
-        html = `<p style="line-height:1.9;text-indent:2em;">${html}</p>`;
+        html = `<p style="line-height:1.9;">${html}</p>`;
     }
 
     const img = data.image
@@ -1548,7 +1559,7 @@ function openNotifPanel() {
     var overlay = document.getElementById('notifPanelOverlay');
     if (panel)   panel.classList.add('active');
     if (overlay) overlay.classList.add('active');
-    setTimeout(markAllRead, 600);
+    // Tidak auto mark-all-read — badge hilang setelah tiap pengumuman diklik
 }
 
 function closeNotifPanel() {
@@ -1640,6 +1651,12 @@ async function loadNotifications() {
                     notifList.push(Object.assign({ id: doc.id }, d));
                 }
             });
+            // Urutkan terbaru di atas
+            notifList.sort(function(a, b) {
+                var ta = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
+                var tb = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
+                return tb - ta;
+            });
             renderNotifPanel();
             updateNotifBadge();
         });
@@ -1681,9 +1698,17 @@ function renderNotifPanel() {
     }
 
     var readSet = getReadSet();
-    var html    = '';
 
-    notifList.forEach(function(item) {
+    // Urutkan: paling baru di atas (berdasarkan createdAt)
+    var sorted = notifList.slice().sort(function(a, b) {
+        var ta = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
+        var tb = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
+        return tb - ta; // descending — terbaru di atas
+    });
+
+    var html = '';
+
+    sorted.forEach(function(item) {
         var isUnread  = !readSet.has(item.id);
         var dateStr   = '';
         if (item.createdAt && item.createdAt.toDate) {
@@ -1705,6 +1730,11 @@ function renderNotifPanel() {
               + itemColor + ';padding:1px 7px;border-radius:999px;font-weight:700;">\u2197 Buka Link</span>'
             : '';
 
+        // Badge NEW untuk pengumuman yang belum dibaca
+        var newBadge = isUnread
+            ? '<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.6rem;background:#ef4444;color:white;padding:1px 7px;border-radius:999px;font-weight:800;letter-spacing:0.5px;margin-left:6px;vertical-align:middle;">NEW</span>'
+            : '';
+
         html +=
             '<div class="notif-item ' + (isUnread ? 'unread' : '') + '"' +
                 ' onclick="openLetterModal(\'' + item.id.replace(/\'/g, "\\'") + '\')"' +
@@ -1714,7 +1744,7 @@ function renderNotifPanel() {
                     '<i class="' + escapeHtml(itemIcon) + '"></i>' +
                 '</div>' +
                 '<div class="notif-item-body">' +
-                    '<div class="notif-item-title">' + escapeHtml(item.title || 'Pengumuman') + '</div>' +
+                    '<div class="notif-item-title">' + escapeHtml(item.title || 'Pengumuman') + newBadge + '</div>' +
                     '<div class="notif-item-preview">' + escapeHtml(preview) + '</div>' +
                     '<div class="notif-item-date">' + dateStr + linkBadge + '</div>' +
                 '</div>' +
@@ -2047,9 +2077,9 @@ function initMagneticButtons() {
 function initAOS() {
     if (typeof AOS !== 'undefined') {
         AOS.init({
-            duration: 800,
+            duration: 550,
             once:     true,
-            offset:   80,
+            offset:   60,
             easing:   'ease-out-cubic'
         });
     }
@@ -2079,18 +2109,27 @@ function initMobileNav() {
 function initMouseGradient() {
     if (window.matchMedia('(max-width:768px)').matches) return;
 
+    let rafPending = false;
     document.addEventListener('mousemove', e => {
-        const x = (e.clientX / window.innerWidth) * 100;
-        const y = (e.clientY / window.innerHeight) * 100;
-        document.documentElement.style.setProperty('--mouse-x', x + '%');
-        document.documentElement.style.setProperty('--mouse-y', y + '%');
-    });
+        if (rafPending) return;
+        rafPending = true;
+        requestAnimationFrame(() => {
+            const x = (e.clientX / window.innerWidth) * 100;
+            const y = (e.clientY / window.innerHeight) * 100;
+            document.documentElement.style.setProperty('--mouse-x', x + '%');
+            document.documentElement.style.setProperty('--mouse-y', y + '%');
+            rafPending = false;
+        });
+    }, { passive: true });
 }
 
 // ============================================
 // INTERSECTION OBSERVER — GENERIC REVEAL
 // ============================================
 function initRevealOnScroll() {
+    // Skip on mobile — AOS handles reveal, double observer causes jank
+    if (window.innerWidth < 768) return;
+
     const targets = $$('.ptn-card, .bento-card, .vm-card, .news-card, .agenda-card, .gallery-item, .testimonial-card, .facility-card, .subject-card, .download-card, .benefit-item, .ranking-card');
 
     const observer = new IntersectionObserver((entries, obs) => {
@@ -2101,12 +2140,12 @@ function initRevealOnScroll() {
                 obs.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
 
     targets.forEach((el, i) => {
         el.style.opacity    = '0';
-        el.style.transform  = 'translateY(24px)';
-        el.style.transition = `opacity 0.5s ease ${(i % 6) * 0.07}s, transform 0.5s ease ${(i % 6) * 0.07}s`;
+        el.style.transform  = 'translateY(20px)';
+        el.style.transition = `opacity 0.45s ease ${(i % 4) * 0.06}s, transform 0.45s ease ${(i % 4) * 0.06}s`;
         observer.observe(el);
     });
 }
