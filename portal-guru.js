@@ -850,7 +850,7 @@ document.getElementById('forgotForm')?.addEventListener('submit', async e => {
   if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Mengirim...'; }
 
   try {
-    await db.collection('resetPasswordRequest').add({
+    await db.collection('resetPasswordRequests').add({
       nip, nuptk, nama, status:'pending',
       alasan:'',
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -879,11 +879,11 @@ document.getElementById('btnDoCek')?.addEventListener('click', async () => {
 
   try {
     // Cari berdasarkan field 'nip', tanpa orderBy
-    let snap = await db.collection('resetPasswordRequest').where('nip','==',nip).get();
+    let snap = await db.collection('resetPasswordRequests').where('nip','==',nip).get();
 
     // Jika tidak ketemu, coba cari berdasarkan field 'nuptk'
     if (snap.empty) {
-      snap = await db.collection('resetPasswordRequest').where('nuptk','==',nip).get();
+      snap = await db.collection('resetPasswordRequests').where('nuptk','==',nip).get();
     }
 
     // Jika masih kosong, tidak ada data
@@ -1003,14 +1003,14 @@ document.getElementById('resetPassForm')?.addEventListener('submit', async e => 
   if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>'; }
 
   try {
-    const reqDoc = await db.collection('resetPasswordRequest').doc(resetDocId).get();
+    const reqDoc = await db.collection('resetPasswordRequests').doc(resetDocId).get();
     if (!reqDoc.exists) throw new Error('Not found');
     const { nip, nuptk } = reqDoc.data();
 
     let gs = await db.collection('guru').where('nip','==',nip).get();
     if (gs.empty) gs = await db.collection('guru').where('nuptk','==',nuptk).get();
     if (!gs.empty) await gs.docs[0].ref.update({ password: np });
-    await db.collection('resetPasswordRequest').doc(resetDocId).update({ status:'completed' });
+    await db.collection('resetPasswordRequests').doc(resetDocId).update({ status:'completed' });
 
     clearInterval(countdownItv);
     closeModal('modalResetPass');
