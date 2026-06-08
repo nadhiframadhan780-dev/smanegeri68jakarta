@@ -71,10 +71,10 @@ const linkUrls = {
     loginGuru:     'portal-guru.html',
     ppdb:          'https://spmb.jakarta.go.id/',
     virsch:        './virsch-68.html',
-    penmurmut:     './unduh-kartu-peserta.html',
+    penmurmut:     './halaman-baru-segera-hadir.html',
     pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
     topJurusan:    './jurusan-kuliah-terbaik-2026.html',
-    kelulusan:     './halaman-sedang-diperbarui.html',
+    kelulusan:     './halaman-baru-segera-hadir.html',
     hukum:         './hukum.html'
 };
 
