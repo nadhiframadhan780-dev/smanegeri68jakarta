@@ -1559,8 +1559,23 @@ section { padding: 96px 0; position: relative; overflow: hidden; }
 }
 .quote-mark { font-size: 2rem; color: var(--primary); opacity: 0.4; margin-bottom: 8px; }
 .quote-block p { font-size: 0.95rem; line-height: 1.85; color: var(--text-secondary); }
-.principal-signature { padding-top: 8px; }
+.principal-signature { padding-top: 8px; display: flex; flex-direction: column; gap: 2px; }
 .signature-name { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: var(--text); }
+.signature-img {
+    width: 140px;
+    height: auto;
+    object-fit: contain;
+    margin: 6px 0 2px;
+    /* Blend agar bg transparan / putih tetap menyatu di light & dark mode */
+    mix-blend-mode: multiply;
+    filter: contrast(1.1);
+    pointer-events: none;
+    user-select: none;
+}
+[data-theme="dark"] .signature-img {
+    mix-blend-mode: screen;
+    filter: invert(1) contrast(1.1);
+}
 .signature-title { font-size: 0.875rem; color: var(--primary); font-weight: 500; }
 
 /* === ABOUT SECTION === */
