@@ -67,15 +67,16 @@ const defaultAlumniData = {
 // LINK URLS
 // ============================================
 const linkUrls = {
-    loginSiswa:    './portal-siswa-68.html',
-    loginGuru:     'portal-guru.html',
-    ppdb:          'https://spmb.jakarta.go.id/',
-    virsch:        './virsch-68.html',
-    penmurmut:     './halaman-baru-segera-hadir.html',
-    pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
-    topJurusan:    './jurusan-kuliah-terbaik-2026.html',
-    kelulusan:     './halaman-baru-segera-hadir.html',
-    hukum:         './hukum.html'
+    loginSiswa:          './portal-siswa-68.html',
+    loginGuru:           'portal-guru.html',
+    ppdb:                'https://spmb.jakarta.go.id/',
+    virsch:              './virsch-68.html',
+    penmurmut:           './halaman-baru-segera-hadir.html',
+    pemeringkatan:       './pemeringkatan-ptn-indonesia-2026.html',
+    topJurusan:          './jurusan-kuliah-terbaik-2026.html',
+    kelulusan:           './halaman-baru-segera-hadir.html',
+    hukum:               './hukum.html',
+    sertifikatAkreditasi:'https://bansm.kemdikbud.go.id/sispena2/akreditasi'
 };
 
 // ============================================
@@ -318,11 +319,28 @@ function initSmoothScroll() {
             const target = document.querySelector(href);
             if (!target) return;
             e.preventDefault();
-            const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-h')) || 72;
-            const y    = target.getBoundingClientRect().top + window.scrollY - navH - 16;
-            window.scrollTo({ top: y, behavior: 'smooth' });
+            scrollToSection(target);
         });
     });
+}
+
+// Fungsi terpusat: hitung offset akurat lalu scroll
+function scrollToSection(el) {
+    const style  = getComputedStyle(document.documentElement);
+    const navH   = parseInt(style.getPropertyValue('--navbar-h')) || 72;
+
+    // Top bar hanya ada di desktop; cek apakah benar-benar tampil
+    const topBar = document.getElementById('topBar');
+    const topH   = (topBar && topBar.offsetHeight > 0)
+                   ? (parseInt(style.getPropertyValue('--topbar-h')) || 40)
+                   : 0;
+
+    const extraPad = 16;
+    const offset   = navH + topH + extraPad;
+
+    // Gunakan getBoundingClientRect agar akurat meski halaman baru dibuka
+    const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
 // ============================================
@@ -480,25 +498,26 @@ function initFloatingFab() {
 // ============================================
 function initLinks() {
     const map = {
-        topLoginSiswa:     'loginSiswa',
-        topLoginGuru:      'loginGuru',
-        topPPDB:           'ppdb',
-        topVirsch:         'virsch',
-        topPenmurmut:      'penmurmut',
-        floatLoginSiswa:   'loginSiswa',
-        floatLoginGuru:    'loginGuru',
-        floatPPDB:         'ppdb',
-        floatVirsch:       'virsch',
-        floatPenmurmut:    'penmurmut',
-        floatPemeringkatan:'pemeringkatan',
-        footerLoginSiswa:  'loginSiswa',
-        footerLoginGuru:   'loginGuru',
-        footerVirsch:      'virsch',
-        footerHukum:       'hukum',
-        btnPemeringkatan:  'pemeringkatan',
-        btnTopJurusan:     'topJurusan',
-        navKelulusan:      'kelulusan',
-        heroPPDB:          'ppdb'
+        topLoginSiswa:       'loginSiswa',
+        topLoginGuru:        'loginGuru',
+        topPPDB:             'ppdb',
+        topVirsch:           'virsch',
+        topPenmurmut:        'penmurmut',
+        floatLoginSiswa:     'loginSiswa',
+        floatLoginGuru:      'loginGuru',
+        floatPPDB:           'ppdb',
+        floatVirsch:         'virsch',
+        floatPenmurmut:      'penmurmut',
+        floatPemeringkatan:  'pemeringkatan',
+        footerLoginSiswa:    'loginSiswa',
+        footerLoginGuru:     'loginGuru',
+        footerVirsch:        'virsch',
+        footerHukum:         'hukum',
+        btnPemeringkatan:    'pemeringkatan',
+        btnTopJurusan:       'topJurusan',
+        navKelulusan:        'kelulusan',
+        heroPPDB:            'ppdb',
+        btnUnduhSertifikat:  'sertifikatAkreditasi'
     };
 
     Object.entries(map).forEach(([id, key]) => {
@@ -746,9 +765,13 @@ function createNewsCard(id, data) {
     const card = document.createElement('div');
     card.className = 'news-card';
 
+    let newsDate = null;
     const dateStr = data.date?.toDate
-        ? new Date(data.date.toDate()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+        ? (() => { newsDate = new Date(data.date.toDate()); return newsDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); })()
         : '';
+
+    // Tandai berita "NEW" jika terbit dalam 7 hari terakhir
+    const isNew = newsDate && (Date.now() - newsDate.getTime()) < 7 * 24 * 60 * 60 * 1000;
 
     const excerpt = data.excerpt || (data.content?.substring(0, 110) + '...') || '';
     const img     = data.image || 'https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png';
@@ -757,6 +780,7 @@ function createNewsCard(id, data) {
         <div class="news-image-wrap">
             <img src="${img}" alt="${data.title}" class="news-image" loading="lazy"
                  onerror="this.src='https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png'">
+            ${isNew ? '<span class="news-new-badge"><i class="fas fa-bolt"></i> NEW</span>' : ''}
         </div>
         <div class="news-content">
             <div class="news-date"><i class="far fa-calendar-alt"></i> ${dateStr}</div>
@@ -2095,8 +2119,8 @@ function initMobileNav() {
             const id = item.getAttribute('data-section');
             const el = document.getElementById(id);
             if (!el) return;
-            const navH = 60;
-            window.scrollTo({ top: el.offsetTop - navH, behavior: 'smooth' });
+            // Pakai fungsi terpusat yang sama agar offset konsisten
+            scrollToSection(el);
             $$('.mob-nav-item').forEach(n => n.classList.remove('active'));
             item.classList.add('active');
         });
