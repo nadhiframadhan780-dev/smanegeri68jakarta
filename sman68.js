@@ -74,7 +74,7 @@ const linkUrls = {
     penmurmut:     './unduh-kartu-peserta.html',
     pemeringkatan: './pemeringkatan-ptn-indonesia-2026.html',
     topJurusan:    './jurusan-kuliah-terbaik-2026.html',
-    kelulusan:     './aduan-penmurmut.html',
+    kelulusan:     './halaman-sedang-diperbarui.html',
     hukum:         './hukum.html'
 };
 
@@ -523,7 +523,7 @@ function initKelulusanLink() {
 
     if (now >= target) {
         el.classList.remove('nav-disabled', 'nav-special');
-        el.textContent   = 'Aduan/Sanggah Penmurmut';
+        el.textContent   = 'Jadwal';
         el.style.cssText = 'pointer-events:auto;opacity:1;cursor:pointer;';
     }
 }
