@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="icon" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="portal-guru.css">
 </head>
 <body>
@@ -114,6 +115,13 @@
           <button type="button" id="btnCekReset" class="btn-outline w-full" style="margin-top:10px;">
             <i class="fas fa-search"></i> Cek Status Reset Password
           </button>
+          <button type="button" id="btnKeBerandaLogin" class="btn-outline w-full" style="margin-top:10px;background:transparent;border-color:#e2e8f0;color:#64748b;" onclick="window.location.replace('./sman68.html')">
+            <i class="fas fa-house"></i> Kembali ke Beranda
+          </button>
+          <div style="margin-top:18px;text-align:center;padding-top:14px;border-top:1px solid #f1f5f9;">
+            <span style="font-size:.8rem;color:#94a3b8;">Belum punya akun guru?</span>
+            <button type="button" onclick="window.location.replace('./daftar-guru.html')" style="background:none;border:none;font-size:.8rem;font-weight:700;color:#059669;cursor:pointer;padding:0 0 0 5px;text-decoration:underline;text-underline-offset:3px;">Daftar Sekarang →</button>
+          </div>
         </form>
       </div>
     </div>
@@ -428,9 +436,14 @@
 
       <!-- == JADWAL == -->
       <section id="pg-jadwal" class="pg" style="display:none;">
-        <div class="pg-header"><div><h1 class="pg-title">Jam Mengajar</h1><p class="pg-sub" id="jadwalDate">—</p></div></div>
-        <div class="panel">
-          <div class="panel-head"><i class="fas fa-chalkboard-teacher"></i><h3>Jadwal Mengajar Hari Ini</h3></div>
+        <div class="pg-header">
+          <div><h1 class="pg-title" id="jadwalPageTitle">Jadwal</h1><p class="pg-sub" id="jadwalDate">—</p></div>
+          <div class="pg-header-right" id="jadwalAddBtnWrap" style="display:none;">
+            <button class="btn-primary" id="btnTambahJadwal"><i class="fas fa-plus"></i> Tambah Jadwal</button>
+          </div>
+        </div>
+        <div class="panel" id="jadwalPanel">
+          <div class="panel-head"><i class="fas fa-chalkboard-teacher"></i><h3 id="jadwalPanelTitle">Jadwal Hari Ini</h3></div>
           <div id="jadwalList" class="jadwal-list-wrap"></div>
         </div>
       </section>
@@ -520,9 +533,17 @@
             <h2 class="profile-name" id="profileName">—</h2>
             <p class="profile-role" id="profileRole">—</p>
             <div class="profile-qr">
-              <p class="profile-qr-label">QR Code Absensi</p>
-              <div class="qr-box"><i class="fas fa-qrcode"></i></div>
+              <p class="profile-qr-label"><i class="fas fa-qrcode" style="margin-right:5px;"></i>QR Code Absensi</p>
+              <div style="display:flex;align-items:center;justify-content:center;width:100%;">
+                <div id="profileQrBox" style="display:inline-flex;align-items:center;justify-content:center;background:#ffffff;border:2px solid #e2e8f0;border-radius:14px;padding:10px;width:152px;height:152px;box-sizing:border-box;flex-shrink:0;">
+                  <i class="fas fa-circle-notch fa-spin" style="color:#94a3b8;font-size:1.2rem;"></i>
+                </div>
+              </div>
+              <p style="font-size:.68rem;color:#94a3b8;margin-top:8px;text-align:center;"><i class="fas fa-mobile-screen-button" style="margin-right:3px;"></i>Scan untuk absensi cepat</p>
             </div>
+            <button id="btnLogoutProfil" class="btn-logout-profil">
+              <i class="fas fa-sign-out-alt"></i> Keluar dari Akun
+            </button>
           </div>
           <div class="panel profile-right-panel">
             <div class="panel-head"><i class="fas fa-edit"></i><h3>Edit Profil</h3></div>
@@ -557,6 +578,30 @@
   <button class="bn" data-page="pengumuman"><i class="fas fa-bullhorn"></i><span>Info</span></button>
   <button class="bn" data-page="profil"><i class="fas fa-user-circle"></i><span>Profil</span></button>
 </nav>
+
+<!-- ===========================
+     MODAL: KONFIRMASI LOGOUT
+     =========================== -->
+<div id="modalLogout" class="modal-bg" style="z-index:9999;">
+  <div class="modal-card" style="max-width:360px;text-align:center;">
+    <div style="display:flex;justify-content:flex-end;"><button class="modal-x" data-close="modalLogout" style="position:relative;top:0;right:0;"><i class="fas fa-times"></i></button></div>
+    <div style="margin:-8px 0 16px;">
+      <div style="width:64px;height:64px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+        <i class="fas fa-arrow-right-from-bracket" style="font-size:1.6rem;color:#dc2626;"></i>
+      </div>
+      <h2 style="font-size:1.1rem;font-weight:800;color:#0f172a;margin-bottom:8px;">Keluar dari Portal?</h2>
+      <p style="font-size:.83rem;color:#64748b;line-height:1.5;">Sesi Anda akan diakhiri. Pastikan sudah melakukan absensi hari ini sebelum keluar.</p>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button data-close="modalLogout" style="flex:1;padding:12px;background:#f1f5f9;border:none;border-radius:10px;font-size:.86rem;font-weight:600;color:#374151;cursor:pointer;">
+        <i class="fas fa-xmark" style="margin-right:4px;"></i>Batal
+      </button>
+      <button id="btnLogoutConfirm" style="flex:1;padding:12px;background:#dc2626;border:none;border-radius:10px;font-size:.86rem;font-weight:700;color:#fff;cursor:pointer;">
+        <i class="fas fa-sign-out-alt" style="margin-right:4px;"></i>Ya, Keluar
+      </button>
+    </div>
+  </div>
+</div>
 
 <script src="portal-guru.js"></script>
 </body>
