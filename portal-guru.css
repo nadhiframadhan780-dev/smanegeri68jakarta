@@ -801,9 +801,21 @@ body {
   .stat-grid { grid-template-columns:repeat(2,1fr); }
   .dash-grid { grid-template-columns:1fr; }
   .profile-layout { grid-template-columns:1fr; }
-  .profile-left-panel { display:flex; align-items:center; gap:20px; text-align:left; padding:20px; }
+  .profile-left-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 20px;
+    text-align: left;
+    padding: 20px;
+  }
   .profile-avatar-wrap { flex-shrink:0; }
   .profile-qr { display:none; }
+  /* Logout button turun ke baris baru, full width */
+  .btn-logout-profil {
+    flex: 1 1 100%;
+    margin-top: 4px;
+  }
 }
 @media(max-width:1000px) {
   .two-col { grid-template-columns:1fr; }
@@ -838,3 +850,102 @@ body {
   .filter-row .field-wrap { min-width:100% !important; width:100%; }
   .topbar-user-info { display:none; }
 }
+
+/* ── Tombol Beranda Login ─────────────────────────── */
+#btnKeBerandaLogin {
+  transition: background .2s, color .2s, border-color .2s;
+}
+#btnKeBerandaLogin:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+/* ── Profile QR Box ──────────────────────────────── */
+.profile-qr { margin-top: 18px; }
+.profile-qr-label {
+  font-size: .72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+#profileQrBox {
+  /* Paksa tetap kotak — tidak boleh melebar */
+  width: 152px !important;
+  height: 152px !important;
+  min-width: 152px !important;
+  min-height: 152px !important;
+  max-width: 152px !important;
+  max-height: 152px !important;
+  padding: 10px !important;
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+}
+/* Semua child qrcodejs: img, canvas, table */
+#profileQrBox > * {
+  display: block !important;
+  width: 132px !important;
+  height: 132px !important;
+  max-width: 132px !important;
+  max-height: 132px !important;
+}
+#profileQrBox img,
+#profileQrBox canvas {
+  border-radius: 6px;
+  object-fit: contain;
+}
+/* qrcodejs kadang inject div pembungkus */
+#profileQrBox > div {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 132px !important;
+  height: 132px !important;
+  overflow: hidden !important;
+}
+#profileQrBox > div > img,
+#profileQrBox > div > canvas {
+  width: 132px !important;
+  height: 132px !important;
+  max-width: 132px !important;
+  max-height: 132px !important;
+}
+
+/* ── Tombol Keluar dari Akun di Profil ────────────── */
+.btn-logout-profil {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 11px 20px;
+  font-family: var(--font);
+  font-size: .84rem;
+  font-weight: 700;
+  color: #dc2626;
+  background: #fff5f5;
+  border: 1.5px solid #fecaca;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: background .2s, border-color .2s, transform .15s;
+  white-space: nowrap;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.btn-logout-profil:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+.btn-logout-profil:active { transform: scale(.97); }
+
+/* ── Jadwal Kegiatan hapus btn ───────────────────── */
+.j-check i.fa-trash { pointer-events: none; }
+
+/* ── Logout Modal ────────────────────────────────── */
+#modalLogout .modal-card { border-radius: 20px; overflow: visible; }
+#btnLogoutConfirm:hover { background: #b91c1c !important; }
+#btnLogoutConfirm:active { transform: scale(.97); }
