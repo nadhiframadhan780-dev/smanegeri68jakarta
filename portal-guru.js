@@ -234,6 +234,45 @@ function fillUserUI() {
   document.getElementById('pMapel').value = mapel;
   document.getElementById('pHp').value    = guru?.hp    || '';
   document.getElementById('pEmail').value = guru?.email || '';
+
+  // Generate QR Code
+  generateAbsensiQR();
+}
+
+function generateAbsensiQR() {
+  const qrBox = document.getElementById('profileQrBox');
+  if (!qrBox || !guru) return;
+  qrBox.innerHTML = '';
+  const qrData = JSON.stringify({
+    type:  'absensi-guru',
+    id:    guru.id,
+    nip:   guru.nip   || '',
+    nuptk: guru.nuptk || '',
+    nama:  guru.nama  || '',
+    ts:    new Date().toISOString().split('T')[0],
+  });
+  const QR_SIZE = 132; // fixed, fits inside 160x160 box with 12px padding each side
+  try {
+    new QRCode(qrBox, {
+      text:         qrData,
+      width:        QR_SIZE,
+      height:       QR_SIZE,
+      colorDark:    '#1e293b',
+      colorLight:   '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+    setTimeout(() => {
+      const child = qrBox.querySelector('img, canvas');
+      if (child) {
+        child.style.cssText = 'display:block;width:' + QR_SIZE + 'px;height:' + QR_SIZE + 'px;border-radius:6px;';
+      }
+      // Remove any extra wrapper div qrcodejs adds
+      const tbl = qrBox.querySelector('table');
+      if (tbl) tbl.style.cssText = 'border-radius:6px;overflow:hidden;';
+    }, 80);
+  } catch(e) {
+    qrBox.innerHTML = '<p style="font-size:.7rem;color:#dc2626;text-align:center;">QR tidak tersedia</p>';
+  }
 }
 
 // ============================================================
@@ -255,7 +294,7 @@ function initPortal() {
 const PAGE_LABELS = {
   dashboard:  ['fa-th-large','Dashboard'],
   absensi:    ['fa-clipboard-check','Absensi'],
-  jadwal:     ['fa-clock','Jam Mengajar'],
+  jadwal:     ['fa-clock','Jadwal'],
   kalender:   ['fa-calendar-alt','Kalender Pendidikan'],
   pengumuman: ['fa-bullhorn','Pengumuman'],
   laporan:    ['fa-chart-bar','Laporan Absensi'],
@@ -337,18 +376,23 @@ window.toggleMobileSidebar = toggleMobileSidebar;
 window.closeMobileSidebar  = closeMobileSidebar;
 
 // ============================================================
-//  LOGOUT
+//  LOGOUT — pakai modal konfirmasi
 // ============================================================
-document.getElementById('btnLogout')?.addEventListener('click', () => {
-  if (!confirm('Keluar dari Portal Guru?')) return;
+function doLogout() {
   guru = null;
   localStorage.removeItem('pgSession');
   document.getElementById('portalApp').style.display = 'none';
   document.getElementById('bottomNav').style.display = 'none';
   document.getElementById('loginPage').style.display = '';
   document.getElementById('loginForm')?.reset();
+  closeModal('modalLogout');
   toast('info','Berhasil Keluar','Sampai jumpa kembali!');
-});
+}
+
+document.getElementById('btnLogout')?.addEventListener('click', () => openModal('modalLogout'));
+document.getElementById('btnLogoutConfirm')?.addEventListener('click', doLogout);
+// Wire profil logout button too
+document.getElementById('btnLogoutProfil')?.addEventListener('click', () => openModal('modalLogout'));
 
 // ============================================================
 //  ABSENSI — STATUS SELECTION
@@ -553,6 +597,13 @@ async function loadDashStats() {
 function loadDashJadwal() {
   const container = document.getElementById('dashJadwal');
   if (!container) return;
+
+  if (isNonMapel()) {
+    container.innerHTML = `<div style="padding:16px;text-align:center;font-size:.8rem;color:#64748b;"><i class="fas fa-calendar-check" style="font-size:1.4rem;margin-bottom:6px;display:block;color:#059669;"></i>Lihat halaman <strong>Jadwal Kegiatan</strong> untuk jadwal Anda.</div>`;
+    loadDashAnn();
+    return;
+  }
+
   const jadwal = getJadwalData();
   const now    = new Date();
   const curMin = now.getHours()*60+now.getMinutes();
@@ -578,8 +629,16 @@ function loadDashJadwal() {
 }
 
 // ============================================================
-//  JADWAL
+//  JADWAL — SMART: Guru Mapel vs Tenaga Pendidik Non-Mapel
 // ============================================================
+const NON_MAPEL_ROLES = ['kepala sekolah','wakil kepala','wakasek','waka','tata usaha','tu ','bendahara','staf','pustakawan','lab','bk','konselor','humas','kurikulum','kesiswaan','sapras','sarana','administrasi'];
+
+function isNonMapel() {
+  const mapel = (guru?.mapel||'').toLowerCase();
+  const jabatan = (guru?.jabatan||'').toLowerCase();
+  return NON_MAPEL_ROLES.some(r => mapel.includes(r) || jabatan.includes(r));
+}
+
 function getJadwalData() {
   return [
     { time:'07:00–08:30', kelas:'XII.3', mapel: guru?.mapel||'Mata Pelajaran' },
@@ -590,7 +649,127 @@ function getJadwalData() {
   ];
 }
 
+// Firestore key for personal jadwal kegiatan (non-mapel)
+async function loadJadwalKegiatan() {
+  const list = document.getElementById('jadwalList');
+  if (!list || !guru) return;
+  list.innerHTML = skeletons(3, '70px');
+  try {
+    const snap = await db.collection('jadwalKegiatan').where('guruId','==',guru.id).get();
+    const items = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.jam||'').localeCompare(b.jam||''));
+    list.innerHTML = '';
+    if (items.length===0) {
+      list.innerHTML = `<div style="padding:24px;text-align:center;color:#94a3b8;font-size:.84rem;"><i class="fas fa-calendar-plus" style="font-size:2rem;margin-bottom:10px;display:block;opacity:.4;"></i>Belum ada jadwal kegiatan.<br>Klik <strong>Tambah Jadwal</strong> untuk menambahkan.</div>`;
+      return;
+    }
+    const today = new Date().toLocaleDateString('id-ID',{weekday:'long'}).split(',')[0].toLowerCase();
+    items.forEach(j => {
+      const el = document.createElement('div');
+      el.className = 'jadwal-item';
+      const isToday = (j.hari||'').toLowerCase().includes(today);
+      el.innerHTML = `
+        <div class="j-time">${safe(j.jam||'—')}</div>
+        <div class="j-info">
+          <div class="j-kelas">${safe(j.kegiatan||'—')}</div>
+          <div class="j-mapel">${safe(j.hari||'')}${j.tempat?` &bull; ${safe(j.tempat)}`:''}</div>
+        </div>
+        ${isToday ? '<span class="j-label now">Hari Ini</span>' : ''}
+        <button class="j-check" onclick="hapusJadwalKegiatan('${j.id}')" title="Hapus"><i class="fas fa-trash" style="color:#dc2626;font-size:.75rem;"></i></button>
+      `;
+      list.appendChild(el);
+    });
+  } catch(e) {
+    list.innerHTML='<p style="padding:20px;text-align:center;color:#dc2626;font-size:.82rem;">Gagal memuat jadwal.</p>';
+  }
+}
+window.hapusJadwalKegiatan = async function(id) {
+  if (!confirm('Hapus jadwal ini?')) return;
+  try {
+    await db.collection('jadwalKegiatan').doc(id).delete();
+    toast('success','Dihapus','Jadwal berhasil dihapus.');
+    loadJadwalKegiatan();
+  } catch(e) { toast('error','Gagal','Tidak dapat menghapus jadwal.'); }
+};
+
+function openTambahJadwal() {
+  const days=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const opts=days.map(d=>`<option>${d}</option>`).join('');
+  const modal = document.createElement('div');
+  modal.id='modalTambahJadwal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML=`
+    <div style="background:#fff;border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <h3 style="font-size:1rem;font-weight:700;color:#0f172a;"><i class="fas fa-calendar-plus" style="color:#059669;margin-right:8px;"></i>Tambah Jadwal Kegiatan</h3>
+        <button onclick="document.getElementById('modalTambahJadwal').remove()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:#64748b;"><i class="fas fa-times"></i></button>
+      </div>
+      <div style="margin-bottom:12px;"><label style="display:block;font-size:.78rem;font-weight:600;color:#374151;margin-bottom:4px;">Hari</label>
+        <select id="tjHari" style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;">${opts}</select></div>
+      <div style="margin-bottom:12px;"><label style="display:block;font-size:.78rem;font-weight:600;color:#374151;margin-bottom:4px;">Jam (mis. 08:00–09:00)</label>
+        <input id="tjJam" type="text" placeholder="07:00–08:30" style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;box-sizing:border-box;"></div>
+      <div style="margin-bottom:12px;"><label style="display:block;font-size:.78rem;font-weight:600;color:#374151;margin-bottom:4px;">Nama Kegiatan</label>
+        <input id="tjKegiatan" type="text" placeholder="Rapat, Piket, Supervisi, dll." style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;box-sizing:border-box;"></div>
+      <div style="margin-bottom:18px;"><label style="display:block;font-size:.78rem;font-weight:600;color:#374151;margin-bottom:4px;">Tempat / Ruangan (opsional)</label>
+        <input id="tjTempat" type="text" placeholder="Ruang Kepala Sekolah, Aula..." style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;box-sizing:border-box;"></div>
+      <div style="display:flex;gap:8px;">
+        <button id="btnSimpanJadwal" onclick="simpanJadwalKegiatan()" style="flex:1;padding:11px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;"><i class="fas fa-save"></i> Simpan</button>
+        <button onclick="document.getElementById('modalTambahJadwal').remove()" style="flex:1;padding:11px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-size:.85rem;cursor:pointer;">Batal</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+window.openTambahJadwal = openTambahJadwal;
+
+window.simpanJadwalKegiatan = async function() {
+  const hari     = document.getElementById('tjHari')?.value;
+  const jam      = document.getElementById('tjJam')?.value.trim();
+  const kegiatan = document.getElementById('tjKegiatan')?.value.trim();
+  const tempat   = document.getElementById('tjTempat')?.value.trim();
+  if (!jam || !kegiatan) { toast('warning','Lengkapi Data','Jam dan nama kegiatan wajib diisi!'); return; }
+  const btn = document.getElementById('btnSimpanJadwal');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';}
+  try {
+    await db.collection('jadwalKegiatan').add({
+      guruId:guru.id, nama:guru.nama, hari, jam, kegiatan, tempat:tempat||'',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('modalTambahJadwal')?.remove();
+    toast('success','Tersimpan!','Jadwal kegiatan berhasil ditambahkan.');
+    loadJadwalKegiatan();
+  } catch(e) {
+    toast('error','Gagal','Tidak dapat menyimpan jadwal.');
+  } finally {
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Simpan';}
+  }
+};
+
 function loadJadwal() {
+  const nonMapel = isNonMapel();
+  // Update page titles
+  const pageTitle   = document.getElementById('jadwalPageTitle');
+  const panelTitle  = document.getElementById('jadwalPanelTitle');
+  const addBtnWrap  = document.getElementById('jadwalAddBtnWrap');
+  const btnTambah   = document.getElementById('btnTambahJadwal');
+
+  if (nonMapel) {
+    if(pageTitle)  pageTitle.textContent  = 'Jadwal Kegiatan';
+    if(panelTitle) panelTitle.textContent = 'Jadwal Kegiatan Saya';
+    if(addBtnWrap) addBtnWrap.style.display = '';
+    if(btnTambah)  { btnTambah.onclick = openTambahJadwal; }
+    // Update nav label
+    const navJadwal = document.querySelector('[data-page="jadwal"] span');
+    if(navJadwal) navJadwal.textContent = 'Jadwal Kegiatan';
+    const bnJadwal = document.querySelector('.bn[data-page="jadwal"] span');
+    if(bnJadwal) bnJadwal.textContent = 'Jadwal';
+    loadJadwalKegiatan();
+    return;
+  }
+
+  // Guru mapel — jadwal mengajar default
+  if(pageTitle)  pageTitle.textContent  = 'Jam Mengajar';
+  if(panelTitle) panelTitle.textContent = 'Jadwal Mengajar Hari Ini';
+  if(addBtnWrap) addBtnWrap.style.display = 'none';
+
   const list = document.getElementById('jadwalList');
   if (!list) return;
   const jadwal = getJadwalData();
@@ -906,8 +1085,9 @@ document.getElementById('btnDoCek')?.addEventListener('click', async () => {
     const sMap = {
       pending:    {cls:'pending',    icon:'fa-clock',        col:'#d97706', lbl:'Menunggu Persetujuan'},
       processing: {cls:'processing', icon:'fa-spinner',      col:'#2563eb', lbl:'Sedang Diproses'},
-      approved:   {cls:'approved',   icon:'fa-check-circle', col:'#059669', lbl:'Disetujui'},
+      approved:   {cls:'approved',   icon:'fa-check-circle', col:'#059669', lbl:'Disetujui — Siap Reset'},
       rejected:   {cls:'rejected',   icon:'fa-times-circle', col:'#dc2626', lbl:'Ditolak'},
+      completed:  {cls:'approved',   icon:'fa-shield-check', col:'#059669', lbl:'Password Berhasil Diperbarui'},
     };
     const st = sMap[data.status]||sMap.pending;
 
@@ -916,6 +1096,10 @@ document.getElementById('btnDoCek')?.addEventListener('click', async () => {
       <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;">
         <p style="font-size:.78rem;color:#059669;font-weight:700;margin-bottom:8px;"><i class="fas fa-exclamation-triangle"></i> Segera reset password sebelum link kedaluwarsa!</p>
         <button onclick="doOpenReset()" class="btn-primary w-full"><i class="fas fa-key"></i> Reset Password Sekarang</button>
+      </div>`;
+    if (data.status==='completed') extra=`
+      <div style="margin-top:12px;padding:12px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
+        <p style="font-size:.8rem;font-weight:700;color:#059669;"><i class="fas fa-circle-check"></i> Password Anda sudah berhasil diperbarui. Silakan login menggunakan password baru.</p>
       </div>`;
     if (data.status==='rejected') extra=`
       <div style="margin-top:10px;padding:10px;background:#fef2f2;border-radius:8px;border:1px solid #fecaca;">
