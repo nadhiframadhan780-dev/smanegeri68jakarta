@@ -542,7 +542,7 @@ function initKelulusanLink() {
 
     if (now >= target) {
         el.classList.remove('nav-disabled', 'nav-special');
-        el.textContent   = 'Jadwal';
+        el.textContent   = 'Jadwal & Unduh';
         el.style.cssText = 'pointer-events:auto;opacity:1;cursor:pointer;';
     }
 }
