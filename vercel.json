@@ -1,0 +1,9 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/sman68",
+      "destination": "/sman68.html"
+    }
+  ]
+}
