@@ -35,8 +35,8 @@ let stampBase64     = null;   // stempel sekolah (dari file yang diupload)
    4. downloadOpen = tgl,  downloadClose = tgl   → hitung mundur pembukaan, lalu hitung mundur penutupan
 ══════════════════════════════════════════════════════ */
 const JADWAL_UNDUH = {
-  downloadOpen:  null,                   // contoh: '2025-07-15T08:00:00'
-  downloadClose: '2026-06-10T17:50:59',  // contoh: '2025-08-01T23:59:59'
+  downloadOpen:  '2026-07-10T15:00:59',  // contoh: '2025-07-15T08:00:00'
+  downloadClose: '2026-06-08T15:00:59',  // contoh: '2025-08-01T23:59:59'
 };
 /* ─────────────────────────────────────────────────── */
 
