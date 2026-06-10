@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jadwal Unduh - SMAN 68 Jakarta</title>
+
+  <!-- Favicon SMAN 68 -->
+  <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" />
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --biru-tua: #003366;
+      --biru-muda: #0057a8;
+      --kuning-emas: #f5c518;
+      --putih: #ffffff;
+      --abu-terang: #f0f4fa;
+      --abu-border: #d0dce8;
+      --teks-gelap: #1a2a3a;
+      --teks-sedang: #4a6080;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: var(--abu-terang);
+      color: var(--teks-gelap);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, var(--biru-tua) 0%, var(--biru-muda) 100%);
+      color: var(--putih);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    }
+
+    header img.logo {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      flex-shrink: 0;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    .header-text h1 {
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      line-height: 1.2;
+    }
+
+    .header-text p {
+      font-size: clamp(0.7rem, 2vw, 0.85rem);
+      opacity: 0.85;
+      margin-top: 3px;
+    }
+
+    /* ── MAIN CONTENT ── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .card {
+      background: var(--putih);
+      border-radius: 16px;
+      box-shadow: 0 6px 32px rgba(0, 51, 102, 0.12);
+      overflow: hidden;
+      width: 100%;
+      max-width: 720px;
+      border: 1px solid var(--abu-border);
+    }
+
+    .card-header {
+      background: linear-gradient(90deg, var(--biru-tua), var(--biru-muda));
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-header .icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .card-header h2 {
+      color: var(--putih);
+      font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .card-header .badge {
+      margin-left: auto;
+      background: var(--kuning-emas);
+      color: var(--biru-tua);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── IMAGE CONTAINER ── */
+    .image-wrapper {
+      padding: 24px 24px 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .image-wrapper img.jadwal {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 2px solid var(--abu-border);
+      display: block;
+      object-fit: contain;
+      box-shadow: 0 2px 12px rgba(0,51,102,0.08);
+    }
+
+    /* ── INFO STRIP ── */
+    .info-strip {
+      margin: 0 24px 24px;
+      background: var(--abu-terang);
+      border: 1px solid var(--abu-border);
+      border-left: 4px solid var(--biru-muda);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.82rem;
+      color: var(--teks-sedang);
+      line-height: 1.6;
+    }
+
+    .info-strip strong {
+      color: var(--biru-tua);
+      font-size: 0.85rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--biru-tua);
+      color: rgba(255,255,255,0.75);
+      text-align: center;
+      padding: 14px 16px;
+      font-size: 0.78rem;
+      letter-spacing: 0.2px;
+    }
+
+    footer span {
+      color: var(--kuning-emas);
+      font-weight: 700;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      header {
+        padding: 14px 16px;
+        gap: 12px;
+      }
+
+      header img.logo {
+        width: 44px;
+        height: 44px;
+      }
+
+      .card-header {
+        padding: 14px 16px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .card-header .badge {
+        margin-left: 0;
+      }
+
+      .image-wrapper {
+        padding: 16px 12px 12px;
+      }
+
+      .info-strip {
+        margin: 0 12px 18px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      header img.logo {
+        width: 36px;
+        height: 36px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <img
+      class="logo"
+      src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png"
+      alt="Logo SMAN 68 Jakarta"
+    />
+    <div class="header-text">
+      <h1>SMA Negeri 68 Jakarta</h1>
+      <p>Portal Informasi Akademik &amp; Administrasi Sekolah</p>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <div class="card">
+
+      <div class="card-header">
+        <span class="icon">📅</span>
+        <h2>Jadwal Unduh Dokumen</h2>
+        <span class="badge">INFO PENTING</span>
+      </div>
+
+      <div class="image-wrapper">
+        <img
+          class="jadwal"
+          src="https://github.com/nadhiframadhan780-dev/appsmanegeri68jakarta/blob/main/jadwal%20unduh%20maintenance.png?raw=true"
+          alt="Jadwal Unduh - Maintenance SMAN 68 Jakarta"
+          loading="lazy"
+        />
+      </div>
+
+      <div class="info-strip">
+        <strong>📌 Perhatian:</strong> Jadwal unduh dokumen berlaku sesuai dengan ketentuan yang tertera pada gambar di atas.
+        Harap unduh dokumen pada waktu yang telah ditentukan. Apabila ada kendala, segera hubungi pihak administrasi sekolah.
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    &copy; 2025 <span>SMA Negeri 68 Jakarta</span> &mdash; Jl. Salemba Raya No.18, Jakarta Pusat
+  </footer>
+
+</body>
+</html>
