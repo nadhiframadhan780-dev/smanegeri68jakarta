@@ -74,7 +74,7 @@ const linkUrls = {
     penmurmut:           './halaman-baru-segera-hadir.html',
     pemeringkatan:       './pemeringkatan-ptn-indonesia-2026.html',
     topJurusan:          './jurusan-kuliah-terbaik-2026.html',
-    kelulusan:           './halaman-baru-segera-hadir.html',
+    kelulusan:           './jadwal_unduh_sman68jakarta.html',
     hukum:               './hukum.html',
     sertifikatAkreditasi:'https://bansm.kemdikbud.go.id/sispena2/akreditasi'
 };
