@@ -36,7 +36,7 @@ let stampBase64     = null;   // stempel sekolah (dari file yang diupload)
 ══════════════════════════════════════════════════════ */
 const JADWAL_UNDUH = {
   downloadOpen:  '2026-07-10T15:00:59',  // contoh: '2025-07-15T08:00:00'
-  downloadClose: '2026-06-08T15:00:59',  // contoh: '2025-08-01T23:59:59'
+  downloadClose: 'null',  // contoh: '2025-08-01T23:59:59'
 };
 /* ─────────────────────────────────────────────────── */
 
