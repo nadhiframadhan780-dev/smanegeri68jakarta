@@ -71,7 +71,7 @@ const linkUrls = {
     loginGuru:           'portal-guru.html',
     ppdb:                'https://spmb.jakarta.go.id/',
     virsch:              './virsch-68.html',
-    penmurmut:           './halaman-baru-segera-hadir.html',
+    penmurmut:           './spmb.sman68jkt.html',
     pemeringkatan:       './pemeringkatan-ptn-indonesia-2026.html',
     topJurusan:          './jurusan-kuliah-terbaik-2026.html',
     kelulusan:           './jadwal_unduh_sman68jakarta.html',
