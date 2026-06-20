@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Jadwal & Unduh Dokumen – SMAN 68 Jakarta</title>
+<title>Pusat Layanan - SMAN 68 Jakarta</title>
 <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -352,6 +352,66 @@ nav{
 .unduh-btn-info h4{font-size:13px;font-weight:700;color:var(--gray-900);margin-bottom:2px}
 .unduh-btn-info p{font-size:11px;color:var(--gray-500)}
 
+/* ═══════ LAYANAN LAINNYA ═══════ */
+.fl-section-sub{font-size:12.5px;color:var(--gray-500);margin:-10px 0 18px;line-height:1.5}
+.fl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media(max-width:980px){.fl-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.fl-grid{grid-template-columns:1fr}}
+
+.fl-card{
+  position:relative;background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(255,255,255,.6));
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1.5px solid rgba(255,255,255,.5);border-radius:22px;padding:26px 20px;
+  text-align:center;overflow:hidden;cursor:pointer;
+  box-shadow:0 8px 28px rgba(15,112,69,.10),0 2px 8px rgba(16,80,160,.06);
+  transition:transform .32s cubic-bezier(.34,1.4,.64,1),box-shadow .32s cubic-bezier(.34,1.4,.64,1),border-color .32s ease;
+  animation:flSlideUp .5s cubic-bezier(.22,1,.36,1) backwards;
+  isolation:isolate;
+}
+@keyframes flSlideUp{from{opacity:0;transform:translateY(26px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.fl-card::before{
+  content:'';position:absolute;inset:0;z-index:0;opacity:0;
+  background:linear-gradient(160deg,rgba(34,192,122,.10),rgba(34,122,232,.10));
+  transition:opacity .32s ease;
+}
+.fl-card:hover{
+  transform:translateY(-8px) scale(1.025);
+  box-shadow:0 20px 44px rgba(15,112,69,.18),0 6px 16px rgba(16,80,160,.12);
+  border-color:rgba(34,192,122,.45);
+}
+.fl-card:hover::before{opacity:1}
+.fl-card:active{transform:translateY(-4px) scale(.99)}
+
+.fl-card-icon{
+  position:relative;z-index:1;width:64px;height:64px;border-radius:18px;margin:0 auto 16px;
+  display:flex;align-items:center;justify-content:center;font-size:27px;color:#fff;
+  background:linear-gradient(135deg,var(--g6),var(--b6));
+  box-shadow:0 8px 18px rgba(18,136,90,.35);
+  transition:transform .32s cubic-bezier(.34,1.4,.64,1);
+}
+.fl-card:hover .fl-card-icon{transform:scale(1.12) rotate(-4deg)}
+.fl-card-name{position:relative;z-index:1;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;
+  color:var(--gray-900);margin-bottom:7px;line-height:1.3}
+.fl-card-desc{position:relative;z-index:1;font-size:12.5px;color:var(--gray-500);line-height:1.55;margin-bottom:18px;
+  min-height:36px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fl-card-btn{
+  position:relative;z-index:1;display:inline-flex;align-items:center;gap:7px;
+  background:linear-gradient(135deg,var(--g6),var(--b6));color:#fff;border:none;
+  border-radius:30px;padding:10px 22px;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;
+  letter-spacing:.01em;overflow:hidden;transition:opacity .2s ease,transform .2s ease;
+}
+.fl-card-btn:hover{opacity:.92}
+.fl-card-btn i{transition:transform .25s cubic-bezier(.34,1.4,.64,1)}
+.fl-card:hover .fl-card-btn i{transform:translateX(3px)}
+
+/* Ripple effect */
+.fl-ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);
+  transform:scale(0);animation:flRippleAnim .55s ease-out;pointer-events:none;z-index:2}
+@keyframes flRippleAnim{to{transform:scale(2.6);opacity:0}}
+
+.fl-empty{grid-column:1/-1;text-align:center;padding:36px 18px;color:var(--gray-400)}
+.fl-empty i{font-size:32px;color:var(--gray-300);margin-bottom:8px;display:block}
+
 /* Toast */
 #toast-stack{position:fixed;bottom:20px;right:20px;z-index:4000;display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none}
 .toast-item{background:var(--g8);color:#fff;padding:12px 16px;border-radius:10px;
@@ -462,7 +522,7 @@ footer strong{color:#fff}
   <div class="nav-inner">
     <img class="nav-logo" src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo SMAN 68" onclick="showSection('jadwal',document.querySelector('.nav-tab'))"/>
     <div class="nav-title">
-      <h1>SMAN 68 Jakarta</h1>
+      <h1>Pusat Layanan - SMAN 68 Jakarta</h1>
       <p>Portal Jadwal, Kalender & Dokumen Resmi</p>
     </div>
     <div class="nav-tabs" id="navTabs">
@@ -470,6 +530,7 @@ footer strong{color:#fff}
       <button class="nav-tab" data-sec="akademik" onclick="showSection('akademik',this)"><i class="fa fa-book-open"></i> Kal. Akademik</button>
       <button class="nav-tab" data-sec="kalender" onclick="showSection('kalender',this)"><i class="fa fa-calendar"></i> Kalender</button>
       <button class="nav-tab" data-sec="unduh" onclick="showSection('unduh',this)"><i class="fa fa-download"></i> Unduh</button>
+      <button class="nav-tab" data-sec="fiturlain" onclick="showSection('fiturlain',this)"><i class="fa fa-th-large"></i> Layanan Lainnya</button>
     </div>
     <button class="hamburger" onclick="toggleMobileNav()"><i class="fa fa-bars"></i></button>
   </div>
@@ -478,14 +539,15 @@ footer strong{color:#fff}
     <button class="nav-tab" data-sec="akademik" onclick="showSection('akademik',this);closeMobileNav()"><i class="fa fa-book-open"></i> Kal. Akademik</button>
     <button class="nav-tab" data-sec="kalender" onclick="showSection('kalender',this);closeMobileNav()"><i class="fa fa-calendar"></i> Kalender</button>
     <button class="nav-tab" data-sec="unduh" onclick="showSection('unduh',this);closeMobileNav()"><i class="fa fa-download"></i> Unduh</button>
+    <button class="nav-tab" data-sec="fiturlain" onclick="showSection('fiturlain',this);closeMobileNav()"><i class="fa fa-th-large"></i> Layanan Lainnya</button>
   </div>
 </nav>
 
 <!-- HERO -->
 <div class="hero">
   <img class="hero-logo" src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68"/>
-  <h2>SMAN 68 Jakarta</h2>
-  <p>Portal Jadwal Pelajaran, Kalender Akademik, dan Unduh Dokumen Resmi Sekolah</p>
+  <h2>Pusat Layanan - SMAN 68 Jakarta</h2>
+  <p>Portal Jadwal Pelajaran, Kalender Akademik, Unduh Dokumen, dan Akses Layanan Resmi Sekolah</p>
 </div>
 
 <!-- JADWAL -->
@@ -570,6 +632,15 @@ footer strong{color:#fff}
     <div id="unduhContent">
       <div class="empty-state"><i class="fa fa-folder-open"></i><p>Belum ada dokumen tersedia.</p></div>
     </div>
+  </div>
+</div>
+
+<!-- LAYANAN LAINNYA ← FITUR BARU (section mandiri) -->
+<div class="section" id="sec-fiturlain" style="display:none">
+  <div class="section-title"><i class="fa fa-rocket"></i> Layanan Lainnya</div>
+  <p class="fl-section-sub">Berbagai layanan tambahan resmi SMAN 68 Jakarta yang bisa kamu akses langsung dari sini.</p>
+  <div class="fl-grid" id="fiturLainnyaGrid">
+    <div class="fl-empty"><i class="fa fa-th-large"></i><p>Belum ada fitur tersedia saat ini.</p></div>
   </div>
 </div>
 
@@ -990,6 +1061,65 @@ onValue(ref(db,'unduh'), snap => {
 
 function loadUnduh(){}
 
+// ==================== LAYANAN LAINNYA ====================
+onValue(ref(db,'fitur_lainnya'), snap => {
+  const data = snap.val();
+  const grid = document.getElementById('fiturLainnyaGrid');
+  if(!grid) return;
+  if(!data || !Object.keys(data).length){
+    grid.innerHTML = `<div class="fl-empty"><i class="fa fa-th-large"></i><p>Belum ada fitur tersedia saat ini.</p></div>`;
+    return;
+  }
+  const FITUR_GRAD_MAP = {
+    'g6,b6':'linear-gradient(135deg,var(--g6),var(--b6))',
+    'g5,g3':'linear-gradient(135deg,var(--g5),var(--g3))',
+    'b6,b4':'linear-gradient(135deg,var(--b6),var(--b4))',
+    'orange,yellow':'linear-gradient(135deg,var(--orange),var(--yellow))',
+    'red,orange':'linear-gradient(135deg,var(--red),var(--orange))'
+  };
+  const entries = Object.entries(data)
+    .filter(([, d]) => d && d.name && d.url && d.active !== false)
+    .sort((a, b) => (a[1].order ?? 0) - (b[1].order ?? 0));
+  if(!entries.length){
+    grid.innerHTML = `<div class="fl-empty"><i class="fa fa-th-large"></i><p>Belum ada fitur tersedia saat ini.</p></div>`;
+    return;
+  }
+  grid.innerHTML = entries.map(([id, d], i) => {
+    const grad = FITUR_GRAD_MAP[d.colorGrad] || FITUR_GRAD_MAP['g6,b6'];
+    const icon = d.icon || 'fa-link';
+    const desc = d.desc || 'Buka untuk informasi lebih lanjut';
+    return `<div class="fl-card" style="animation-delay:${Math.min(i,8)*0.06}s" data-fitur-id="${id}" onclick="openFiturLink(event,'${btoa(unescape(encodeURIComponent(d.url)))}')">
+      <div class="fl-card-icon" style="background:${grad}"><i class="fa ${icon}"></i></div>
+      <div class="fl-card-name">${d.name}</div>
+      <div class="fl-card-desc">${desc}</div>
+      <span class="fl-card-btn"><i class="fa fa-arrow-right"></i> Buka Fitur</span>
+    </div>`;
+  }).join('');
+});
+
+window.openFiturLink = function(e, b64url){
+  // Ripple effect
+  try{
+    const card = e.currentTarget;
+    const ripple = document.createElement('span');
+    ripple.className = 'fl-ripple';
+    const rect = card.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 1.4;
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    card.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  }catch(err){}
+  try{
+    const url = decodeURIComponent(escape(atob(b64url)));
+    setTimeout(() => { window.open(url, '_blank', 'noopener,noreferrer'); }, 140);
+  }catch(err){
+    showToast('❌ Gagal membuka fitur');
+  }
+};
+
+
 // ==================== KALENDER AGENDA ====================
 const months_id = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const today = new Date();
@@ -1149,7 +1279,7 @@ init();
 
 // ==================== UI HELPERS ====================
 window.showSection = function(id, btn){
-  ['jadwal','akademik','kalender','unduh'].forEach(s => {
+  ['jadwal','akademik','kalender','unduh','fiturlain'].forEach(s => {
     const el = document.getElementById('sec-'+s);
     if(el) el.style.display = s===id ? '' : 'none';
   });
