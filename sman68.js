@@ -2036,7 +2036,7 @@ function closeCookieBanner() {
 function initDownloadAPK() {
     $('btnDownloadAPK')?.addEventListener('click', e => {
         e.preventDefault();
-        const url = 'https://github.com/nadhiframadhan780-dev/android.sman.68.jakarta/raw/refs/heads/main/SMAN%2068%20Jakarta.apk';
+        const url = 'https://www.sman68jakarta.xyz/SMAN%2068%20Jakarta.apk';
         window.open(url, '_blank');
     });
 }
