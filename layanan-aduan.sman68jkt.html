@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layanan Aduan Resmi — SMAN 68 Jakarta</title>
+<meta name="description" content="Layanan Aduan Resmi SMAN 68 Jakarta. Sampaikan aduan Anda dengan aman, cepat, dan terpercaya.">
+
+<!-- Favicon: Logo SMAN 68 Jakarta -->
+<link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+<link rel="shortcut icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+<link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+/* ============================================
+   CSS VARIABLES — DESIGN TOKENS
+   ============================================ */
+:root {
+  /* Colors — Green & Blue gradient palette */
+  --c-emerald-50: #ECFDF5;
+  --c-emerald-100: #D1FAE5;
+  --c-emerald-500: #10B981;
+  --c-emerald-600: #059669;
+  --c-emerald-700: #047857;
+  --c-forest-900: #0B3D2E;
+
+  --c-blue-50: #EFF6FF;
+  --c-blue-100: #DBEAFE;
+  --c-blue-500: #3B82F6;
+  --c-blue-600: #2563EB;
+  --c-blue-700: #1D4ED8;
+  --c-navy-900: #0C2D48;
+
+  --c-amber-500: #F59E0B;
+  --c-amber-600: #D97706;
+  --c-amber-50: #FFFBEB;
+  --c-red-500: #EF4444;
+  --c-red-600: #DC2626;
+  --c-red-50: #FEF2F2;
+
+  --c-ink-900: #0F172A;
+  --c-ink-700: #334155;
+  --c-ink-500: #64748B;
+  --c-ink-400: #94A3B8;
+  --c-ink-200: #E2E8F0;
+  --c-ink-100: #F1F5F9;
+  --c-ink-50: #F8FAFC;
+  --c-white: #FFFFFF;
+
+  --grad-primary: linear-gradient(135deg, var(--c-emerald-500) 0%, var(--c-blue-600) 100%);
+  --grad-primary-soft: linear-gradient(135deg, var(--c-emerald-50) 0%, var(--c-blue-50) 100%);
+  --grad-text: linear-gradient(135deg, var(--c-emerald-600) 0%, var(--c-blue-600) 100%);
+  --grad-hero-bg: radial-gradient(circle at 15% 20%, rgba(16,185,129,0.10), transparent 45%), radial-gradient(circle at 85% 10%, rgba(37,99,235,0.10), transparent 45%);
+
+  /* Typography */
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Spacing / Layout */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --container-max: 1180px;
+
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 48px rgba(15, 23, 42, 0.12);
+  --shadow-glow-green: 0 8px 32px rgba(16, 185, 129, 0.25);
+  --shadow-glow-blue: 0 8px 32px rgba(37, 99, 235, 0.25);
+
+  --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  color: var(--c-ink-900);
+  background: var(--c-ink-50);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+img, svg { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, select, textarea { font-family: inherit; font-size: 1rem; }
+a { color: inherit; text-decoration: none; }
+ul, ol { list-style: none; }
+
+:focus-visible {
+  outline: 2.5px solid var(--c-blue-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   BACKGROUND DECORATION
+   ============================================ */
+.bg-decoration {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+}
+.bg-orb-1 {
+  width: 480px; height: 480px;
+  background: var(--c-emerald-500);
+  top: -120px; left: -120px;
+  animation: float-orb 18s ease-in-out infinite;
+}
+.bg-orb-2 {
+  width: 420px; height: 420px;
+  background: var(--c-blue-500);
+  top: 30%; right: -150px;
+  animation: float-orb 22s ease-in-out infinite reverse;
+}
+@keyframes float-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, 60px) scale(1.08); }
+}
+
+/* ============================================
+   TOAST NOTIFICATIONS
+   ============================================ */
+.toast-container {
+  position: fixed;
+  top: 88px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: calc(100vw - 40px);
+  width: 380px;
+}
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--c-white);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-lg);
+  border-left: 4px solid var(--c-ink-300);
+  animation: toast-in var(--transition-base) forwards;
+  position: relative;
+  overflow: hidden;
+}
+.toast.toast-success { border-left-color: var(--c-emerald-500); }
+.toast.toast-error { border-left-color: var(--c-red-500); }
+.toast.toast-warning { border-left-color: var(--c-amber-500); }
+.toast.toast-info { border-left-color: var(--c-blue-500); }
+.toast.removing { animation: toast-out var(--transition-fast) forwards; }
+.toast-icon { font-size: 1.2rem; line-height: 1; flex-shrink: 0; margin-top: 1px; }
+.toast-body { flex: 1; min-width: 0; }
+.toast-title { font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 2px; }
+.toast-msg { font-size: 0.83rem; color: var(--c-ink-500); }
+.toast-close { flex-shrink: 0; color: var(--c-ink-400); padding: 2px; border-radius: 6px; transition: var(--transition-fast); }
+.toast-close:hover { background: var(--c-ink-100); color: var(--c-ink-700); }
+.toast-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: currentColor; opacity: 0.25; animation: toast-progress 4s linear forwards; }
+.toast-success .toast-progress { color: var(--c-emerald-500); }
+.toast-error .toast-progress { color: var(--c-red-500); }
+.toast-warning .toast-progress { color: var(--c-amber-500); }
+.toast-info .toast-progress { color: var(--c-blue-500); }
+
+@keyframes toast-in { from { opacity: 0; transform: translateX(40px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes toast-out { to { opacity: 0; transform: translateX(40px) scale(0.95); } }
+@keyframes toast-progress { from { width: 100%; } to { width: 0%; } }
+
+@media (max-width: 560px) {
+  .toast-container { left: 12px; right: 12px; width: auto; top: 78px; }
+}
+
+/* ============================================
+   NAVBAR
+   ============================================ */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(248, 250, 252, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+.navbar-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.navbar-brand { display: flex; align-items: center; gap: 11px; }
+.brand-mark {
+  width: 42px; height: 42px; flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--c-white);
+  border: 1px solid var(--c-ink-100);
+  box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; justify-content: center;
+  padding: 4px;
+  overflow: hidden;
+}
+.brand-mark-sm { width: 36px; height: 36px; padding: 3px; }
+.brand-logo-img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+.brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.brand-title { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; color: var(--c-ink-900); }
+.brand-subtitle { font-size: 0.74rem; color: var(--c-ink-500); font-weight: 500; }
+
+.navbar-actions { display: flex; align-items: center; gap: 8px; }
+.nav-link {
+  font-size: 0.88rem; font-weight: 600; color: var(--c-ink-700);
+  padding: 9px 16px; border-radius: var(--radius-pill);
+  transition: var(--transition-fast);
+}
+.nav-link:hover { background: var(--c-ink-100); color: var(--c-ink-900); }
+.nav-cta {
+  font-size: 0.88rem; font-weight: 700; color: var(--c-white);
+  background: var(--grad-primary);
+  padding: 10px 20px; border-radius: var(--radius-pill);
+  transition: var(--transition-base);
+  box-shadow: var(--shadow-glow-green);
+}
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(16,185,129,0.32); }
+.nav-cta:active { transform: translateY(0); }
+
+.navbar-mobile-toggle { display: none; flex-direction: column; gap: 4px; padding: 8px; }
+.navbar-mobile-toggle span { width: 22px; height: 2px; background: var(--c-ink-900); border-radius: 2px; transition: var(--transition-fast); }
+.navbar-mobile-menu {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 20px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-base), padding var(--transition-base);
+}
+.navbar-mobile-menu.open { max-height: 200px; padding: 8px 20px 16px; }
+.mobile-menu-item {
+  text-align: left; padding: 12px 14px; border-radius: var(--radius-sm);
+  font-weight: 600; font-size: 0.92rem; color: var(--c-ink-700);
+}
+.mobile-menu-item:hover { background: var(--c-ink-100); }
+.mobile-menu-cta { background: var(--grad-primary); color: var(--c-white); text-align: center; }
+
+@media (max-width: 720px) {
+  .navbar-actions { display: none; }
+  .navbar-mobile-toggle { display: flex; }
+  .navbar-mobile-menu { display: flex; }
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-weight: 700; font-size: 0.92rem; font-family: var(--font-body);
+  padding: 13px 24px; border-radius: var(--radius-pill);
+  transition: var(--transition-base);
+  white-space: nowrap;
+}
+.btn svg { flex-shrink: 0; }
+.btn-primary {
+  background: var(--grad-primary); color: var(--c-white);
+  box-shadow: var(--shadow-glow-green);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(16,185,129,0.32); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary {
+  background: var(--c-white); color: var(--c-ink-700);
+  border: 1.5px solid var(--c-ink-200);
+}
+.btn-secondary:hover { border-color: var(--c-ink-400); background: var(--c-ink-50); }
+.btn-ghost { background: transparent; color: var(--c-ink-700); border: 1.5px solid transparent; }
+.btn-ghost:hover { background: var(--c-ink-100); }
+.btn-lg { padding: 15px 28px; font-size: 0.96rem; }
+.btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+.btn-submit {
+  background: var(--c-ink-300, #CBD5E1); color: var(--c-white);
+  pointer-events: none;
+  transition: background var(--transition-base), box-shadow var(--transition-base), transform var(--transition-fast);
+}
+.btn-submit.enabled {
+  background: var(--grad-primary);
+  box-shadow: var(--shadow-glow-green);
+  pointer-events: auto;
+}
+.btn-submit.enabled:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(16,185,129,0.32); }
+
+/* ============================================
+   VIEWS — PAGE SWITCHING
+   ============================================ */
+.view { display: none; animation: view-fade-in var(--transition-slow) forwards; }
+.view.active { display: block; }
+@keyframes view-fade-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 64px 24px 80px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 48px;
+  align-items: center;
+  background: var(--grad-hero-bg);
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.8rem; font-weight: 700; color: var(--c-emerald-700);
+  background: var(--c-emerald-50);
+  padding: 7px 14px; border-radius: var(--radius-pill);
+  margin-bottom: 22px;
+  border: 1px solid var(--c-emerald-100);
+}
+.eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c-emerald-500); animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.hero-school-badge {
+  display: inline-flex; align-items: center; gap: 11px;
+  background: var(--c-white);
+  border: 1px solid var(--c-ink-100);
+  border-radius: var(--radius-pill);
+  padding: 8px 18px 8px 8px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 18px;
+}
+.hero-school-logo-img {
+  width: 36px; height: 36px;
+  object-fit: contain;
+  object-position: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--c-white);
+}
+.hero-school-badge span {
+  font-weight: 700; font-size: 0.88rem; color: var(--c-ink-700);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 4.2vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.12;
+  color: var(--c-ink-900);
+  letter-spacing: -0.02em;
+  margin-bottom: 22px;
+}
+.text-gradient {
+  background: var(--grad-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-desc {
+  font-size: 1.05rem; color: var(--c-ink-500);
+  max-width: 540px; margin-bottom: 32px;
+}
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 44px; }
+
+.hero-stats { display: flex; flex-direction: column; gap: 16px; }
+.hero-stat { display: flex; align-items: center; gap: 12px; }
+.stat-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem; flex-shrink: 0;
+}
+.stat-icon-green { background: var(--c-emerald-50); }
+.stat-icon-blue { background: var(--c-blue-50); }
+.stat-title { display: block; font-weight: 700; font-size: 0.92rem; color: var(--c-ink-900); }
+.stat-desc { display: block; font-size: 0.8rem; color: var(--c-ink-500); }
+
+/* Hero visual: floating cards */
+.hero-visual { position: relative; height: 460px; display: flex; align-items: center; justify-content: center; }
+.hero-glow {
+  position: absolute; width: 320px; height: 320px; border-radius: 50%;
+  background: var(--grad-primary); opacity: 0.16; filter: blur(60px);
+}
+.hero-card-stack { position: relative; width: 100%; height: 100%; }
+.floating-card {
+  position: absolute;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 20px;
+  animation: card-float 6s ease-in-out infinite;
+}
+.card-ticket { top: 6%; left: 6%; width: 230px; animation-delay: 0s; }
+.card-progress { bottom: 12%; left: 2%; width: 150px; text-align: center; animation-delay: 1.2s; }
+.card-shield { top: 36%; right: 0; width: 165px; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.85rem; color: var(--c-ink-700); animation-delay: 2.4s; }
+@keyframes card-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-14px); }
+}
+.ticket-mini-header { display: flex; align-items: center; gap: 7px; font-size: 0.74rem; font-weight: 700; color: var(--c-ink-500); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+.ticket-mini-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c-emerald-500); }
+.ticket-mini-number { font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; color: var(--c-ink-900); margin-bottom: 12px; letter-spacing: 0.02em; }
+.status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.74rem; font-weight: 700; padding: 5px 11px; border-radius: var(--radius-pill); }
+.status-pill-success { background: var(--c-emerald-100); color: var(--c-emerald-700); }
+.status-pill-pending { background: var(--c-amber-50); color: var(--c-amber-600); }
+.status-pill-process { background: var(--c-blue-100); color: var(--c-blue-700); }
+
+.progress-ring-wrap { position: relative; width: 80px; height: 80px; margin: 0 auto 8px; }
+.progress-ring { width: 80px; height: 80px; transform: rotate(-90deg); }
+.progress-ring-bg { fill: none; stroke: var(--c-ink-100); stroke-width: 7; }
+.progress-ring-fg { fill: none; stroke: var(--c-emerald-500); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 213.6; stroke-dashoffset: 0; transition: stroke-dashoffset 1s ease; }
+.progress-ring-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--c-ink-900); }
+.card-progress-text { font-size: 0.8rem; font-weight: 700; color: var(--c-ink-700); }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; padding-top: 40px; }
+  .hero-visual { height: 320px; order: -1; }
+  .floating-card { padding: 16px; }
+  .card-ticket { width: 190px; }
+}
+@media (max-width: 540px) {
+  .hero-actions { flex-direction: column; }
+  .hero-actions .btn { width: 100%; }
+  .hero-visual { display: none; }
+}
+
+/* ============================================
+   INFO / STEPS SECTION
+   ============================================ */
+.info-section { padding: 20px 24px 90px; }
+.info-section-inner { max-width: var(--container-max); margin: 0 auto; text-align: center; }
+.section-title { font-family: var(--font-display); font-size: clamp(1.6rem, 2.6vw, 2.1rem); font-weight: 800; color: var(--c-ink-900); margin-bottom: 10px; }
+.section-subtitle { color: var(--c-ink-500); margin-bottom: 44px; font-size: 1rem; }
+.step-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; text-align: left; }
+.step-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  padding: 30px 26px; box-shadow: var(--shadow-sm);
+  border: 1px solid var(--c-ink-100);
+  transition: var(--transition-base);
+}
+.step-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: var(--c-emerald-100); }
+.step-number {
+  font-family: var(--font-display); font-size: 1.6rem; font-weight: 800;
+  background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent;
+  margin-bottom: 14px;
+}
+.step-card h3 { font-family: var(--font-display); font-size: 1.08rem; font-weight: 700; margin-bottom: 8px; }
+.step-card p { color: var(--c-ink-500); font-size: 0.92rem; }
+@media (max-width: 820px) { .step-grid { grid-template-columns: 1fr; } }
+
+/* ============================================
+   FORM PAGE — GENERAL
+   ============================================ */
+.form-page { max-width: 760px; margin: 0 auto; padding: 32px 24px 100px; }
+.back-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-weight: 600; font-size: 0.88rem; color: var(--c-ink-500);
+  margin-bottom: 28px; padding: 8px 0;
+  transition: var(--transition-fast);
+}
+.back-link:hover { color: var(--c-ink-900); gap: 10px; }
+.form-header { margin-bottom: 32px; }
+.form-header h1 { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 800; margin-bottom: 8px; }
+.form-header p { color: var(--c-ink-500); }
+
+/* Progress steps */
+.form-progress { display: flex; align-items: center; margin-bottom: 36px; }
+.form-progress-step { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
+.form-progress-circle {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.92rem;
+  background: var(--c-ink-100); color: var(--c-ink-400);
+  transition: var(--transition-base);
+  border: 2px solid transparent;
+}
+.form-progress-step.active .form-progress-circle { background: var(--grad-primary); color: var(--c-white); box-shadow: var(--shadow-glow-green); }
+.form-progress-step.done .form-progress-circle { background: var(--c-emerald-500); color: var(--c-white); }
+.form-progress-label { font-size: 0.76rem; font-weight: 600; color: var(--c-ink-400); }
+.form-progress-step.active .form-progress-label { color: var(--c-ink-900); }
+.form-progress-line { flex: 1; height: 2px; background: var(--c-ink-200); margin: 0 8px; margin-bottom: 22px; position: relative; overflow: hidden; }
+.form-progress-line::after { content: ''; position: absolute; inset: 0; background: var(--grad-primary); transform: scaleX(0); transform-origin: left; transition: transform var(--transition-slow); }
+.form-progress-line.filled::after { transform: scaleX(1); }
+
+/* Form step transition */
+.form-step { display: none; animation: step-in var(--transition-base) forwards; }
+.form-step.active { display: block; }
+@keyframes step-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+
+/* Form card (glassmorphism-light) */
+.form-card {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--c-ink-100);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.form-card-title { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 1.12rem; font-weight: 700; margin-bottom: 6px; }
+.form-card-icon { font-size: 1.2rem; }
+.form-card-desc { color: var(--c-ink-500); font-size: 0.89rem; margin-bottom: 20px; }
+.optional-tag { font-size: 0.7rem; font-weight: 700; color: var(--c-ink-400); background: var(--c-ink-100); padding: 3px 9px; border-radius: var(--radius-pill); margin-left: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
+
+/* Form fields */
+.form-group { margin-bottom: 18px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group label { display: block; font-weight: 600; font-size: 0.87rem; margin-bottom: 7px; color: var(--c-ink-700); }
+.required-mark { color: var(--c-red-500); }
+.optional-mark { color: var(--c-ink-400); font-weight: 500; font-size: 0.82rem; }
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="url"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 13px 15px;
+  border: 1.5px solid var(--c-ink-200);
+  border-radius: var(--radius-sm);
+  background: var(--c-white);
+  color: var(--c-ink-900);
+  transition: var(--transition-fast);
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--c-emerald-500);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+.form-group input.invalid, .form-group select.invalid, .form-group textarea.invalid {
+  border-color: var(--c-red-500);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
+}
+.form-group textarea { resize: vertical; min-height: 140px; line-height: 1.6; }
+.field-error {
+  display: block; font-size: 0.78rem; color: var(--c-red-600); font-weight: 600;
+  margin-top: 6px; min-height: 0; opacity: 0; transform: translateY(-4px);
+  transition: var(--transition-fast);
+}
+.field-error.show { opacity: 1; transform: translateY(0); }
+.field-error.show::before { content: '⚠ '; }
+
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+/* Radio cards (category selection) */
+.radio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 6px; }
+.radio-grid-5 { grid-template-columns: repeat(3, 1fr); }
+.radio-card {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  text-align: center; padding: 18px 10px;
+  border: 1.5px solid var(--c-ink-200); border-radius: var(--radius-md);
+  cursor: pointer; transition: var(--transition-fast);
+  background: var(--c-white);
+}
+.radio-card input { position: absolute; opacity: 0; pointer-events: none; }
+.radio-card-icon { font-size: 1.5rem; }
+.radio-card-label { font-size: 0.8rem; font-weight: 600; color: var(--c-ink-700); line-height: 1.25; }
+.radio-card:hover { border-color: var(--c-emerald-500); background: var(--c-emerald-50); transform: translateY(-2px); }
+.radio-card:has(input:checked) {
+  border-color: var(--c-emerald-500);
+  background: linear-gradient(135deg, var(--c-emerald-50), var(--c-blue-50));
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
+}
+.radio-card:has(input:checked) .radio-card-label { color: var(--c-emerald-700); }
+@media (max-width: 600px) { .radio-grid, .radio-grid-5 { grid-template-columns: repeat(2, 1fr); } }
+
+/* Conditional fields reveal */
+.conditional-fields {
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height var(--transition-slow), opacity var(--transition-base), margin var(--transition-base);
+  margin-top: 0;
+}
+.conditional-fields.open { max-height: 500px; opacity: 1; margin-top: 18px; }
+
+/* Anonymous switch toggle */
+.anon-toggle { margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--c-ink-100); }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; cursor: pointer; }
+.switch-row-text { display: flex; flex-direction: column; gap: 2px; }
+.switch-row-text strong { font-size: 0.9rem; color: var(--c-ink-900); }
+.switch-row-text small { font-size: 0.78rem; color: var(--c-ink-500); }
+.switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+.switch-slider { position: absolute; inset: 0; background: var(--c-ink-200); border-radius: var(--radius-pill); transition: var(--transition-base); }
+.switch-slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: var(--c-white); border-radius: 50%; transition: var(--transition-base); box-shadow: var(--shadow-sm); }
+.switch input:checked + .switch-slider { background: var(--grad-primary); }
+.switch input:checked + .switch-slider::before { transform: translateX(20px); }
+
+/* Textarea char counter */
+.textarea-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+.char-counter { font-size: 0.78rem; font-weight: 600; color: var(--c-ink-400); margin-left: auto; }
+.char-counter.valid { color: var(--c-emerald-600); }
+
+/* Upload zone */
+.upload-zone {
+  border: 2px dashed var(--c-ink-200); border-radius: var(--radius-md);
+  padding: 30px 20px; text-align: center;
+  transition: var(--transition-fast); cursor: pointer;
+  background: var(--c-ink-50);
+}
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--c-emerald-500); background: var(--c-emerald-50); }
+.upload-icon { color: var(--c-ink-400); display: flex; justify-content: center; margin-bottom: 10px; }
+.upload-zone-content p { font-size: 0.9rem; color: var(--c-ink-700); margin-bottom: 4px; }
+.upload-hint { font-size: 0.78rem; color: var(--c-ink-400); }
+.upload-zone-file { display: flex; align-items: center; gap: 12px; text-align: left; }
+.upload-file-icon { font-size: 1.8rem; }
+.upload-file-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.upload-file-name { font-weight: 600; font-size: 0.88rem; color: var(--c-ink-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upload-file-size { font-size: 0.78rem; color: var(--c-ink-500); }
+.upload-file-remove { padding: 8px; border-radius: 8px; color: var(--c-ink-500); transition: var(--transition-fast); }
+.upload-file-remove:hover { background: var(--c-red-50); color: var(--c-red-600); }
+
+/* Form nav buttons */
+.form-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+@media (max-width: 480px) { .form-nav { flex-direction: column-reverse; } .form-nav .btn { width: 100%; } }
+
+/* ============================================
+   RULES CARDS
+   ============================================ */
+.rules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
+.rule-card {
+  background: var(--c-white); border: 1px solid var(--c-ink-100); border-radius: var(--radius-md);
+  padding: 18px; transition: var(--transition-fast);
+}
+.rule-card:hover { border-color: var(--c-emerald-100); box-shadow: var(--shadow-sm); }
+.rule-number {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 9px;
+  background: var(--grad-primary-soft); color: var(--c-emerald-700);
+  font-family: var(--font-display); font-weight: 800; font-size: 0.82rem;
+  margin-bottom: 10px;
+}
+.rule-card h3 { font-size: 0.94rem; font-weight: 700; margin-bottom: 6px; }
+.rule-card p { font-size: 0.82rem; color: var(--c-ink-500); line-height: 1.55; }
+@media (max-width: 700px) { .rules-grid { grid-template-columns: 1fr; } }
+
+/* Agreement checkbox */
+.agreement-check {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 16px; border-radius: var(--radius-md);
+  background: var(--c-ink-50); border: 1.5px solid var(--c-ink-200);
+  cursor: pointer; transition: var(--transition-fast);
+}
+.agreement-check:has(input:checked) { background: var(--c-emerald-50); border-color: var(--c-emerald-500); }
+.agreement-check input { position: absolute; opacity: 0; pointer-events: none; }
+.agreement-checkbox-visual {
+  width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0; margin-top: 1px;
+  border: 2px solid var(--c-ink-300, #CBD5E1); background: var(--c-white);
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition-fast);
+}
+.agreement-checkbox-visual svg { opacity: 0; transform: scale(0.5); transition: var(--transition-fast); }
+.agreement-check:has(input:checked) .agreement-checkbox-visual { background: var(--grad-primary); border-color: transparent; }
+.agreement-check:has(input:checked) .agreement-checkbox-visual svg { opacity: 1; transform: scale(1); }
+.agreement-text { font-size: 0.9rem; font-weight: 600; color: var(--c-ink-700); line-height: 1.5; }
+
+/* Review summary */
+.review-summary { display: flex; flex-direction: column; gap: 10px; }
+.review-row { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--c-ink-100); font-size: 0.88rem; }
+.review-row:last-child { border-bottom: none; }
+.review-row-label { color: var(--c-ink-500); font-weight: 600; flex-shrink: 0; }
+.review-row-value { color: var(--c-ink-900); font-weight: 600; text-align: right; word-break: break-word; }
+
+/* ============================================
+   SUCCESS PAGE
+   ============================================ */
+.success-page { max-width: 560px; margin: 0 auto; padding: 60px 24px 100px; }
+.success-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  padding: 48px 36px; text-align: center;
+  box-shadow: var(--shadow-lg); border: 1px solid var(--c-ink-100);
+}
+.success-icon-wrap { display: flex; justify-content: center; margin-bottom: 24px; }
+.success-checkmark { width: 88px; height: 88px; }
+.success-checkmark-circle { fill: none; stroke: var(--c-emerald-500); stroke-width: 3; stroke-dasharray: 226; stroke-dashoffset: 226; animation: draw-circle 0.6s ease forwards; }
+.success-checkmark-check { fill: none; stroke: var(--c-emerald-500); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 48; stroke-dashoffset: 48; animation: draw-check 0.4s ease forwards 0.5s; }
+@keyframes draw-circle { to { stroke-dashoffset: 0; } }
+@keyframes draw-check { to { stroke-dashoffset: 0; } }
+
+.success-card h1 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; margin-bottom: 14px; }
+.success-card p { color: var(--c-ink-500); font-size: 0.94rem; margin-bottom: 28px; }
+
+.ticket-display {
+  position: relative;
+  background: var(--grad-primary-soft);
+  border: 1.5px dashed var(--c-emerald-500);
+  border-radius: var(--radius-md);
+  padding: 24px 20px;
+  margin-bottom: 28px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.ticket-display-label { font-size: 0.78rem; font-weight: 700; color: var(--c-emerald-700); text-transform: uppercase; letter-spacing: 0.05em; }
+.ticket-display-number { font-family: var(--font-display); font-size: 1.9rem; font-weight: 800; color: var(--c-ink-900); letter-spacing: 0.03em; margin-bottom: 8px; }
+.ticket-copy-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 0.82rem; font-weight: 700; color: var(--c-emerald-700);
+  background: var(--c-white); padding: 9px 16px; border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm); transition: var(--transition-fast);
+}
+.ticket-copy-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.ticket-copy-btn.copied { background: var(--c-emerald-500); color: var(--c-white); }
+
+.success-actions { display: flex; gap: 12px; }
+.success-actions .btn { flex: 1; }
+@media (max-width: 480px) { .success-actions { flex-direction: column; } }
+
+/* ============================================
+   STATUS CHECK PAGE
+   ============================================ */
+.status-page { max-width: 680px; margin: 0 auto; padding: 32px 24px 100px; }
+.status-header { margin-bottom: 28px; }
+.status-header h1 { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 800; margin-bottom: 8px; }
+.status-header p { color: var(--c-ink-500); }
+
+.status-search-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--c-ink-100);
+  margin-bottom: 24px;
+}
+.search-method-toggle { display: inline-flex; background: var(--c-ink-100); border-radius: var(--radius-pill); padding: 4px; margin-bottom: 18px; }
+.search-method-btn {
+  padding: 9px 18px; border-radius: var(--radius-pill); font-size: 0.85rem; font-weight: 700;
+  color: var(--c-ink-500); transition: var(--transition-fast);
+}
+.search-method-btn.active { background: var(--c-white); color: var(--c-ink-900); box-shadow: var(--shadow-sm); }
+.search-input-row { display: flex; gap: 10px; }
+.search-input {
+  flex: 1; padding: 13px 16px; border: 1.5px solid var(--c-ink-200); border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+}
+.search-input:focus { border-color: var(--c-blue-500); box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
+.search-submit-btn { flex-shrink: 0; }
+@media (max-width: 480px) { .search-input-row { flex-direction: column; } .search-submit-btn { width: 100%; } }
+
+/* Status result cards */
+.status-result { display: flex; flex-direction: column; gap: 18px; }
+.status-result-card {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  padding: 28px; box-shadow: var(--shadow-sm); border: 1px solid var(--c-ink-100);
+  animation: view-fade-in var(--transition-base) forwards;
+}
+.status-result-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+.status-result-ticket { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; }
+.status-result-date { font-size: 0.8rem; color: var(--c-ink-400); }
+
+.status-banner {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px; border-radius: var(--radius-md); margin-bottom: 16px;
+}
+.status-banner-icon { font-size: 1.8rem; flex-shrink: 0; }
+.status-banner-text strong { display: block; font-size: 0.98rem; margin-bottom: 2px; }
+.status-banner-text span { font-size: 0.85rem; opacity: 0.9; }
+
+.status-banner.pending { background: var(--c-amber-50); color: var(--c-amber-600); }
+.status-banner.pending strong { color: #92400E; }
+.status-banner.process { background: var(--c-blue-50); color: var(--c-blue-700); }
+.status-banner.process strong { color: var(--c-navy-900); }
+.status-banner.done { background: var(--c-emerald-50); color: var(--c-emerald-700); }
+.status-banner.done strong { color: var(--c-forest-900); }
+
+.status-icon-spin { display: inline-block; animation: spin 1.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.status-progress-track { height: 8px; background: var(--c-blue-100); border-radius: var(--radius-pill); overflow: hidden; margin-top: 4px; }
+.status-progress-fill { height: 100%; background: var(--c-blue-500); border-radius: var(--radius-pill); animation: progress-fill-anim 1.6s ease-in-out infinite; width: 55%; }
+@keyframes progress-fill-anim { 0% { transform: translateX(-30%); } 100% { transform: translateX(180%); } }
+
+.status-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; font-size: 0.85rem; }
+.status-detail-item { display: flex; flex-direction: column; gap: 2px; }
+.status-detail-item span:first-child { color: var(--c-ink-400); font-size: 0.76rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+.status-detail-item span:last-child { color: var(--c-ink-900); font-weight: 600; }
+
+.operator-reply {
+  background: var(--c-emerald-50); border-radius: var(--radius-md);
+  padding: 18px; margin-top: 12px; border-left: 4px solid var(--c-emerald-500);
+}
+.operator-reply-title { display: flex; align-items: center; gap: 7px; font-weight: 700; font-size: 0.85rem; color: var(--c-emerald-700); margin-bottom: 8px; }
+.operator-reply-text { font-size: 0.9rem; color: var(--c-ink-700); line-height: 1.6; font-style: italic; }
+
+.status-empty {
+  text-align: center; padding: 50px 20px; color: var(--c-ink-400);
+}
+.status-empty-icon { font-size: 2.4rem; margin-bottom: 12px; }
+.status-empty p { font-size: 0.92rem; }
+
+@media (max-width: 500px) { .status-detail-grid { grid-template-columns: 1fr; } }
+
+/* ============================================
+   SKELETON LOADING
+   ============================================ */
+.skeleton { background: linear-gradient(90deg, var(--c-ink-100) 25%, var(--c-ink-200) 50%, var(--c-ink-100) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.4s ease-in-out infinite; border-radius: var(--radius-sm); }
+@keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skeleton-card { height: 160px; border-radius: var(--radius-lg); }
+
+/* ============================================
+   LOADING OVERLAY
+   ============================================ */
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 9998;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity var(--transition-base);
+}
+.loading-overlay.show { display: flex; opacity: 1; }
+.loading-box {
+  background: var(--c-white); border-radius: var(--radius-lg);
+  padding: 36px 44px; display: flex; flex-direction: column; align-items: center; gap: 16px;
+  box-shadow: var(--shadow-lg);
+}
+.loading-spinner {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 4px solid var(--c-ink-100);
+  border-top-color: var(--c-emerald-500);
+  border-right-color: var(--c-blue-500);
+  animation: spin 0.8s linear infinite;
+}
+.loading-box p { font-weight: 600; font-size: 0.92rem; color: var(--c-ink-700); }
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer { background: var(--c-ink-900); padding: 40px 24px; margin-top: 40px; }
+.footer-inner { max-width: var(--container-max); margin: 0 auto; text-align: center; }
+.footer-brand { display: inline-flex; align-items: center; gap: 9px; margin-bottom: 12px; font-weight: 700; color: var(--c-white); font-family: var(--font-display); }
+.footer-tagline { color: rgba(255,255,255,0.6); font-size: 0.88rem; margin-bottom: 6px; }
+.footer-copyright { color: rgba(255,255,255,0.4); font-size: 0.8rem; }
+
+</style>
+</head>
+<body>
+
+<!-- ============================================ -->
+<!-- BACKGROUND DECORATION -->
+<!-- ============================================ -->
+<div class="bg-decoration" aria-hidden="true">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+</div>
+
+<!-- ============================================ -->
+<!-- TOAST CONTAINER -->
+<!-- ============================================ -->
+<div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+<!-- ============================================ -->
+<!-- NAVIGATION -->
+<!-- ============================================ -->
+<header class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <div class="navbar-brand">
+      <div class="brand-mark">
+        <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo SMAN 68 Jakarta" class="brand-logo-img" loading="eager">
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">Layanan Aduan</span>
+        <span class="brand-subtitle">SMAN 68 Jakarta</span>
+      </div>
+    </div>
+    <nav class="navbar-actions">
+      <button class="nav-link" id="navStatusBtn" type="button">Cek Status Aduan</button>
+      <button class="nav-cta" id="navFormBtn" type="button">Buat Aduan</button>
+    </nav>
+    <button class="navbar-mobile-toggle" id="mobileToggle" aria-label="Buka menu" type="button">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="navbar-mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-item" id="mobileStatusBtn" type="button">Cek Status Aduan</button>
+    <button class="mobile-menu-item mobile-menu-cta" id="mobileFormBtn" type="button">Buat Aduan</button>
+  </div>
+</header>
+
+<!-- ============================================ -->
+<!-- MAIN VIEWS CONTAINER -->
+<!-- ============================================ -->
+<main id="mainContent">
+
+  <!-- ===== VIEW: HERO / LANDING ===== -->
+  <section class="view view-hero active" id="view-hero">
+    <div class="hero">
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          <span class="eyebrow-dot"></span>
+          Sistem Pengaduan Digital Resmi
+        </div>
+        <div class="hero-school-badge">
+          <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo SMAN 68 Jakarta" class="hero-school-logo-img" loading="eager">
+          <span>SMA Negeri 68 Jakarta</span>
+        </div>
+        <h1 class="hero-title">
+          Suara Anda <span class="text-gradient">Didengar.</span><br>
+          Sekolah yang Lebih Baik <span class="text-gradient">Dimulai dari Sini.</span>
+        </h1>
+        <p class="hero-desc">
+          Sampaikan aduan, masukan, atau keresahan Anda terkait lingkungan SMAN 68 Jakarta secara aman, rahasia, dan terstruktur. Setiap laporan akan ditinjau langsung oleh pihak sekolah.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" id="heroFormBtn" type="button">
+            <span>Ajukan Aduan Sekarang</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="btn btn-ghost btn-lg" id="heroStatusBtn" type="button">
+            Lacak Aduan Saya
+          </button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="stat-icon stat-icon-green">🔒</span>
+            <div>
+              <span class="stat-title">Aman &amp; Rahasia</span>
+              <span class="stat-desc">Data terenkripsi penuh</span>
+            </div>
+          </div>
+          <div class="hero-stat">
+            <span class="stat-icon stat-icon-blue">⚡</span>
+            <div>
+              <span class="stat-title">Respon 1x24 Jam</span>
+              <span class="stat-desc">Ditindaklanjuti cepat</span>
+            </div>
+          </div>
+          <div class="hero-stat">
+            <span class="stat-icon stat-icon-green">🎓</span>
+            <div>
+              <span class="stat-title">Untuk Semua</span>
+              <span class="stat-desc">Siswa, guru &amp; masyarakat</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-card-stack">
+          <div class="floating-card card-ticket">
+            <div class="ticket-mini-header">
+              <span class="ticket-mini-dot"></span>
+              Tiket Aduan
+            </div>
+            <div class="ticket-mini-number">ADN-58291</div>
+            <div class="ticket-mini-status">
+              <span class="status-pill status-pill-success">Selesai</span>
+            </div>
+          </div>
+          <div class="floating-card card-progress">
+            <div class="progress-ring-wrap">
+              <svg viewBox="0 0 80 80" class="progress-ring">
+                <circle cx="40" cy="40" r="34" class="progress-ring-bg"/>
+                <circle cx="40" cy="40" r="34" class="progress-ring-fg"/>
+              </svg>
+              <span class="progress-ring-label">100%</span>
+            </div>
+            <span class="card-progress-text">Tertangani</span>
+          </div>
+          <div class="floating-card card-shield">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6V11C4 16.5 7.5 20.5 12 22C16.5 20.5 20 16.5 20 11V6L12 2Z" stroke="#10B981" stroke-width="1.8"/><path d="M9 12L11 14L15 9.5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Privasi Terjaga</span>
+          </div>
+        </div>
+        <div class="hero-glow"></div>
+      </div>
+    </div>
+
+    <!-- Info Section -->
+    <section class="info-section">
+      <div class="info-section-inner">
+        <h2 class="section-title">Bagaimana Cara Kerjanya?</h2>
+        <p class="section-subtitle">Tiga langkah sederhana untuk menyampaikan aduan Anda</p>
+        <div class="step-grid">
+          <div class="step-card">
+            <div class="step-number">01</div>
+            <h3>Isi Formulir</h3>
+            <p>Lengkapi data dan jelaskan aduan Anda secara rinci, sertakan bukti pendukung bila ada.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-number">02</div>
+            <h3>Dapatkan Tiket</h3>
+            <p>Sistem akan memberikan nomor tiket unik untuk melacak status aduan Anda kapan saja.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-number">03</div>
+            <h3>Pantau &amp; Terima Jawaban</h3>
+            <p>Operator sekolah akan meninjau dan memberikan tanggapan maksimal dalam 1x24 jam.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ===== VIEW: FORM ADUAN ===== -->
+  <section class="view view-form" id="view-form">
+    <div class="form-page">
+      <button class="back-link" id="backFromForm" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Kembali ke Beranda
+      </button>
+
+      <div class="form-header">
+        <h1>Formulir Layanan Aduan</h1>
+        <p>Isi data di bawah ini dengan lengkap dan jujur. Seluruh data Anda akan dijaga kerahasiaannya.</p>
+      </div>
+
+      <!-- Progress Steps -->
+      <div class="form-progress" id="formProgress">
+        <div class="form-progress-step active" data-step="1">
+          <span class="form-progress-circle">1</span>
+          <span class="form-progress-label">Identitas</span>
+        </div>
+        <div class="form-progress-line"></div>
+        <div class="form-progress-step" data-step="2">
+          <span class="form-progress-circle">2</span>
+          <span class="form-progress-label">Aduan</span>
+        </div>
+        <div class="form-progress-line"></div>
+        <div class="form-progress-step" data-step="3">
+          <span class="form-progress-circle">3</span>
+          <span class="form-progress-label">Persetujuan</span>
+        </div>
+      </div>
+
+      <form id="aduanForm" novalidate>
+
+        <!-- ===== STEP 1: IDENTITAS ===== -->
+        <div class="form-step active" id="step-1">
+          <div class="form-card">
+            <h2 class="form-card-title">
+              <span class="form-card-icon">👤</span>
+              Kategori Pelapor
+            </h2>
+            <p class="form-card-desc">Pilih kategori yang paling sesuai dengan Anda.</p>
+
+            <div class="radio-grid" id="pelaporGrid" role="radiogroup" aria-label="Kategori Pelapor">
+              <label class="radio-card">
+                <input type="radio" name="kategoriPelapor" value="Siswa" required>
+                <span class="radio-card-icon">🎓</span>
+                <span class="radio-card-label">Siswa</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="kategoriPelapor" value="Guru" required>
+                <span class="radio-card-icon">📚</span>
+                <span class="radio-card-label">Guru</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="kategoriPelapor" value="Tenaga Pendidik Lainnya" required>
+                <span class="radio-card-icon">🧑‍🏫</span>
+                <span class="radio-card-label">Tenaga Pendidik Lainnya</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="kategoriPelapor" value="Tenaga Kerja Lainnya" required>
+                <span class="radio-card-icon">🛠️</span>
+                <span class="radio-card-label">Tenaga Kerja Lainnya</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="kategoriPelapor" value="Orang Tua/Wali Murid" required>
+                <span class="radio-card-icon">👨‍👩‍👧</span>
+                <span class="radio-card-label">Orang Tua/Wali Murid</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="kategoriPelapor" value="Masyarakat Umum/Lainnya" required>
+                <span class="radio-card-icon">🌐</span>
+                <span class="radio-card-label">Masyarakat Umum/Lainnya</span>
+              </label>
+            </div>
+            <span class="field-error" id="err-kategoriPelapor"></span>
+
+            <!-- Conditional: Siswa fields -->
+            <div class="conditional-fields" id="siswaFields">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="kelasSelect">Kelas <span class="required-mark">*</span></label>
+                  <select id="kelasSelect" name="kelas">
+                    <option value="" disabled selected>Pilih kelas</option>
+                    <optgroup label="Kelas X">
+                    </optgroup>
+                    <optgroup label="Kelas XI">
+                    </optgroup>
+                    <optgroup label="Kelas XII">
+                    </optgroup>
+                  </select>
+                  <span class="field-error" id="err-kelas"></span>
+                </div>
+                <div class="form-group">
+                  <label for="jurusanSelect">Jurusan <span class="required-mark">*</span></label>
+                  <select id="jurusanSelect" name="jurusan">
+                    <option value="" disabled selected>Pilih jurusan</option>
+                    <option value="IPA">IPA</option>
+                    <option value="IPS">IPS</option>
+                    <option value="Kurikulum Merdeka">Kurikulum Merdeka</option>
+                    <option value="Bahasa dan Budaya">Bahasa dan Budaya</option>
+                  </select>
+                  <span class="field-error" id="err-jurusan"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h2 class="form-card-title">
+              <span class="form-card-icon">📝</span>
+              Identitas Pelapor
+            </h2>
+
+            <div class="anon-toggle">
+              <label class="switch-row">
+                <span class="switch-row-text">
+                  <strong>Ajukan secara Anonymous</strong>
+                  <small>Nama Anda tidak akan ditampilkan atau disimpan</small>
+                </span>
+                <span class="switch">
+                  <input type="checkbox" id="anonToggle">
+                  <span class="switch-slider"></span>
+                </span>
+              </label>
+            </div>
+
+            <div class="form-group" id="namaGroup">
+              <label for="namaInput">Nama Lengkap <span class="required-mark">*</span></label>
+              <input type="text" id="namaInput" name="nama" placeholder="Tulis nama lengkap Anda" autocomplete="name">
+              <span class="field-error" id="err-nama"></span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="emailInput">Email <span class="required-mark">*</span></label>
+                <input type="email" id="emailInput" name="email" placeholder="nama@gmail.com" autocomplete="email">
+                <span class="field-error" id="err-email"></span>
+              </div>
+              <div class="form-group">
+                <label for="teleponInput">Nomor Telepon <span class="required-mark">*</span></label>
+                <input type="tel" id="teleponInput" name="nomorTelepon" placeholder="08xxxxxxxxxx atau +62xxxxxxxxxx" autocomplete="tel">
+                <span class="field-error" id="err-telepon"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <span></span>
+            <button type="button" class="btn btn-primary" id="toStep2">
+              Lanjutkan
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== STEP 2: ADUAN ===== -->
+        <div class="form-step" id="step-2">
+          <div class="form-card">
+            <h2 class="form-card-title">
+              <span class="form-card-icon">📂</span>
+              Tujuan / Kategori Aduan
+            </h2>
+            <p class="form-card-desc">Pilih kategori yang paling sesuai dengan aduan Anda.</p>
+
+            <div class="radio-grid radio-grid-5" id="kategoriAduanGrid" role="radiogroup" aria-label="Kategori Aduan">
+              <label class="radio-card">
+                <input type="radio" name="kategoriAduan" value="Akademik" required>
+                <span class="radio-card-icon">📖</span>
+                <span class="radio-card-label">Akademik</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="kategoriAduan" value="Fasilitas" required>
+                <span class="radio-card-icon">🏫</span>
+                <span class="radio-card-label">Fasilitas</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="kategoriAduan" value="Layanan Sekolah" required>
+                <span class="radio-card-icon">🗂️</span>
+                <span class="radio-card-label">Layanan Sekolah</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="kategoriAduan" value="Aduan Keresahan" required>
+                <span class="radio-card-icon">⚠️</span>
+                <span class="radio-card-label">Aduan Keresahan</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="kategoriAduan" value="Lainnya" required>
+                <span class="radio-card-icon">✨</span>
+                <span class="radio-card-label">Lainnya</span>
+              </label>
+            </div>
+            <span class="field-error" id="err-kategoriAduan"></span>
+
+            <div class="conditional-fields" id="kategoriLainnyaField">
+              <div class="form-group">
+                <label for="kategoriLainnyaInput">Tuliskan kategori aduan Anda <span class="required-mark">*</span></label>
+                <input type="text" id="kategoriLainnyaInput" name="kategoriLainnya" placeholder="Contoh: Keamanan Lingkungan Sekolah">
+                <span class="field-error" id="err-kategoriLainnya"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h2 class="form-card-title">
+              <span class="form-card-icon">✍️</span>
+              Isi Aduan
+            </h2>
+            <p class="form-card-desc">Jelaskan aduan Anda secara detail, jelas, sopan, dan lengkap. Minimal 100 karakter.</p>
+
+            <div class="form-group">
+              <textarea id="isiAduanInput" name="isiAduan" rows="7" placeholder="Tuliskan kronologi atau penjelasan aduan Anda di sini secara rinci..."></textarea>
+              <div class="textarea-footer">
+                <span class="field-error" id="err-isiAduan"></span>
+                <span class="char-counter" id="charCounter">0 / 100 karakter minimum</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h2 class="form-card-title">
+              <span class="form-card-icon">📎</span>
+              Bukti Pendukung <span class="optional-tag">Opsional</span>
+            </h2>
+            <p class="form-card-desc">Unggah bukti pendukung (PDF, JPG, JPEG, PNG) atau lampirkan tautan Google Drive.</p>
+
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,image/jpeg,image/png,application/pdf" hidden>
+              <div class="upload-zone-content" id="uploadZoneEmpty">
+                <div class="upload-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4L7 9M12 4l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <p><strong>Klik untuk unggah</strong> atau seret file ke sini</p>
+                <span class="upload-hint">PDF, JPG, JPEG, PNG — Maks 5MB</span>
+              </div>
+              <div class="upload-zone-file" id="uploadZoneFile" hidden>
+                <div class="upload-file-icon" id="uploadFileIcon">📄</div>
+                <div class="upload-file-info">
+                  <span class="upload-file-name" id="uploadFileName"></span>
+                  <span class="upload-file-size" id="uploadFileSize"></span>
+                </div>
+                <button type="button" class="upload-file-remove" id="removeFileBtn" aria-label="Hapus file">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <span class="field-error" id="err-file"></span>
+
+            <div class="form-group" style="margin-top: 1.25rem;">
+              <label for="driveLink">Atau tautan Google Drive <span class="optional-mark">(opsional)</span></label>
+              <input type="url" id="driveLink" name="googleDriveLink" placeholder="https://drive.google.com/...">
+              <span class="field-error" id="err-driveLink"></span>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <button type="button" class="btn btn-secondary" id="toStep1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Kembali
+            </button>
+            <button type="button" class="btn btn-primary" id="toStep3">
+              Lanjutkan
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== STEP 3: PERATURAN & SUBMIT ===== -->
+        <div class="form-step" id="step-3">
+          <div class="form-card">
+            <h2 class="form-card-title">
+              <span class="form-card-icon">📋</span>
+              Peraturan Penggunaan Layanan Aduan
+            </h2>
+            <p class="form-card-desc">Mohon membaca seluruh peraturan berikut sebelum mengirimkan aduan Anda.</p>
+
+            <div class="rules-grid">
+              <div class="rule-card">
+                <div class="rule-number">01</div>
+                <h3>Bahasa yang Sopan</h3>
+                <p>Pelapor wajib menyampaikan aduan dengan bahasa yang sopan dan tidak mengandung unsur SARA, ujaran kebencian, maupun ancaman terhadap pihak manapun.</p>
+              </div>
+              <div class="rule-card">
+                <div class="rule-number">02</div>
+                <h3>Berdasarkan Fakta</h3>
+                <p>Aduan yang disampaikan harus berdasarkan fakta yang benar, objektif, dan dapat dipertanggungjawabkan oleh pelapor.</p>
+              </div>
+              <div class="rule-card">
+                <div class="rule-number">03</div>
+                <h3>Larangan Laporan Palsu</h3>
+                <p>Pelapor dilarang mengirimkan laporan palsu, spam, atau informasi yang menyesatkan yang dapat merugikan pihak lain.</p>
+              </div>
+              <div class="rule-card">
+                <div class="rule-number">04</div>
+                <h3>Hak Verifikasi Sekolah</h3>
+                <p>Pihak sekolah berhak melakukan verifikasi terhadap seluruh laporan yang diterima sebelum diproses lebih lanjut.</p>
+              </div>
+              <div class="rule-card">
+                <div class="rule-number">05</div>
+                <h3>Kerahasiaan Data</h3>
+                <p>SMAN 68 Jakarta berkomitmen menjaga kerahasiaan dan privasi seluruh data pelapor sesuai kebijakan perlindungan data yang berlaku.</p>
+              </div>
+            </div>
+
+            <label class="agreement-check">
+              <input type="checkbox" id="agreeCheckbox">
+              <span class="agreement-checkbox-visual">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="agreement-text">Saya telah membaca dan menyetujui seluruh peraturan yang berlaku.</span>
+            </label>
+          </div>
+
+          <!-- Review summary -->
+          <div class="form-card">
+            <h2 class="form-card-title">
+              <span class="form-card-icon">🔍</span>
+              Ringkasan Aduan Anda
+            </h2>
+            <div class="review-summary" id="reviewSummary">
+              <!-- Filled dynamically by JS -->
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <button type="button" class="btn btn-secondary" id="toStep2Back">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Kembali
+            </button>
+            <button type="submit" class="btn btn-submit" id="submitBtn" disabled>
+              <span>Kirim Aduan</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: SUCCESS ===== -->
+  <section class="view view-success" id="view-success">
+    <div class="success-page">
+      <div class="success-card">
+        <div class="success-icon-wrap">
+          <svg class="success-checkmark" viewBox="0 0 80 80">
+            <circle class="success-checkmark-circle" cx="40" cy="40" r="36"/>
+            <path class="success-checkmark-check" d="M24 41L34 51L56 29"/>
+          </svg>
+        </div>
+        <h1>Aduan Anda Berhasil Terkirim</h1>
+        <p>Terima kasih telah menggunakan layanan aduan SMAN 68 Jakarta. Aduan Anda akan ditinjau oleh operator. Silakan tunggu maksimal 1x24 jam untuk mendapatkan tanggapan.</p>
+
+        <div class="ticket-display">
+          <div class="ticket-display-perforation"></div>
+          <span class="ticket-display-label">Nomor Tiket Aduan</span>
+          <span class="ticket-display-number" id="generatedTicketNumber">ADN-00000</span>
+          <button class="ticket-copy-btn" id="copyTicketBtn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2"/></svg>
+            Salin Nomor Tiket
+          </button>
+        </div>
+
+        <div class="success-actions">
+          <button class="btn btn-secondary" id="successHomeBtn" type="button">Kembali ke Beranda</button>
+          <button class="btn btn-primary" id="successCheckBtn" type="button">Cek Status Aduan</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: CEK STATUS ===== -->
+  <section class="view view-status" id="view-status">
+    <div class="status-page">
+      <button class="back-link" id="backFromStatus" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Kembali ke Beranda
+      </button>
+
+      <div class="status-header">
+        <h1>Cek Status Aduan</h1>
+        <p>Lacak perkembangan aduan Anda menggunakan nomor tiket atau email.</p>
+      </div>
+
+      <div class="status-search-card">
+        <div class="search-method-toggle" role="tablist">
+          <button type="button" class="search-method-btn active" data-method="ticket" role="tab">
+            Nomor Tiket
+          </button>
+          <button type="button" class="search-method-btn" data-method="email" role="tab">
+            Email
+          </button>
+        </div>
+
+        <div class="search-input-row">
+          <input type="text" id="searchTicketInput" placeholder="Contoh: ADN-58291" class="search-input">
+          <input type="email" id="searchEmailInput" placeholder="nama@gmail.com" class="search-input" hidden>
+          <button class="btn btn-primary search-submit-btn" id="searchSubmitBtn" type="button">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>Cari</span>
+          </button>
+        </div>
+        <span class="field-error" id="err-search"></span>
+      </div>
+
+      <!-- Result area -->
+      <div class="status-result" id="statusResult"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================================ -->
+<!-- FOOTER -->
+<!-- ============================================ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="brand-mark brand-mark-sm">
+        <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo SMAN 68 Jakarta" class="brand-logo-img" loading="lazy">
+      </div>
+      <span>SMAN 68 Jakarta</span>
+    </div>
+    <p class="footer-tagline">Layanan Aduan Resmi — Aman, Transparan, dan Terpercaya.</p>
+    <p class="footer-copyright">© 2026 SMAN 68 Jakarta. Seluruh data dijaga kerahasiaannya.</p>
+  </div>
+</footer>
+
+<!-- ============================================ -->
+<!-- LOADING OVERLAY -->
+<!-- ============================================ -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">
+    <div class="loading-spinner"></div>
+    <p id="loadingText">Mengirim aduan Anda...</p>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ============================================
+   FIREBASE CONFIGURATION
+   ============================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDAcKcg3alPOTH3FFGelYmsW7jcMMe2PLI",
+  authDomain: "upnvjdatsystem.firebaseapp.com",
+  databaseURL: "https://upnvjdatsystem-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "upnvjdatsystem",
+  storageBucket: "upnvjdatsystem.firebasestorage.app",
+  messagingSenderId: "57095309946",
+  appId: "1:57095309946:web:b0e9f3f86380d549ffc9c3"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const ADUAN_COLLECTION = "aduan";
+
+/* ============================================
+   TOAST NOTIFICATION SYSTEM
+   ============================================ */
+const toastContainer = document.getElementById('toastContainer');
+const TOAST_ICONS = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+const TOAST_TITLES = { success: 'Berhasil', error: 'Terjadi Kesalahan', warning: 'Perhatian', info: 'Informasi' };
+
+function showToast(type, message, title) {
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${TOAST_ICONS[type] || 'ℹ️'}</span>
+    <div class="toast-body">
+      <span class="toast-title">${title || TOAST_TITLES[type]}</span>
+      <span class="toast-msg">${message}</span>
+    </div>
+    <button class="toast-close" type="button" aria-label="Tutup notifikasi">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="toast-progress"></div>
+  `;
+  toastContainer.appendChild(toast);
+
+  const dismiss = () => {
+    toast.classList.add('removing');
+    setTimeout(() => toast.remove(), 220);
+  };
+  toast.querySelector('.toast-close').addEventListener('click', dismiss);
+  const autoTimer = setTimeout(dismiss, 4000);
+  toast.addEventListener('mouseenter', () => clearTimeout(autoTimer));
+}
+
+/* ============================================
+   VIEW NAVIGATION
+   ============================================ */
+const views = {
+  hero: document.getElementById('view-hero'),
+  form: document.getElementById('view-form'),
+  success: document.getElementById('view-success'),
+  status: document.getElementById('view-status'),
+};
+
+function showView(name) {
+  Object.values(views).forEach(v => v.classList.remove('active'));
+  views[name].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  closeMobileMenu();
+}
+
+// Nav buttons
+document.getElementById('navFormBtn').addEventListener('click', () => { resetForm(); showView('form'); });
+document.getElementById('navStatusBtn').addEventListener('click', () => showView('status'));
+document.getElementById('mobileFormBtn').addEventListener('click', () => { resetForm(); showView('form'); });
+document.getElementById('mobileStatusBtn').addEventListener('click', () => showView('status'));
+document.getElementById('heroFormBtn').addEventListener('click', () => { resetForm(); showView('form'); });
+document.getElementById('heroStatusBtn').addEventListener('click', () => showView('status'));
+document.getElementById('backFromForm').addEventListener('click', () => showView('hero'));
+document.getElementById('backFromStatus').addEventListener('click', () => showView('hero'));
+document.getElementById('successHomeBtn').addEventListener('click', () => showView('hero'));
+document.getElementById('successCheckBtn').addEventListener('click', () => showView('status'));
+
+// Mobile menu toggle
+const mobileToggle = document.getElementById('mobileToggle');
+const mobileMenu = document.getElementById('mobileMenu');
+mobileToggle.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+function closeMobileMenu() { mobileMenu.classList.remove('open'); }
+
+/* ============================================
+   POPULATE KELAS DROPDOWN (X.1-8, XI.1-8, XII.1-8)
+   ============================================ */
+(function populateKelas() {
+  const select = document.getElementById('kelasSelect');
+  const groups = select.querySelectorAll('optgroup');
+  const tingkat = ['X', 'XI', 'XII'];
+  tingkat.forEach((t, idx) => {
+    for (let i = 1; i <= 8; i++) {
+      const opt = document.createElement('option');
+      opt.value = `${t}.${i}`;
+      opt.textContent = `${t}.${i}`;
+      groups[idx].appendChild(opt);
+    }
+  });
+})();
+
+/* ============================================
+   FORM STATE
+   ============================================ */
+let uploadedFile = null; // { base64, name, type, size }
+let currentStep = 1;
+
+const form = document.getElementById('aduanForm');
+const pelaporGrid = document.getElementById('pelaporGrid');
+const siswaFields = document.getElementById('siswaFields');
+const anonToggle = document.getElementById('anonToggle');
+const namaInput = document.getElementById('namaInput');
+const namaGroup = document.getElementById('namaGroup');
+const kategoriAduanGrid = document.getElementById('kategoriAduanGrid');
+const kategoriLainnyaField = document.getElementById('kategoriLainnyaField');
+const isiAduanInput = document.getElementById('isiAduanInput');
+const charCounter = document.getElementById('charCounter');
+const agreeCheckbox = document.getElementById('agreeCheckbox');
+const submitBtn = document.getElementById('submitBtn');
+
+/* ----- Kategori Pelapor -> reveal Siswa fields ----- */
+pelaporGrid.addEventListener('change', (e) => {
+  if (e.target.name === 'kategoriPelapor') {
+    const isSiswa = e.target.value === 'Siswa';
+    siswaFields.classList.toggle('open', isSiswa);
+    document.getElementById('kelasSelect').required = isSiswa;
+    document.getElementById('jurusanSelect').required = isSiswa;
+    if (!isSiswa) {
+      document.getElementById('kelasSelect').value = '';
+      document.getElementById('jurusanSelect').value = '';
+    }
+    clearFieldError('kategoriPelapor');
+  }
+});
+
+/* ----- Anonymous toggle ----- */
+anonToggle.addEventListener('change', () => {
+  if (anonToggle.checked) {
+    namaInput.value = '';
+    namaInput.disabled = true;
+    namaInput.placeholder = 'Anonymous';
+    namaGroup.style.opacity = '0.55';
+    clearFieldError('nama');
+  } else {
+    namaInput.disabled = false;
+    namaInput.placeholder = 'Tulis nama lengkap Anda';
+    namaGroup.style.opacity = '1';
+  }
+});
+
+/* ----- Kategori Aduan -> reveal "Lainnya" field ----- */
+kategoriAduanGrid.addEventListener('change', (e) => {
+  if (e.target.name === 'kategoriAduan') {
+    const isLainnya = e.target.value === 'Lainnya';
+    kategoriLainnyaField.classList.toggle('open', isLainnya);
+    document.getElementById('kategoriLainnyaInput').required = isLainnya;
+    if (!isLainnya) document.getElementById('kategoriLainnyaInput').value = '';
+    clearFieldError('kategoriAduan');
+  }
+});
+
+/* ----- Char counter for Isi Aduan ----- */
+isiAduanInput.addEventListener('input', () => {
+  const len = isiAduanInput.value.length;
+  if (len >= 100) {
+    charCounter.textContent = `${len} karakter — cukup ✓`;
+    charCounter.classList.add('valid');
+  } else {
+    charCounter.textContent = `${len} / 100 karakter minimum`;
+    charCounter.classList.remove('valid');
+  }
+  if (len > 0) clearFieldError('isiAduan');
+});
+
+/* ----- Agreement checkbox -> enable submit button ----- */
+agreeCheckbox.addEventListener('change', () => {
+  submitBtn.disabled = !agreeCheckbox.checked;
+  submitBtn.classList.toggle('enabled', agreeCheckbox.checked);
+});
+
+/* ============================================
+   FILE UPLOAD HANDLING
+   ============================================ */
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+const uploadZoneEmpty = document.getElementById('uploadZoneEmpty');
+const uploadZoneFile = document.getElementById('uploadZoneFile');
+const uploadFileName = document.getElementById('uploadFileName');
+const uploadFileSize = document.getElementById('uploadFileSize');
+const uploadFileIcon = document.getElementById('uploadFileIcon');
+const removeFileBtn = document.getElementById('removeFileBtn');
+
+const ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+uploadZone.addEventListener('click', (e) => {
+  if (e.target.closest('.upload-file-remove')) return;
+  if (!uploadedFile) fileInput.click();
+});
+uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFileSelect(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) handleFileSelect(fileInput.files[0]);
+});
+removeFileBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  uploadedFile = null;
+  fileInput.value = '';
+  uploadZoneEmpty.hidden = false;
+  uploadZoneFile.hidden = true;
+  clearFieldError('file');
+});
+
+function handleFileSelect(file) {
+  clearFieldError('file');
+  const ext = file.name.split('.').pop().toLowerCase();
+  const validExt = ['pdf', 'jpg', 'jpeg', 'png'].includes(ext);
+
+  if (!validExt || !ALLOWED_TYPES.includes(file.type)) {
+    showFieldError('file', 'Format file tidak didukung. Gunakan PDF, JPG, JPEG, atau PNG.');
+    showToast('error', 'Format file tidak didukung. Gunakan PDF, JPG, JPEG, atau PNG.');
+    return;
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    showFieldError('file', 'Ukuran file melebihi batas maksimum 5MB.');
+    showToast('error', 'Ukuran file melebihi batas maksimum 5MB.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    uploadedFile = {
+      base64: reader.result, // includes data:<mime>;base64, prefix
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    };
+    uploadFileName.textContent = file.name;
+    uploadFileSize.textContent = formatFileSize(file.size);
+    uploadFileIcon.textContent = file.type === 'application/pdf' ? '📄' : '🖼️';
+    uploadZoneEmpty.hidden = true;
+    uploadZoneFile.hidden = false;
+    showToast('success', 'File berhasil dilampirkan.');
+  };
+  reader.onerror = () => {
+    showToast('error', 'Gagal membaca file. Silakan coba lagi.');
+  };
+  reader.readAsDataURL(file);
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+/* ============================================
+   FIELD ERROR HELPERS
+   ============================================ */
+function showFieldError(key, message) {
+  const el = document.getElementById('err-' + key);
+  if (el) { el.textContent = message; el.classList.add('show'); }
+}
+function clearFieldError(key) {
+  const el = document.getElementById('err-' + key);
+  if (el) { el.textContent = ''; el.classList.remove('show'); }
+}
+function markInvalid(inputEl, invalid) {
+  if (!inputEl) return;
+  inputEl.classList.toggle('invalid', invalid);
+}
+
+/* ============================================
+   VALIDATION FUNCTIONS
+   ============================================ */
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^(08\d{8,12}|\+62\d{8,13})$/;
+
+function validateStep1() {
+  let valid = true;
+
+  // Kategori pelapor
+  const kategoriPelapor = form.querySelector('input[name="kategoriPelapor"]:checked');
+  if (!kategoriPelapor) {
+    showFieldError('kategoriPelapor', 'Silakan pilih kategori pelapor.');
+    valid = false;
+  } else {
+    clearFieldError('kategoriPelapor');
+    if (kategoriPelapor.value === 'Siswa') {
+      const kelas = document.getElementById('kelasSelect').value;
+      const jurusan = document.getElementById('jurusanSelect').value;
+      if (!kelas) { showFieldError('kelas', 'Silakan pilih kelas Anda.'); markInvalid(document.getElementById('kelasSelect'), true); valid = false; }
+      else { clearFieldError('kelas'); markInvalid(document.getElementById('kelasSelect'), false); }
+      if (!jurusan) { showFieldError('jurusan', 'Silakan pilih jurusan Anda.'); markInvalid(document.getElementById('jurusanSelect'), true); valid = false; }
+      else { clearFieldError('jurusan'); markInvalid(document.getElementById('jurusanSelect'), false); }
+    }
+  }
+
+  // Nama (only if not anonymous)
+  if (!anonToggle.checked) {
+    if (!namaInput.value.trim()) {
+      showFieldError('nama', 'Nama lengkap wajib diisi, atau pilih mode Anonymous.');
+      markInvalid(namaInput, true);
+      valid = false;
+    } else { clearFieldError('nama'); markInvalid(namaInput, false); }
+  }
+
+  // Email
+  const emailInput = document.getElementById('emailInput');
+  if (!emailInput.value.trim()) {
+    showFieldError('email', 'Email wajib diisi.'); markInvalid(emailInput, true); valid = false;
+  } else if (!EMAIL_REGEX.test(emailInput.value.trim())) {
+    showFieldError('email', 'Format email tidak valid. Contoh: nama@gmail.com'); markInvalid(emailInput, true); valid = false;
+  } else { clearFieldError('email'); markInvalid(emailInput, false); }
+
+  // Telepon
+  const teleponInput = document.getElementById('teleponInput');
+  const teleponVal = teleponInput.value.trim().replace(/[\s-]/g, '');
+  if (!teleponVal) {
+    showFieldError('telepon', 'Nomor telepon wajib diisi.'); markInvalid(teleponInput, true); valid = false;
+  } else if (!PHONE_REGEX.test(teleponVal)) {
+    showFieldError('telepon', 'Gunakan format 08xxxxxxxxxx atau +62xxxxxxxxxx.'); markInvalid(teleponInput, true); valid = false;
+  } else { clearFieldError('telepon'); markInvalid(teleponInput, false); }
+
+  return valid;
+}
+
+function validateStep2() {
+  let valid = true;
+
+  const kategoriAduan = form.querySelector('input[name="kategoriAduan"]:checked');
+  if (!kategoriAduan) {
+    showFieldError('kategoriAduan', 'Silakan pilih kategori aduan.');
+    valid = false;
+  } else {
+    clearFieldError('kategoriAduan');
+    if (kategoriAduan.value === 'Lainnya') {
+      const lainnyaInput = document.getElementById('kategoriLainnyaInput');
+      if (!lainnyaInput.value.trim()) {
+        showFieldError('kategoriLainnya', 'Silakan tuliskan kategori aduan Anda.');
+        markInvalid(lainnyaInput, true);
+        valid = false;
+      } else { clearFieldError('kategoriLainnya'); markInvalid(lainnyaInput, false); }
+    }
+  }
+
+  const isiLen = isiAduanInput.value.trim().length;
+  if (isiLen === 0) {
+    showFieldError('isiAduan', 'Isi aduan wajib diisi.'); markInvalid(isiAduanInput, true); valid = false;
+  } else if (isiLen < 100) {
+    showFieldError('isiAduan', `Isi aduan minimal 100 karakter (saat ini ${isiLen} karakter).`); markInvalid(isiAduanInput, true); valid = false;
+  } else { clearFieldError('isiAduan'); markInvalid(isiAduanInput, false); }
+
+  // Google Drive link (optional but validate format if filled)
+  const driveLink = document.getElementById('driveLink');
+  if (driveLink.value.trim() && !driveLink.value.trim().toLowerCase().includes('drive.google.com')) {
+    showFieldError('driveLink', 'Tautan harus berupa link Google Drive yang valid.'); markInvalid(driveLink, true); valid = false;
+  } else { clearFieldError('driveLink'); markInvalid(driveLink, false); }
+
+  return valid;
+}
+
+/* ============================================
+   STEP NAVIGATION
+   ============================================ */
+function goToStep(step) {
+  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + step).classList.add('active');
+
+  document.querySelectorAll('.form-progress-step').forEach(el => {
+    const s = parseInt(el.dataset.step, 10);
+    el.classList.toggle('active', s === step);
+    el.classList.toggle('done', s < step);
+  });
+  document.querySelectorAll('.form-progress-line').forEach((line, idx) => {
+    line.classList.toggle('filled', idx < step - 1);
+  });
+
+  currentStep = step;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (step === 3) renderReviewSummary();
+}
+
+document.getElementById('toStep2').addEventListener('click', () => {
+  if (validateStep1()) goToStep(2);
+  else showToast('warning', 'Mohon lengkapi data identitas dengan benar.');
+});
+document.getElementById('toStep1').addEventListener('click', () => goToStep(1));
+document.getElementById('toStep3').addEventListener('click', () => {
+  if (validateStep2()) goToStep(3);
+  else showToast('warning', 'Mohon lengkapi isi aduan dengan benar.');
+});
+document.getElementById('toStep2Back').addEventListener('click', () => goToStep(2));
+
+/* ============================================
+   REVIEW SUMMARY (Step 3)
+   ============================================ */
+function renderReviewSummary() {
+  const kategoriPelapor = form.querySelector('input[name="kategoriPelapor"]:checked');
+  const kategoriAduan = form.querySelector('input[name="kategoriAduan"]:checked');
+  const nama = anonToggle.checked ? 'Anonymous' : (namaInput.value.trim() || '-');
+  const email = document.getElementById('emailInput').value.trim();
+  const telepon = document.getElementById('teleponInput').value.trim();
+  const isiAduanPreview = isiAduanInput.value.trim();
+  const preview = isiAduanPreview.length > 120 ? isiAduanPreview.slice(0, 120) + '…' : isiAduanPreview;
+
+  let kategoriAduanLabel = kategoriAduan ? kategoriAduan.value : '-';
+  if (kategoriAduan && kategoriAduan.value === 'Lainnya') {
+    kategoriAduanLabel = document.getElementById('kategoriLainnyaInput').value.trim();
+  }
+
+  const rows = [
+    ['Kategori Pelapor', kategoriPelapor ? kategoriPelapor.value : '-'],
+  ];
+  if (kategoriPelapor && kategoriPelapor.value === 'Siswa') {
+    rows.push(['Kelas', document.getElementById('kelasSelect').value || '-']);
+    rows.push(['Jurusan', document.getElementById('jurusanSelect').value || '-']);
+  }
+  rows.push(['Nama', nama]);
+  rows.push(['Email', email]);
+  rows.push(['Nomor Telepon', telepon]);
+  rows.push(['Kategori Aduan', kategoriAduanLabel]);
+  rows.push(['Isi Aduan', preview || '-']);
+  rows.push(['Bukti Pendukung', uploadedFile ? uploadedFile.name : 'Tidak ada']);
+
+  document.getElementById('reviewSummary').innerHTML = rows.map(([label, value]) => `
+    <div class="review-row">
+      <span class="review-row-label">${label}</span>
+      <span class="review-row-value">${escapeHtml(value)}</span>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ============================================
+   TICKET NUMBER GENERATION
+   ============================================ */
+async function generateUniqueTicketNumber() {
+  let ticketNumber;
+  let isUnique = false;
+  let attempts = 0;
+
+  while (!isUnique && attempts < 10) {
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    ticketNumber = `ADN-${randomNum}`;
+    const existing = await db.collection(ADUAN_COLLECTION).where('ticketNumber', '==', ticketNumber).limit(1).get();
+    isUnique = existing.empty;
+    attempts++;
+  }
+  return ticketNumber;
+}
+
+/* ============================================
+   LOADING OVERLAY
+   ============================================ */
+const loadingOverlay = document.getElementById('loadingOverlay');
+const loadingText = document.getElementById('loadingText');
+function showLoading(text) {
+  loadingText.textContent = text || 'Memproses...';
+  loadingOverlay.classList.add('show');
+}
+function hideLoading() {
+  loadingOverlay.classList.remove('show');
+}
+
+/* ============================================
+   FORM SUBMISSION
+   ============================================ */
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if (!agreeCheckbox.checked) {
+    showToast('warning', 'Anda harus menyetujui peraturan terlebih dahulu.');
+    return;
+  }
+
+  // Final re-validation of all steps for safety
+  if (!validateStep1()) { goToStep(1); showToast('error', 'Terdapat data identitas yang belum lengkap atau valid.'); return; }
+  if (!validateStep2()) { goToStep(2); showToast('error', 'Terdapat data aduan yang belum lengkap atau valid.'); return; }
+
+  showLoading('Mengirim aduan Anda...');
+  submitBtn.disabled = true;
+
+  try {
+    const kategoriPelapor = form.querySelector('input[name="kategoriPelapor"]:checked').value;
+    const kategoriAduanRadio = form.querySelector('input[name="kategoriAduan"]:checked').value;
+    const kategoriLainnya = kategoriAduanRadio === 'Lainnya' ? document.getElementById('kategoriLainnyaInput').value.trim() : '';
+    const isAnon = anonToggle.checked;
+
+    const ticketNumber = await generateUniqueTicketNumber();
+
+    const payload = {
+      ticketNumber: ticketNumber,
+      nama: isAnon ? 'Anonymous' : namaInput.value.trim(),
+      kategoriPelapor: kategoriPelapor,
+      kelas: kategoriPelapor === 'Siswa' ? document.getElementById('kelasSelect').value : '',
+      jurusan: kategoriPelapor === 'Siswa' ? document.getElementById('jurusanSelect').value : '',
+      email: document.getElementById('emailInput').value.trim(),
+      nomorTelepon: document.getElementById('teleponInput').value.trim(),
+      kategoriAduan: kategoriAduanRadio,
+      kategoriLainnya: kategoriLainnya,
+      isiAduan: isiAduanInput.value.trim(),
+      fileBase64: uploadedFile ? uploadedFile.base64 : '',
+      fileName: uploadedFile ? uploadedFile.name : '',
+      fileType: uploadedFile ? uploadedFile.type : '',
+      fileSize: uploadedFile ? uploadedFile.size : 0,
+      googleDriveLink: document.getElementById('driveLink').value.trim(),
+      status: 'pending',
+      jawabanOperator: '',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+
+    await db.collection(ADUAN_COLLECTION).add(payload);
+
+    hideLoading();
+    document.getElementById('generatedTicketNumber').textContent = ticketNumber;
+    showView('success');
+    showToast('success', 'Aduan Anda telah berhasil dikirim dan akan segera ditinjau.');
+
+    // Re-trigger checkmark animation
+    const checkCircle = document.querySelector('.success-checkmark-circle');
+    const checkPath = document.querySelector('.success-checkmark-check');
+    [checkCircle, checkPath].forEach(el => {
+      el.style.animation = 'none';
+      requestAnimationFrame(() => { el.style.animation = ''; });
+    });
+
+  } catch (err) {
+    console.error('Gagal mengirim aduan:', err);
+    hideLoading();
+    showToast('error', 'Gagal mengirim aduan. Silakan periksa koneksi internet Anda dan coba lagi.');
+    submitBtn.disabled = !agreeCheckbox.checked;
+  }
+});
+
+/* ============================================
+   COPY TICKET NUMBER
+   ============================================ */
+document.getElementById('copyTicketBtn').addEventListener('click', async (e) => {
+  const ticketNumber = document.getElementById('generatedTicketNumber').textContent;
+  const btn = e.currentTarget;
+  try {
+    await navigator.clipboard.writeText(ticketNumber);
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Tersalin!`;
+    showToast('success', 'Nomor tiket berhasil disalin.');
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2"/></svg> Salin Nomor Tiket`;
+    }, 2200);
+  } catch {
+    showToast('error', 'Gagal menyalin nomor tiket. Silakan salin secara manual.');
+  }
+});
+
+/* ============================================
+   RESET FORM (when entering form view fresh)
+   ============================================ */
+function resetForm() {
+  form.reset();
+  currentStep = 1;
+  uploadedFile = null;
+  fileInput.value = '';
+  uploadZoneEmpty.hidden = false;
+  uploadZoneFile.hidden = true;
+  siswaFields.classList.remove('open');
+  kategoriLainnyaField.classList.remove('open');
+  namaInput.disabled = false;
+  namaInput.placeholder = 'Tulis nama lengkap Anda';
+  namaGroup.style.opacity = '1';
+  charCounter.textContent = '0 / 100 karakter minimum';
+  charCounter.classList.remove('valid');
+  submitBtn.disabled = true;
+  submitBtn.classList.remove('enabled');
+  document.querySelectorAll('.field-error').forEach(el => { el.textContent = ''; el.classList.remove('show'); });
+  document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+  goToStep(1);
+}
+
+/* ============================================
+   STATUS CHECK FEATURE
+   ============================================ */
+const searchMethodBtns = document.querySelectorAll('.search-method-btn');
+const searchTicketInput = document.getElementById('searchTicketInput');
+const searchEmailInput = document.getElementById('searchEmailInput');
+let searchMethod = 'ticket';
+
+searchMethodBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    searchMethodBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    searchMethod = btn.dataset.method;
+    searchTicketInput.hidden = searchMethod !== 'ticket';
+    searchEmailInput.hidden = searchMethod !== 'email';
+    clearFieldError('search');
+  });
+});
+
+document.getElementById('searchSubmitBtn').addEventListener('click', performStatusSearch);
+searchTicketInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') performStatusSearch(); });
+searchEmailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') performStatusSearch(); });
+
+async function performStatusSearch() {
+  clearFieldError('search');
+  const resultContainer = document.getElementById('statusResult');
+
+  let query;
+  let searchValue;
+
+  if (searchMethod === 'ticket') {
+    searchValue = searchTicketInput.value.trim().toUpperCase();
+    if (!searchValue) {
+      showFieldError('search', 'Silakan masukkan nomor tiket aduan Anda.');
+      return;
+    }
+    query = db.collection(ADUAN_COLLECTION).where('ticketNumber', '==', searchValue);
+  } else {
+    searchValue = searchEmailInput.value.trim();
+    if (!searchValue || !EMAIL_REGEX.test(searchValue)) {
+      showFieldError('search', 'Silakan masukkan alamat email yang valid.');
+      return;
+    }
+    query = db.collection(ADUAN_COLLECTION).where('email', '==', searchValue);
+  }
+
+  // Show skeleton loading
+  resultContainer.innerHTML = `
+    <div class="skeleton skeleton-card"></div>
+  `;
+
+  try {
+    const snapshot = await query.orderBy('createdAt', 'desc').get();
+
+    if (snapshot.empty) {
+      resultContainer.innerHTML = `
+        <div class="status-empty">
+          <div class="status-empty-icon">🔍</div>
+          <p>Tidak ditemukan aduan dengan ${searchMethod === 'ticket' ? 'nomor tiket' : 'email'} tersebut.<br>Pastikan data yang Anda masukkan sudah benar.</p>
+        </div>
+      `;
+      return;
+    }
+
+    resultContainer.innerHTML = '';
+    snapshot.forEach(doc => {
+      resultContainer.appendChild(renderStatusCard(doc.data()));
+    });
+
+  } catch (err) {
+    console.error('Gagal mencari aduan:', err);
+    // Fallback: try without orderBy in case of missing index
+    try {
+      const snapshot = await query.get();
+      if (snapshot.empty) {
+        resultContainer.innerHTML = `
+          <div class="status-empty">
+            <div class="status-empty-icon">🔍</div>
+            <p>Tidak ditemukan aduan dengan ${searchMethod === 'ticket' ? 'nomor tiket' : 'email'} tersebut.</p>
+          </div>
+        `;
+      } else {
+        resultContainer.innerHTML = '';
+        snapshot.forEach(doc => resultContainer.appendChild(renderStatusCard(doc.data())));
+      }
+    } catch (err2) {
+      resultContainer.innerHTML = `
+        <div class="status-empty">
+          <div class="status-empty-icon">⚠️</div>
+          <p>Terjadi kesalahan saat mencari data. Silakan coba lagi nanti.</p>
+        </div>
+      `;
+      showToast('error', 'Gagal memuat status aduan. Periksa koneksi Anda.');
+    }
+  }
+}
+
+function renderStatusCard(data) {
+  const card = document.createElement('div');
+  card.className = 'status-result-card';
+
+  const dateStr = data.createdAt && data.createdAt.toDate
+    ? data.createdAt.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+    : '-';
+
+  let bannerHtml = '';
+  const status = (data.status || 'pending').toLowerCase();
+
+  if (status === 'pending') {
+    bannerHtml = `
+      <div class="status-banner pending">
+        <span class="status-banner-icon">⏳</span>
+        <div class="status-banner-text">
+          <strong>Pending / Dalam Antrian</strong>
+          <span>Aduan Anda masih dalam antrean. Mohon menunggu maksimal 1x24 jam.</span>
+        </div>
+      </div>
+    `;
+  } else if (status === 'diproses' || status === 'processing' || status === 'sedang diproses') {
+    bannerHtml = `
+      <div class="status-banner process">
+        <span class="status-banner-icon status-icon-spin">⚙️</span>
+        <div class="status-banner-text">
+          <strong>Sedang Diproses</strong>
+          <span>Aduan Anda sedang diproses oleh operator.</span>
+        </div>
+      </div>
+      <div class="status-progress-track"><div class="status-progress-fill"></div></div>
+    `;
+  } else {
+    // selesai / disetujui / completed
+    bannerHtml = `
+      <div class="status-banner done">
+        <span class="status-banner-icon">✅</span>
+        <div class="status-banner-text">
+          <strong>Disetujui / Selesai</strong>
+          <span>Aduan Anda telah ditinjau dan ditindaklanjuti oleh pihak sekolah.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  let operatorReplyHtml = '';
+  if (data.jawabanOperator && data.jawabanOperator.trim()) {
+    operatorReplyHtml = `
+      <div class="operator-reply">
+        <div class="operator-reply-title">💬 Jawaban Operator</div>
+        <div class="operator-reply-text">"${escapeHtml(data.jawabanOperator)}"</div>
+      </div>
+    `;
+  }
+
+  card.innerHTML = `
+    <div class="status-result-header">
+      <span class="status-result-ticket">${escapeHtml(data.ticketNumber || '-')}</span>
+      <span class="status-result-date">Diajukan ${dateStr}</span>
+    </div>
+    ${bannerHtml}
+    <div class="status-detail-grid">
+      <div class="status-detail-item"><span>Kategori Pelapor</span><span>${escapeHtml(data.kategoriPelapor || '-')}</span></div>
+      <div class="status-detail-item"><span>Kategori Aduan</span><span>${escapeHtml(data.kategoriAduan === 'Lainnya' ? (data.kategoriLainnya || 'Lainnya') : (data.kategoriAduan || '-'))}</span></div>
+    </div>
+    ${operatorReplyHtml}
+  `;
+
+  return card;
+}
+
+/* ============================================
+   INIT
+   ============================================ */
+goToStep(1);
+
+</script>
+</body>
+</html>
