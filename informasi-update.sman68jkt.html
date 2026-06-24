@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Informasi Update — SMAN 68 Jakarta</title>
+  <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #1B7A3D;
+      --green-light: #A8E6B5;
+      --green-mid: #2E9E54;
+      --blue: #1A4F8B;
+      --blue-light: #BBDEFB;
+      --blue-mid: #1565C0;
+      --white: #FFFFFF;
+      --bg: #F4F8F5;
+      --surface: #FFFFFF;
+      --text: #1A2332;
+      --text-sec: #5F6368;
+      --border: #E0EDE5;
+      --grad: linear-gradient(135deg, #1B7A3D 0%, #1A4F8B 100%);
+      --grad-light: linear-gradient(135deg, #A8E6B5 0%, #BBDEFB 100%);
+      --radius: 16px;
+      --shadow: 0 2px 12px rgba(27,122,61,0.08);
+      --shadow-lg: 0 8px 32px rgba(26,79,139,0.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--grad);
+      padding: clamp(20px, 4vw, 40px) clamp(16px, 5vw, 48px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 24px rgba(26,79,139,0.2);
+    }
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-logo {
+      height: clamp(40px, 6vw, 60px);
+      width: auto;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.15);
+      padding: 4px;
+      flex-shrink: 0;
+    }
+    .header-text { flex: 1; min-width: 180px; }
+    .header-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-light);
+      opacity: 0.9;
+    }
+    .header-title {
+      font-size: clamp(18px, 3.5vw, 26px);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .header-subtitle {
+      font-size: 13px;
+      color: rgba(255,255,255,0.72);
+      margin-top: 2px;
+    }
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+    }
+    .live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #6EE97A;
+      box-shadow: 0 0 0 0 rgba(110,233,122,0.6);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(110,233,122,0.6); }
+      70%  { box-shadow: 0 0 0 6px rgba(110,233,122,0); }
+      100% { box-shadow: 0 0 0 0 rgba(110,233,122,0); }
+    }
+
+    /* ── Search bar ── */
+    .search-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px clamp(16px, 5vw, 48px) 8px;
+    }
+    .search-box {
+      position: relative;
+    }
+    .search-icon {
+      position: absolute;
+      left: 16px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: var(--text-sec);
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 14px;
+      background: var(--surface);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: var(--shadow);
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(27,122,61,0.1);
+    }
+    .search-input::placeholder { color: var(--text-sec); }
+
+    /* ── Main ── */
+    .main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px clamp(16px, 5vw, 48px) 64px;
+    }
+
+    /* ── Skeleton ── */
+    .skeleton-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      animation: shimmer 1.4s infinite;
+    }
+    .skel-line {
+      background: linear-gradient(90deg, #E8F0EB 25%, #D0E4D8 50%, #E8F0EB 75%);
+      background-size: 200% 100%;
+      border-radius: 6px;
+      animation: shimmer-move 1.4s infinite;
+    }
+    .skel-v { height: 32px; width: 100px; margin-bottom: 12px; }
+    .skel-t { height: 20px; width: 60%; margin-bottom: 8px; }
+    .skel-d { height: 14px; width: 40%; margin-bottom: 20px; }
+    .skel-item { height: 14px; width: 80%; margin-bottom: 10px; }
+    .skel-item:last-child { width: 65%; }
+    @keyframes shimmer-move {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── Update cards (timeline) ── */
+    .timeline {
+      position: relative;
+      padding-left: 28px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px; top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--green) 0%, var(--blue) 100%);
+      border-radius: 2px;
+      opacity: 0.25;
+    }
+    .update-card {
+      position: relative;
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: clamp(20px, 3vw, 32px);
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      border: 1.5px solid var(--border);
+      transition: box-shadow 0.25s, transform 0.25s;
+      animation: fadeSlideIn 0.4s ease both;
+    }
+    .update-card::before {
+      content: '';
+      position: absolute;
+      left: -32px; top: 28px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--grad);
+      box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px rgba(27,122,61,0.2);
+    }
+    .update-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    .version-badge {
+      font-size: clamp(22px, 4vw, 30px);
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .latest-tag {
+      background: var(--grad);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      align-self: center;
+    }
+    .card-title {
+      font-size: clamp(15px, 2.5vw, 18px);
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 4px;
+    }
+    .card-date {
+      font-size: 13px;
+      color: var(--text-sec);
+      margin-top: 2px;
+      margin-bottom: 20px;
+    }
+    .card-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 18px;
+    }
+
+    /* ── Change items ── */
+    .changes-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .change-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .change-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .badge-feature  { background: #E8F5E9; color: #1B7A3D; }
+    .badge-fix      { background: #E3F2FD; color: #1565C0; }
+    .badge-improvement { background: linear-gradient(135deg, #E8F5E9, #E3F2FD); color: #1B5E20; }
+    .badge-security { background: #ECEFF1; color: #37474F; }
+    .change-text {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.55;
+      padding-top: 2px;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--text-sec);
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .empty-desc  { font-size: 14px; line-height: 1.6; max-width: 340px; margin: 0 auto; }
+
+    /* ── No results ── */
+    .no-results {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--text-sec);
+      font-size: 14px;
+    }
+
+    /* ── Error banner ── */
+    .error-banner {
+      background: #FFF3F3;
+      border: 1.5px solid #FFCDD2;
+      border-radius: 12px;
+      padding: 16px 20px;
+      color: #C62828;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: var(--text-sec);
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .timeline { padding-left: 20px; }
+      .timeline::before { left: 4px; }
+      .update-card::before { left: -24px; }
+      .header-inner { gap: 12px; }
+      .live-badge { padding: 5px 10px; font-size: 11px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <img class="header-logo" src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="Logo SMAN 68 Jakarta" />
+      <div class="header-text">
+        <div class="header-eyebrow">SMAN 68 Jakarta</div>
+        <div class="header-title">Pusat Informasi Update</div>
+        <div class="header-subtitle">Riwayat pembaruan & fitur sistem terbaru</div>
+      </div>
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        Live
+      </div>
+    </div>
+  </header>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="search" id="searchInput" placeholder="Cari versi atau kata kunci…" aria-label="Cari update" />
+    </div>
+  </div>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="error-banner" id="errorBanner">⚠️ Gagal memuat data. Periksa koneksi internet dan coba lagi.</div>
+
+    <!-- Skeleton loaders -->
+    <div id="skeletonWrap">
+      <div class="timeline">
+        <div class="skeleton-card">
+          <div class="skel-line skel-v"></div>
+          <div class="skel-line skel-t"></div>
+          <div class="skel-line skel-d"></div>
+          <div class="skel-line skel-item"></div>
+          <div class="skel-line skel-item"></div>
+          <div class="skel-line skel-item"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skel-line skel-v"></div>
+          <div class="skel-line skel-t"></div>
+          <div class="skel-line skel-d"></div>
+          <div class="skel-line skel-item"></div>
+          <div class="skel-line skel-item"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data container -->
+    <div id="timelineWrap" style="display:none;">
+      <div class="timeline" id="timelineList"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyState" style="display:none;">
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">Belum ada update</div>
+        <div class="empty-desc">Belum ada riwayat pembaruan yang dipublikasikan. Cek kembali nanti.</div>
+      </div>
+    </div>
+
+    <!-- No results -->
+    <div id="noResults" style="display:none;">
+      <div class="no-results">Tidak ada hasil untuk pencarian "<span id="searchTerm"></span>".</div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    &copy; 2026 SMAN 68 Jakarta — Sistem Informasi Sekolah
+  </footer>
+
+  <!-- Firebase SDK (modular via CDN) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    // ── Firebase config ──
+    const firebaseConfig = {
+      apiKey: "AIzaSyDAcKcg3alPOTH3FFGelYmsW7jcMMe2PLI",
+      authDomain: "upnvjdatsystem.firebaseapp.com",
+      databaseURL: "https://upnvjdatsystem-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "upnvjdatsystem",
+      storageBucket: "upnvjdatsystem.firebasestorage.app",
+      messagingSenderId: "57095309946",
+      appId: "1:57095309946:web:b0e9f3f86380d549ffc9c3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+    const rtdb = getDatabase(app);
+
+    // ── DOM refs ──
+    const skeletonWrap  = document.getElementById("skeletonWrap");
+    const timelineWrap  = document.getElementById("timelineWrap");
+    const timelineList  = document.getElementById("timelineList");
+    const emptyState    = document.getElementById("emptyState");
+    const noResults     = document.getElementById("noResults");
+    const errorBanner   = document.getElementById("errorBanner");
+    const searchInput   = document.getElementById("searchInput");
+    const searchTermEl  = document.getElementById("searchTerm");
+
+    let allUpdates = []; // cache dari Firestore
+
+    // ── Badge map ──
+    const BADGE = {
+      feature:     { icon: "✨", label: "Fitur Baru",  cls: "badge-feature" },
+      fix:         { icon: "🛠️", label: "Perbaikan",   cls: "badge-fix" },
+      improvement: { icon: "⚡", label: "Peningkatan", cls: "badge-improvement" },
+      security:    { icon: "🔒", label: "Keamanan",    cls: "badge-security" },
+    };
+
+    // ── Format tanggal Indonesia ──
+    function formatDate(str) {
+      if (!str) return "—";
+      const d = new Date(str + "T00:00:00"); // avoid TZ shift
+      return d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    }
+
+    // ── Render satu kartu ──
+    function renderCard(doc, index, isLatest) {
+      const { version, title, releaseDate, changes = [] } = doc;
+      const card = document.createElement("div");
+      card.className = "update-card";
+      card.dataset.version = version || "";
+      card.dataset.title   = (title || "").toLowerCase();
+      card.style.animationDelay = `${index * 60}ms`;
+
+      const changesHTML = changes.map(c => {
+        const b = BADGE[c.type] || BADGE.improvement;
+        return `<li class="change-item">
+          <span class="change-badge ${b.cls}">${b.icon} ${b.label}</span>
+          <span class="change-text">${escHtml(c.text)}</span>
+        </li>`;
+      }).join("");
+
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="version-badge">v${escHtml(version || "")}</span>
+          ${isLatest ? '<span class="latest-tag">✦ Terbaru</span>' : ""}
+        </div>
+        <div class="card-title">${escHtml(title || "")}</div>
+        <div class="card-date">🗓 ${formatDate(releaseDate)}</div>
+        <div class="card-divider"></div>
+        <ul class="changes-list">${changesHTML}</ul>
+      `;
+      return card;
+    }
+
+    // ── Render list ──
+    function renderList(updates, filter = "") {
+      timelineList.innerHTML = "";
+      const filtered = filter
+        ? updates.filter(u =>
+            (u.version || "").toLowerCase().includes(filter) ||
+            (u.title   || "").toLowerCase().includes(filter)
+          )
+        : updates;
+
+      if (filtered.length === 0 && updates.length > 0) {
+        // no search results
+        timelineWrap.style.display = "none";
+        noResults.style.display = "block";
+        searchTermEl.textContent = filter;
+        return;
+      }
+
+      noResults.style.display = "none";
+
+      if (filtered.length === 0) {
+        timelineWrap.style.display = "none";
+        emptyState.style.display = "block";
+        return;
+      }
+
+      emptyState.style.display = "none";
+      timelineWrap.style.display = "block";
+      filtered.forEach((u, i) => {
+        timelineList.appendChild(renderCard(u, i, i === 0 && !filter));
+      });
+    }
+
+    // ── Escape HTML ──
+    function escHtml(s) {
+      return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    // ── Firestore real-time listener ──
+    // Kita gunakan onSnapshot langsung dari Firestore — cara paling stabil & real-time.
+    // RTDB digunakan sebagai penguat notifikasi, namun onSnapshot Firestore sudah cukup cepat.
+    const q = query(collection(db, "updates"), orderBy("releaseDate", "desc"));
+
+    let firstLoad = true;
+
+    onSnapshot(q, (snapshot) => {
+      if (firstLoad) {
+        skeletonWrap.style.display = "none";
+        firstLoad = false;
+      }
+      allUpdates = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderList(allUpdates, searchInput.value.trim().toLowerCase());
+    }, (err) => {
+      console.error("Firestore error:", err);
+      skeletonWrap.style.display = "none";
+      errorBanner.style.display = "block";
+    });
+
+    // ── RTDB listener (trigger notifikasi tambahan / fallback) ──
+    // Jika koneksi RTDB mendapat update meta/lastUpdated, ini sebagai sinyal tambahan.
+    // Karena onSnapshot Firestore sudah real-time, RTDB di sini hanya sebagai penguat.
+    const metaRef = ref(rtdb, "meta/lastUpdated");
+    onValue(metaRef, () => {
+      // Firestore onSnapshot sudah menangani update — tidak perlu re-fetch manual.
+      // Komentar ini sebagai catatan arsitektur: RTDB berperan sebagai "ping" notifikasi.
+    });
+
+    // ── Search handler ──
+    searchInput.addEventListener("input", () => {
+      renderList(allUpdates, searchInput.value.trim().toLowerCase());
+    });
+  </script>
+</body>
+</html>
