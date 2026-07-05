@@ -53,14 +53,15 @@ const ptnList = [
     { name: 'PNJ',     fullName: 'Politeknik Negeri Jakarta',         logo: 'https://upload.wikimedia.org/wikipedia/id/1/16/Logo_Politeknik_Negeri_Jakarta.jpg' },
     { name: 'MONASH',  fullName: 'Monash University',                 logo: 'https://brandlogos.net/wp-content/uploads/2024/06/monash_university-logo_brandlogos.net_bzf0m.png' },
     { name: 'UT',      fullName: 'University of Toronto',             logo: 'https://download.logo.wine/logo/University_of_Toronto/University_of_Toronto-Logo.wine.png' },
-    { name: 'UWA',     fullName: 'The University of Western Australia', logo: 'https://www.freelogovectors.net/wp-content/uploads/2021/04/university-of-western-australia-logo-freelogovectors.net_.png' }
+    { name: 'UWA',     fullName: 'The University of Western Australia', logo: 'https://www.freelogovectors.net/wp-content/uploads/2021/04/university-of-western-australia-logo-freelogovectors.net_.png' },
+    { name: 'ITERA',   fullName: 'Institut Teknologi Sumatera',       logo: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Logo_ITERA.png' }
 ];
 
 const defaultAlumniData = {
     'UI': 2450, 'UGM': 1850, 'ITB': 1650, 'UNAIR': 1420, 'IPB': 1350,
     'UNDIP': 1280, 'UNPAD': 1150, 'UB': 980, 'ITS': 890, 'UNJ': 750,
     'UPNVJ': 520, 'UNAND': 310, 'UNHAS': 280, 'UPNVYK': 220, 'PNJ': 190,
-    'MONASH': 1, 'UT': 2, 'UWA': 1
+    'MONASH': 1, 'UT': 2, 'UWA': 1, 'ITERA': 1
 };
 
 // ============================================
