@@ -1,0 +1,2111 @@
+<!-- daftar.ulang.html - VERSI UPDATE DENGAN DATA DIRI LENGKAP -->
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Ulang – SMAN 68 Jakarta</title>
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png">
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* ================================
+       ROOT — Sama dengan sistem utama
+    ================================ */
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Space+Mono:wght@400;700&display=swap');
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-base: #f0f4f8;
+      --bg-card: #ffffff;
+      --bg-input: #f8fafc;
+      --bg-input: #f1f5f9;
+      --bg-input-focus: #ffffff;
+      --border: #e2e8f0;
+      --border-focus: #006633;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
+      --shadow-lg: 0 20px 50px rgba(0,0,0,0.12);
+      --shadow-xl: 0 32px 64px rgba(0,0,0,0.16);
+      --green: #006633;
+      --green-light: #00883f;
+      --green-pale: #e8f5e9;
+      --blue: #0077bb;
+      --blue-light: #0099dd;
+      --blue-pale: #e3f2fd;
+      --grad: linear-gradient(135deg, #006633 0%, #0077bb 100%);
+      --grad-soft: linear-gradient(135deg, rgba(0,102,51,0.08) 0%, rgba(0,119,187,0.08) 100%);
+      --warn-bg: #fffbeb; --warn-border: #f59e0b; --warn-text: #92400e;
+      --info-bg: #eff6ff; --info-border: #3b82f6; --info-text: #1e40af;
+      --success-bg: #f0fdf4; --success-border: #22c55e; --success-text: #14532d;
+      --danger-bg: #fff1f2; --danger-border: #f43f5e; --danger-text: #881337;
+      --radius-xs: 6px; --radius-sm: 10px; --radius-md: 16px; --radius-lg: 24px; --radius-full: 9999px;
+      --transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #0d1117;
+      --bg-card: #161b22;
+      --bg-input: #1c2128;
+      --bg-input: #21262d;
+      --bg-input-focus: #2d333b;
+      --border: #30363d;
+      --border-focus: #00cc66;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #484f58;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      --shadow-lg: 0 20px 50px rgba(0,0,0,0.5);
+      --shadow-xl: 0 32px 64px rgba(0,0,0,0.6);
+      --green: #00cc66;
+      --green-light: #00ff88;
+      --green-pale: rgba(0,204,102,0.12);
+      --blue: #58a6ff;
+      --blue-light: #79c0ff;
+      --blue-pale: rgba(88,166,255,0.12);
+      --grad: linear-gradient(135deg, #00cc66 0%, #58a6ff 100%);
+      --grad-soft: linear-gradient(135deg, rgba(0,204,102,0.1) 0%, rgba(88,166,255,0.1) 100%);
+      --warn-bg: rgba(245,158,11,0.12); --warn-border: #d97706; --warn-text: #fcd34d;
+      --info-bg: rgba(59,130,246,0.12); --info-border: #3b82f6; --info-text: #93c5fd;
+      --success-bg: rgba(34,197,94,0.12); --success-border: #22c55e; --success-text: #86efac;
+      --danger-bg: rgba(244,63,94,0.12); --danger-border: #f43f5e; --danger-text: #fda4af;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ================================
+       TOAST
+    ================================ */
+    .toast-wrap {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-lg);
+      min-width: 280px;
+      max-width: 380px;
+      pointer-events: all;
+      animation: slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+      border-left: 4px solid var(--green);
+    }
+    .toast-item.t-error { border-left-color: #f43f5e; }
+    .toast-item.t-warn { border-left-color: #f59e0b; }
+    .toast-item.t-success { border-left-color: #22c55e; }
+    .toast-item.t-info { border-left-color: #3b82f6; }
+    .toast-item i { font-size: 1.1rem; flex-shrink: 0; }
+    .toast-item.t-error i { color: #f43f5e; }
+    .toast-item.t-warn i { color: #f59e0b; }
+    .toast-item.t-success i { color: #22c55e; }
+    .toast-item.t-info i { color: #3b82f6; }
+    .toast-msg { font-size: 0.875rem; font-weight: 500; flex: 1; }
+    @keyframes slideIn { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* ================================
+       HEADER
+    ================================ */
+    .header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: var(--shadow-sm);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .header-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-logo-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .header-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: contain;
+      border: 2px solid var(--border);
+      background: white;
+      padding: 3px;
+    }
+    .header-brand {
+      flex: 1;
+      min-width: 0;
+    }
+    .header-brand h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-brand p {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .clock-display {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--green);
+      background: var(--green-pale);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      letter-spacing: 1px;
+      border: 1px solid rgba(0,102,51,0.2);
+      min-width: 90px;
+      text-align: center;
+    }
+    [data-theme="dark"] .clock-display { border-color: rgba(0,204,102,0.2); }
+    .theme-toggle {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--bg-input);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: var(--transition);
+      color: var(--text-secondary);
+    }
+    .theme-toggle:hover { border-color: var(--green); color: var(--green); background: var(--green-pale); }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--bg-input);
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: var(--transition);
+    }
+    .logout-btn:hover { border-color: #f43f5e; color: #f43f5e; background: var(--danger-bg); }
+
+    /* ================================
+       MAIN WRAP
+    ================================ */
+    .main-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    /* ================================
+       CARD
+    ================================ */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-icon {
+      width: 40px; height: 40px;
+      background: var(--grad);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .card-header h2 { font-size: 1.05rem; font-weight: 700; }
+    .card-header p { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+
+    /* ================================
+       FORM
+    ================================ */
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 7px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-label i { color: var(--green); width: 14px; font-size: 0.8rem; }
+    .req { color: #ef4444; font-size: 0.75rem; }
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      transition: var(--transition);
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--border-focus);
+      background: var(--bg-input-focus);
+      box-shadow: 0 0 0 3px rgba(0,102,51,0.1);
+    }
+    [data-theme="dark"] .form-input:focus { box-shadow: 0 0 0 3px rgba(0,204,102,0.12); }
+    .form-input:disabled, .form-input[readonly] {
+      background: var(--bg-input);
+      cursor: default;
+      opacity: 0.8;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .form-hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+
+    .data-source-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg-input);
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+      margin-left: 8px;
+    }
+    .data-source-badge i { color: var(--green); font-size: 0.65rem; }
+
+    .field-readonly {
+      position: relative;
+    }
+    .field-readonly .form-input {
+      background: var(--bg-input);
+      border-style: dashed;
+    }
+    .field-readonly .form-input:focus {
+      border-color: var(--border);
+      box-shadow: none;
+    }
+
+    /* ================================
+       ALERT
+    ================================ */
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+      border: 1px solid;
+    }
+    .alert i { margin-top: 1px; flex-shrink: 0; }
+    .alert-warn { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-text); }
+    .alert-info { background: var(--info-bg); border-color: var(--info-border); color: var(--info-text); }
+    .alert-success { background: var(--success-bg); border-color: var(--success-border); color: var(--success-text); }
+    .alert-danger { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-text); }
+
+    /* ================================
+       BUTTONS
+    ================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border: none;
+      border-radius: var(--radius-full);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--grad);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(0,102,51,0.25);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,102,51,0.35); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; background: var(--text-muted); box-shadow: none; }
+    .btn-success {
+      background: #22c55e;
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(34,197,94,0.3);
+    }
+    .btn-success:hover { transform: translateY(-2px); background: #16a34a; }
+    .btn-secondary {
+      background: var(--bg-input);
+      color: var(--text-primary);
+      border: 1.5px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--green); color: var(--green); }
+    .btn-full { width: 100%; }
+    .btn-lg { padding: 16px 30px; font-size: 1rem; }
+    .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+    .btn-social {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: var(--radius-full);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      color: #fff;
+    }
+    .btn-social.instagram { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .btn-social.tiktok { background: linear-gradient(135deg, #000000, #25f4ee, #fe2c55); }
+    .btn-social.whatsapp { background: #25d366; }
+    .btn-social.email { background: #ea4335; }
+    .btn-social:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+    /* ================================
+       RULES SCROLL
+    ================================ */
+    .rules-scroll {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 22px;
+      max-height: 280px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+    }
+    .rules-scroll ol { padding-left: 18px; }
+    .rules-scroll li { margin-bottom: 9px; font-size: 0.875rem; color: var(--text-secondary); }
+
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 18px; height: 18px;
+      margin-top: 2px;
+      accent-color: var(--green);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .checkbox-row label { font-size: 0.875rem; font-weight: 500; cursor: pointer; color: var(--success-text); }
+
+    /* ================================
+       LOGIN PAGE
+    ================================ */
+    #loginPage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 80px);
+      padding: 20px;
+    }
+    .login-card {
+      max-width: 440px;
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px 36px;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+    .login-card .login-logo {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      margin-bottom: 12px;
+    }
+    .login-card h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .login-card p.sub {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .login-card .form-group { text-align: left; }
+
+    /* ================================
+       DASHBOARD
+    ================================ */
+    .welcome-banner {
+      background: var(--grad);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      color: #fff;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .welcome-banner::after {
+      content: '';
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+    }
+    .welcome-banner h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+    .welcome-banner p { font-size: 0.9rem; opacity: 0.85; }
+
+    /* ================================
+       STATUS CARD
+    ================================ */
+    .status-card {
+      text-align: center;
+      padding: 28px 24px;
+      border-radius: var(--radius-lg);
+      border: 1.5px solid;
+      margin-top: 20px;
+    }
+    .status-card .status-icon { font-size: 3.5rem; margin-bottom: 12px; }
+    .status-card h3 { font-size: 1.2rem; margin-bottom: 8px; }
+    .status-card p { font-size: 0.9rem; color: var(--text-secondary); }
+    .status-card.s-proses { background: var(--info-bg); border-color: var(--info-border); color: var(--info-text); }
+    .status-card.s-proses .status-icon { color: #3b82f6; }
+    .status-card.s-valid { background: var(--success-bg); border-color: var(--success-border); color: var(--success-text); }
+    .status-card.s-valid .status-icon { color: #22c55e; }
+    .status-card.s-tidak-valid { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-text); }
+    .status-card.s-tidak-valid .status-icon { color: #f43f5e; }
+    .status-meta {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.5);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      text-align: left;
+    }
+    [data-theme="dark"] .status-meta { background: rgba(0,0,0,0.2); }
+    .status-meta strong { display: block; margin-bottom: 6px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; }
+
+    .social-links {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .social-links .btn-social { min-width: 120px; justify-content: center; }
+
+    /* ================================
+       GATE / WEBSITE CLOSED
+    ================================ */
+    #websiteGate {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      background: var(--bg-base);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+    #websiteGate.active { display: flex; }
+    .gate-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+      max-width: 540px;
+      width: 100%;
+      text-align: center;
+      box-shadow: var(--shadow-xl);
+      animation: gateIn 0.4s cubic-bezier(0.4,0,0.2,1) both;
+    }
+    @keyframes gateIn {
+      from { opacity: 0; transform: translateY(24px) scale(0.97); }
+      to { opacity: 1; transform: none; }
+    }
+    .gate-card .gate-icon-wrap {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: var(--danger-bg);
+      border: 2px solid var(--danger-border);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+      color: var(--danger-text);
+    }
+    .gate-card .gate-logo {
+      width: 60px; height: 60px;
+      object-fit: contain;
+      margin: 0 auto 16px;
+      display: block;
+      opacity: 0.7;
+    }
+    .gate-card h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 12px; }
+    .gate-card p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; }
+
+    /* ================================
+       MODAL SUKSES
+    ================================ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(4px);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: var(--shadow-xl);
+      animation: modalUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes modalUp { from { transform: translateY(30px) scale(0.96); opacity: 0; } to { transform: none; opacity: 1; } }
+    .modal-icon { font-size: 4rem; margin-bottom: 16px; }
+    .modal-icon.success { color: #22c55e; }
+    .modal-box h2 { font-size: 1.4rem; margin-bottom: 10px; }
+    .modal-box p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 10px; }
+
+    /* ================================
+       DATA COMPLETE INDICATOR
+    ================================ */
+    .data-complete-indicator {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 16px 0;
+      border: 2px solid;
+    }
+    .data-complete-indicator.success {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+      color: var(--success-text);
+    }
+    .data-complete-indicator.warning {
+      background: var(--warn-bg);
+      border-color: var(--warn-border);
+      color: var(--warn-text);
+    }
+    .data-complete-indicator i { font-size: 1.3rem; }
+
+    /* ================================
+       RESPONSIVE
+    ================================ */
+    @media (max-width: 768px) {
+      .card { padding: 20px 16px; }
+      .form-row, .form-row-3 { grid-template-columns: 1fr; }
+      .header-brand h1 { font-size: 0.9rem; }
+      .btn-group { flex-direction: column; }
+      .login-card { padding: 28px 20px; }
+      .welcome-banner { padding: 20px; }
+      .welcome-banner h2 { font-size: 1.1rem; }
+      .social-links .btn-social { min-width: 100%; }
+    }
+    @media (max-width: 480px) {
+      .clock-display { font-size: 0.78rem; padding: 5px 8px; min-width: 70px; }
+      .header-logo { width: 38px; height: 38px; }
+      .main-wrap { padding: 20px 12px 60px; }
+      .gate-card { padding: 32px 20px; }
+    }
+
+    .hidden { display: none !important; }
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-20 { margin-top: 20px; }
+    .flex-center { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  </style>
+  <style>
+    /* ================================
+       TAB NAVIGATION
+    ================================ */
+    .tab-nav{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;margin-bottom:22px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+    .tab-nav::-webkit-scrollbar{display:none;}
+    .tab-btn{position:relative;display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:var(--radius-full);border:1.5px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-family:var(--font-body);font-weight:700;font-size:.82rem;white-space:nowrap;cursor:pointer;transition:var(--transition);flex-shrink:0;}
+    .tab-btn i{font-size:.85rem;}
+    .tab-btn:hover{border-color:var(--green);color:var(--green);}
+    .tab-btn.active{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(0,102,51,.25);}
+    .tab-btn .tab-badge{background:#f43f5e;color:#fff;font-size:.65rem;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:2px;}
+    .tab-btn.active .tab-badge{background:rgba(255,255,255,.3);}
+    .tab-btn .tab-lock{font-size:.7rem;opacity:.7;}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;animation:fadeIn .25s ease;}
+
+    /* ================================
+       NOTICE / LOCK BANNERS
+    ================================ */
+    .notice-help{display:flex;gap:10px;align-items:flex-start;background:var(--info-bg);border:1px solid var(--info-border);color:var(--info-text);padding:13px 16px;border-radius:var(--radius-sm);font-size:.82rem;margin-bottom:20px;line-height:1.65;}
+    .notice-help i{margin-top:2px;flex-shrink:0;}
+    .notice-help a{color:var(--info-text);font-weight:800;text-decoration:underline;}
+    .lock-banner{display:flex;gap:10px;align-items:flex-start;background:var(--bg-input);border:1px dashed var(--border);color:var(--text-secondary);padding:12px 16px;border-radius:var(--radius-sm);font-size:.8rem;margin-bottom:18px;line-height:1.6;}
+    .lock-banner i{color:var(--text-muted);margin-top:2px;}
+
+    /* ================================
+       READONLY DATA GRID
+    ================================ */
+    .dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;}
+    .dd-item.full{grid-column:1/-1;}
+    .dd-label{font-size:.7rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.045em;margin-bottom:6px;}
+    .dd-value{font-size:.9rem;font-weight:600;padding:10px 14px;background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius-sm);min-height:22px;word-break:break-word;color:var(--text-primary);}
+    .dd-section-title{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:800;color:var(--text-primary);margin:24px 0 14px;padding-bottom:9px;border-bottom:2px solid var(--border);}
+    .dd-section-title:first-of-type{margin-top:0;}
+    .dd-section-title i{color:var(--green);}
+
+    /* ================================
+       FOTO PROFIL
+    ================================ */
+    .foto-wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:20px;padding:16px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);}
+    .foto-preview{width:104px;height:138px;border-radius:10px;border:2px solid var(--border);background:var(--bg-card);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+    .foto-preview img{width:100%;height:100%;object-fit:cover;}
+    .foto-preview i{font-size:24px;color:var(--text-muted);}
+    .foto-meta{font-size:.8rem;color:var(--text-secondary);line-height:1.6;}
+    .foto-meta strong{color:var(--text-primary);}
+
+    /* ================================
+       BADGES
+    ================================ */
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--radius-full);font-size:.7rem;font-weight:800;border:1px solid transparent;letter-spacing:.01em;}
+    .badge-green{background:var(--success-bg);color:var(--success-text);border-color:var(--success-border);}
+    .badge-amber{background:var(--warn-bg);color:var(--warn-text);border-color:var(--warn-border);}
+    .badge-red{background:var(--danger-bg);color:var(--danger-text);border-color:var(--danger-border);}
+    .badge-grey{background:var(--bg-input);color:var(--text-muted);border-color:var(--border);}
+    .badge-blue{background:var(--info-bg);color:var(--info-text);border-color:var(--info-border);}
+    .mono{font-family:var(--font-mono);}
+
+    /* ================================
+       DOC RECAP GRID (read-only)
+    ================================ */
+    .doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:13px;margin-bottom:6px;}
+    .doc-card{border:1.5px solid var(--border);border-radius:var(--radius-md);padding:15px;background:var(--bg-input);transition:var(--transition);}
+    .doc-card.dc-valid{border-color:var(--success-border);background:var(--success-bg);}
+    .doc-card.dc-pending{border-color:var(--warn-border);background:var(--warn-bg);}
+    .doc-card.dc-ditolak{border-color:var(--danger-border);background:var(--danger-bg);}
+    .doc-card-top{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
+    .doc-icon{width:32px;height:32px;border-radius:9px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;color:var(--green);flex-shrink:0;font-size:.8rem;box-shadow:var(--shadow-sm);}
+    .doc-title{font-size:.8rem;font-weight:800;margin-bottom:3px;line-height:1.3;}
+    .doc-desc{font-size:.71rem;color:var(--text-secondary);line-height:1.5;}
+    .doc-foot{display:flex;justify-content:space-between;align-items:center;margin-top:11px;gap:8px;flex-wrap:wrap;}
+    .doc-link-btn{font-size:.72rem;font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:5px;text-decoration:none;}
+    .doc-link-btn:hover{text-decoration:underline;}
+
+    /* ================================
+       SURAT KESIAPAN (upload wajib tunggal)
+    ================================ */
+    .surat-explain{background:var(--info-bg);border:1px solid var(--info-border);border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:20px;font-size:.84rem;color:var(--info-text);line-height:1.7;}
+    .surat-explain h4{font-size:.85rem;margin-bottom:6px;display:flex;align-items:center;gap:7px;}
+    .surat-explain ul{margin:8px 0 0 20px;}
+    .surat-explain li{margin-bottom:4px;}
+    .surat-format-box{display:flex;align-items:center;gap:14px;background:var(--bg-input);border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px;}
+    .surat-format-ic{width:40px;height:40px;border-radius:10px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:1.05rem;flex-shrink:0;box-shadow:var(--shadow-sm);}
+    .surat-format-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:.8rem;}
+    .surat-format-text strong{font-size:.85rem;color:var(--text-primary);}
+    .surat-format-text span{color:var(--text-secondary);font-size:.76rem;line-height:1.5;}
+    .surat-format-box .btn{flex-shrink:0;}
+    .surat-card{border:2px solid var(--border);border-radius:var(--radius-lg);padding:22px;background:var(--bg-input);}
+    .surat-card.dc-valid{border-color:var(--success-border);background:var(--success-bg);}
+    .surat-card.dc-pending{border-color:var(--warn-border);background:var(--warn-bg);}
+    .surat-card.dc-ditolak{border-color:var(--danger-border);background:var(--danger-bg);}
+    .surat-top{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;justify-content:space-between;margin-bottom:14px;}
+    .surat-icon{width:46px;height:46px;border-radius:12px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:1.2rem;flex-shrink:0;box-shadow:var(--shadow-sm);}
+    .doc-reason{margin-top:14px;padding:13px 15px;background:rgba(244,63,94,.08);border-left:3px solid #f43f5e;border-radius:8px;font-size:.83rem;color:var(--danger-text);display:flex;gap:9px;align-items:flex-start;}
+    .surat-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+    .surat-foot{margin-top:14px;font-size:.75rem;color:var(--text-muted);}
+
+    /* ================================
+       CHAT / ADUAN
+    ================================ */
+    .chat-wrap{display:flex;flex-direction:column;height:540px;border:1.5px solid var(--border);border-radius:var(--radius-md);overflow:hidden;background:var(--bg-input);}
+    .chat-templates{display:flex;gap:6px;padding:10px;overflow-x:auto;border-bottom:1px solid var(--border);background:var(--bg-card);flex-shrink:0;-webkit-overflow-scrolling:touch;}
+    .tpl-chip{flex-shrink:0;padding:7px 13px;border-radius:var(--radius-full);border:1px solid var(--border);background:var(--bg-input);font-size:.71rem;font-family:var(--font-body);cursor:pointer;white-space:nowrap;transition:var(--transition);color:var(--text-secondary);}
+    .tpl-chip:hover{border-color:var(--green);color:var(--green);background:var(--green-pale);}
+    .chat-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:11px;}
+    .chat-empty{margin:auto;text-align:center;color:var(--text-muted);font-size:.8rem;}
+    .chat-empty i{display:block;font-size:1.9rem;margin-bottom:9px;}
+    .msg-row{display:flex;flex-direction:column;max-width:80%;}
+    .msg-row.me{align-self:flex-end;align-items:flex-end;}
+    .msg-row.them{align-self:flex-start;align-items:flex-start;}
+    .msg-bubble{padding:9px 13px;border-radius:14px;font-size:.83rem;line-height:1.55;word-break:break-word;white-space:pre-wrap;}
+    .msg-row.me .msg-bubble{background:var(--grad);color:#fff;border-bottom-right-radius:4px;}
+    .msg-row.them .msg-bubble{background:var(--bg-card);border:1px solid var(--border);border-bottom-left-radius:4px;}
+    .msg-meta{font-size:.64rem;color:var(--text-muted);margin-top:4px;padding:0 4px;}
+    .chat-input-bar{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border);background:var(--bg-card);flex-shrink:0;}
+    .chat-input-bar textarea{flex:1;resize:none;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 13px;font-family:var(--font-body);font-size:.85rem;background:var(--bg-input);color:var(--text-primary);outline:none;max-height:90px;}
+    .chat-input-bar textarea:focus{border-color:var(--border-focus);}
+    .chat-send{width:42px;height:42px;border-radius:50%;border:none;background:var(--grad);color:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);font-size:.9rem;}
+    .chat-send:hover{transform:scale(1.07);}
+    .chat-send:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+    .typing-row{display:flex;gap:4px;padding:9px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;width:fit-content;}
+    .typing-dot{width:6px;height:6px;border-radius:50%;background:var(--text-muted);animation:typingBounce 1.2s infinite;}
+    .typing-dot:nth-child(2){animation-delay:.2s;}
+    .typing-dot:nth-child(3){animation-delay:.4s;}
+    @keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:.5;}30%{transform:translateY(-5px);opacity:1;}}
+
+    /* ================================
+       FINALISASI
+    ================================ */
+    .final-locked{text-align:center;padding:44px 18px;}
+    .final-lock-icon{width:72px;height:72px;border-radius:50%;background:var(--bg-input);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:27px;color:var(--text-muted);}
+    .final-progress-list{margin:22px auto 0;display:inline-flex;flex-direction:column;gap:9px;text-align:left;}
+    .final-progress-item{display:flex;align-items:center;gap:9px;font-size:.84rem;}
+    .final-progress-item i{width:16px;text-align:center;}
+    .final-progress-item.done{color:var(--success-text);}
+    .final-progress-item.pending{color:var(--text-muted);}
+    .btn-locked{background:var(--bg-input)!important;color:var(--text-muted)!important;cursor:not-allowed!important;box-shadow:none!important;border:1.5px solid var(--border);}
+    .btn-locked:hover{transform:none!important;}
+    .success-final{text-align:center;padding:8px 4px;}
+    .success-final .si{width:92px;height:92px;border-radius:50%;background:var(--success-bg);border:2px solid var(--success-border);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:42px;color:#22c55e;animation:popIn .5s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes popIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+    .slogan-tag{display:inline-block;margin:16px 0;padding:9px 22px;background:var(--grad);color:#fff;border-radius:var(--radius-full);font-weight:800;letter-spacing:.08em;font-size:.85rem;text-transform:uppercase;}
+    .portal-box{margin-top:20px;padding:16px 18px;background:var(--bg-input);border:1px dashed var(--border);border-radius:var(--radius-sm);font-size:.83rem;text-align:left;line-height:1.7;}
+    .portal-box a{color:var(--green);font-weight:800;word-break:break-all;}
+
+    /* ================================
+       RESPONSIVE — MOBILE-FIRST OVERRIDES
+    ================================ */
+    @media (max-width: 768px) {
+      .dd-grid{grid-template-columns:1fr;}
+      .doc-grid{grid-template-columns:1fr;}
+      .chat-wrap{height:70vh;min-height:400px;}
+      .foto-wrap{flex-direction:column;align-items:flex-start;text-align:left;}
+      .surat-top{flex-direction:column;}
+      .surat-format-box{flex-direction:column;align-items:flex-start;text-align:left;}
+      .surat-format-box .btn{width:100%;justify-content:center;}
+      .tab-btn{padding:10px 14px;font-size:.76rem;}
+    }
+    @media (max-width: 480px) {
+      .msg-row{max-width:92%;}
+      .chat-templates{padding:8px;}
+      .tpl-chip{font-size:.68rem;padding:6px 10px;}
+      .surat-actions{flex-direction:column;}
+      .surat-actions .btn{width:100%;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ================================
+     WEBSITE GATE (Ditutup oleh Operator)
+================================ -->
+<div id="websiteGate">
+  <div class="gate-card">
+    <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68" class="gate-logo"/>
+    <div class="gate-icon-wrap"><i class="fas fa-door-closed"></i></div>
+    <h2>Halaman Daftar Ulang Ditutup</h2>
+    <p>Halaman Daftar Ulang Penerimaan Murid Mutasi Tahun Ajaran 2026/2027 telah ditutup. Terima kasih atas partisipasi dan kerja sama seluruh calon murid.</p>
+  </div>
+</div>
+
+<!-- ================================
+     HEADER
+================================ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo-wrap">
+      <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68" class="header-logo">
+    </div>
+    <div class="header-brand">
+      <h1>Daftar Ulang Murid Mutasi</h1>
+      <p>SMA Negeri 68 Jakarta · T.A. 2026/2027</p>
+    </div>
+    <div class="header-right">
+      <div class="clock-display" id="clockDisplay">00:00:00</div>
+      <button class="theme-toggle" id="themeToggle" title="Ganti tema">
+        <i class="fas fa-moon" id="themeIcon"></i>
+      </button>
+      <button class="logout-btn" id="logoutBtn" style="display:none;">
+        <i class="fas fa-right-from-bracket"></i> Keluar
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ================================
+     MAIN WRAP
+================================ -->
+<div class="main-wrap" id="appContainer">
+
+  <!-- ===== LOGIN PAGE ===== -->
+  <div id="loginPage">
+    <div class="login-card">
+      <img src="https://upload.wikimedia.org/wikipedia/id/1/19/Logo_SMAN_68_Jakarta.png" alt="SMAN 68" class="login-logo">
+      <h2>Login Daftar Ulang</h2>
+      <p class="sub">Masukkan Nomor Pendaftaran &amp; Tanggal Lahir Anda</p>
+
+      <div id="loginAlert" class="alert alert-danger hidden">
+        <i class="fas fa-circle-xmark"></i>
+        <span id="loginAlertText">—</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-hashtag"></i> Nomor Pendaftaran</label>
+        <input type="text" id="loginNoDaftar" class="form-input" placeholder="198168XXXXXXXX" maxlength="14" style="font-family:var(--font-mono);letter-spacing:1px;">
+      </div>
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-calendar-days"></i> Tanggal Lahir</label>
+        <input type="date" id="loginTglLahir" class="form-input">
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" id="loginBtn">
+        <i class="fas fa-right-to-bracket"></i> Login
+      </button>
+      <p style="margin-top:16px;font-size:0.75rem;color:var(--text-muted);">
+        <i class="fas fa-circle-info"></i> Hanya calon murid yang <strong>LULUS SELEKSI</strong> dapat login.
+      </p>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD (setelah login) ===== -->
+  <div id="dashboardPage" style="display:none;">
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+      <h2 id="welcomeName">Selamat datang, [Nama]</h2>
+      <p>Selamat atas kelulusan Anda dalam seleksi mutasi SMAN 68 Jakarta. Lengkapi seluruh tahapan di bawah ini untuk menyelesaikan proses daftar ulang.</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav" id="tabNav">
+      <button class="tab-btn active" data-tab="dataDiri" id="tabBtn-dataDiri"><i class="fas fa-id-card"></i> Data Diri</button>
+      <button class="tab-btn" data-tab="ortu" id="tabBtn-ortu"><i class="fas fa-people-roof"></i> Data Orang Tua</button>
+      <button class="tab-btn" data-tab="dokumen" id="tabBtn-dokumen"><i class="fas fa-cloud-arrow-up"></i> Upload Dokumen</button>
+      <button class="tab-btn" data-tab="aduan" id="tabBtn-aduan"><i class="fas fa-comments"></i> Aduan <span class="tab-badge hidden" id="tabBadgeAduan">0</span></button>
+      <button class="tab-btn" data-tab="final" id="tabBtn-final"><i class="fas fa-flag-checkered"></i> Finalisasi <i class="fas fa-lock tab-lock" id="tabLockFinal"></i></button>
+    </div>
+
+    <!-- ===== TAB: DATA DIRI ===== -->
+    <div class="tab-panel active" id="panel-dataDiri">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon"><i class="fas fa-id-card"></i></div>
+          <div><h2>Data Diri Calon Murid</h2><p>Data diri sesuai dengan yang diisi pada Registrasi Murid Mutasi</p></div>
+        </div>
+        <div class="notice-help">
+          <i class="fas fa-circle-info"></i>
+          <div>Jika data tidak sesuai silahkan hubungi bagian Helpdesk 68 di <a href="https://sman68jakarta.xyz" target="_blank" rel="noopener">https://sman68jakarta.xyz</a> bagian Kontak.</div>
+        </div>
+        <div class="lock-banner"><i class="fas fa-lock"></i> Data ini bersumber langsung dari Registrasi Murid Mutasi dan tidak dapat diubah di halaman Daftar Ulang.</div>
+        <div id="dataDiriReadonlyBody">
+          <div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i><span>Memuat data diri...</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: DATA ORANG TUA ===== -->
+    <div class="tab-panel" id="panel-ortu">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon"><i class="fas fa-people-roof"></i></div>
+          <div><h2>Data Orang Tua / Wali</h2><p>Data orang tua/wali sesuai dengan yang diisi pada Registrasi Murid Mutasi</p></div>
+        </div>
+        <div class="notice-help">
+          <i class="fas fa-circle-info"></i>
+          <div>Jika data tidak sesuai silahkan hubungi bagian Helpdesk 68 di <a href="https://sman68jakarta.xyz" target="_blank" rel="noopener">https://sman68jakarta.xyz</a> bagian Kontak.</div>
+        </div>
+        <div class="lock-banner"><i class="fas fa-lock"></i> Data ini bersumber langsung dari Registrasi Murid Mutasi dan tidak dapat diubah di halaman Daftar Ulang.</div>
+        <div id="ortuReadonlyBody">
+          <div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i><span>Memuat data orang tua...</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: UPLOAD DOKUMEN ===== -->
+    <div class="tab-panel" id="panel-dokumen">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon"><i class="fas fa-folder-open"></i></div>
+          <div><h2>Rekap Dokumen Registrasi</h2><p>Rekap status verifikasi seluruh dokumen yang telah diunggah pada tahap Registrasi Murid Mutasi</p></div>
+        </div>
+        <div id="recapDocGrid" class="doc-grid">
+          <div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i><span>Memuat rekap dokumen...</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon"><i class="fas fa-file-signature"></i></div>
+          <div><h2>Upload Surat Pernyataan Siap Menjadi Siswa</h2><p>Dokumen wajib khusus tahap Daftar Ulang</p></div>
+        </div>
+        <div class="surat-explain">
+          <h4><i class="fas fa-circle-info"></i> Keterangan Dokumen</h4>
+          <p>Surat Pernyataan Siap Menjadi Siswa SMAN 68 Jakarta merupakan dokumen resmi yang menyatakan bahwa calon murid mutasi beserta orang tua/wali telah membaca, memahami, dan menyetujui untuk mematuhi seluruh peraturan, tata tertib, serta ketentuan akademik dan kesiswaan yang berlaku di SMAN 68 Jakarta. Dokumen ini menjadi salah satu syarat wajib dan dasar administratif utama sebelum calon murid dinyatakan resmi menjadi bagian dari keluarga besar SMAN 68 Jakarta.</p>
+          <ul>
+            <li>Surat ditandatangani oleh calon murid <strong>dan</strong> orang tua/wali di atas meterai (jika dipersyaratkan panitia).</li>
+            <li>Dokumen wajib diunggah dalam format <strong>PDF</strong> dan hasil pindai <strong>berwarna</strong> (bukan hitam-putih).</li>
+            <li>Unggah dalam bentuk <strong>tautan Google Drive</strong> yang sudah diatur aksesnya menjadi "Siapa saja yang memiliki link dapat melihat".</li>
+            <li>Dokumen akan diverifikasi oleh operator sebelum tahap Finalisasi Daftar Ulang dapat diakses.</li>
+          </ul>
+        </div>
+        <div class="surat-format-box hidden" id="suratFormatBox">
+          <div class="surat-format-ic"><i class="fas fa-file-arrow-down"></i></div>
+          <div class="surat-format-text">
+            <strong>Format Surat Pernyataan</strong>
+            <span>Unduh format resmi sebagai acuan sebelum diisi, ditandatangani, dan diunggah kembali.</span>
+          </div>
+          <a href="#" id="btnDownloadFormatSurat" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
+            <i class="fas fa-download"></i> Unduh Format
+          </a>
+        </div>
+        <div id="suratCard"><div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i><span>Memuat status dokumen...</span></div></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: ADUAN ===== -->
+    <div class="tab-panel" id="panel-aduan">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon"><i class="fas fa-comments"></i></div>
+          <div><h2>Aduan &amp; Live Chat Operator</h2><p>Sampaikan kendala Anda secara langsung kepada operator secara realtime. Anda juga dapat meminta pembukaan akses upload ulang surat pernyataan di sini.</p></div>
+        </div>
+        <div class="chat-wrap">
+          <div class="chat-templates" id="chatTemplates"></div>
+          <div class="chat-body" id="chatBody">
+            <div class="chat-empty"><i class="fas fa-comment-dots"></i>Belum ada percakapan. Pilih template atau ketik pesan Anda.</div>
+          </div>
+          <div class="chat-input-bar">
+            <textarea id="chatInput" rows="1" placeholder="Ketik pesan aduan Anda..."></textarea>
+            <button class="chat-send" id="chatSendBtn"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: FINALISASI ===== -->
+    <div class="tab-panel" id="panel-final">
+      <div class="card" id="finalCard">
+        <div class="card-header">
+          <div class="card-icon"><i class="fas fa-flag-checkered"></i></div>
+          <div><h2>Finalisasi Daftar Ulang</h2><p>Kunci dan selesaikan proses daftar ulang Anda</p></div>
+        </div>
+        <div id="finalBody">
+          <div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i><span>Memuat status finalisasi...</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /dashboardPage -->
+</div><!-- /main-wrap -->
+
+<!-- ================================
+     MODAL UPLOAD SURAT PERNYATAAN
+================================ -->
+<div class="modal-overlay" id="modalUploadSurat">
+  <div class="modal-box">
+    <div class="modal-icon" style="color:#0077bb;"><i class="fab fa-google-drive"></i></div>
+    <h2>Upload Surat Pernyataan</h2>
+    <p style="margin-bottom:14px;">Tempel tautan Google Drive dokumen Anda. Pastikan sharing diatur ke "Siapa saja yang memiliki link dapat melihat", format PDF, dan hasil pindai berwarna.</p>
+    <div class="form-group" style="text-align:left;">
+      <label class="form-label"><i class="fab fa-google-drive"></i> Tautan Google Drive</label>
+      <input type="url" id="uploadSuratLink" class="form-input" placeholder="https://drive.google.com/file/d/...">
+    </div>
+    <div class="btn-group" style="justify-content:center;">
+      <button class="btn btn-secondary" id="batalUploadSuratBtn">Batal</button>
+      <button class="btn btn-primary" id="simpanUploadSuratBtn"><i class="fas fa-check"></i> Simpan &amp; Kirim</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================
+     FIREBASE & MAIN SCRIPT
+================================ -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+// ============================================================
+// FIREBASE INIT
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDAcKcg3alPOTH3FFGelYmsW7jcMMe2PLI",
+  authDomain: "upnvjdatsystem.firebaseapp.com",
+  projectId: "upnvjdatsystem",
+  storageBucket: "upnvjdatsystem.firebasestorage.app",
+  messagingSenderId: "57095309946",
+  appId: "1:57095309946:web:b0e9f3f86380d549ffc9c3",
+  databaseURL: "https://upnvjdatsystem-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+let rtdb = null;
+try { rtdb = firebase.database(); } catch (e) { console.error('Realtime Database gagal diinisialisasi. Periksa databaseURL.', e); }
+
+// ============================================================
+// HELPERS
+// ============================================================
+function toast(msg, type = 'info') {
+  const w = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = `toast-item t-${type}`;
+  const ic = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warn: 'fa-triangle-exclamation', info: 'fa-circle-info' };
+  el.innerHTML = `<i class="fas ${ic[type] || ic.info}"></i><span class="toast-msg">${msg}</span>`;
+  w.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(110%)'; el.style.transition = '.3s ease'; setTimeout(() => el.remove(), 300); }, 4500);
+}
+
+function esc(s) { if (s === null || s === undefined || s === '') return ''; const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+
+function fmtTgl(t) {
+  if (!t) return '-';
+  try { const d = new Date(t); return isNaN(d) ? t : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return t; }
+}
+
+function formatTanggalWaktu(val) {
+  if (!val) return '-';
+  let d;
+  if (val && typeof val === 'object' && typeof val.toDate === 'function') d = val.toDate();
+  else d = new Date(val);
+  if (isNaN(d.getTime())) return '-';
+  return d.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB';
+}
+
+function toJSDate(val) {
+  if (!val) return null;
+  if (typeof val === 'object' && typeof val.toDate === 'function') return val.toDate();
+  const d = new Date(val);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function toDateInputValue(val) {
+  const d = toJSDate(val);
+  if (!d) return '';
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function safeURL(url) {
+  if (!url) return '';
+  try {
+    const u = new URL(url);
+    if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
+  } catch (e) { /* invalid */ }
+  return '';
+}
+function isValidDriveLink(url) {
+  if (!url) return false;
+  return /^https?:\/\/(drive\.google\.com|docs\.google\.com)\//i.test(url.trim());
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); });
+});
+
+// ============================================================
+// PENJAGA KEPEMILIKAN DATA (CRITICAL SECURITY GUARD)
+// ------------------------------------------------------------
+// Fungsi ini WAJIB dipanggil sebelum menampilkan data `pendaftaranMutasi`
+// atau `daftarUlang` milik siapa pun ke layar. Jika `noDaftar` pada data
+// yang mau ditampilkan TIDAK cocok dengan `noDaftar` milik sesi yang
+// sedang login, data tersebut DITOLAK MENTAH-MENTAH — calon siswa tidak
+// akan pernah melihat data calon siswa lain.
+// ============================================================
+function dataBelongsToSession(session, data) {
+  if (!session || !data) return false;
+  return String(session.noDaftar || '').trim() === String(data.noDaftar || '').trim();
+}
+
+function rejectForeignData(context) {
+  console.error('[SECURITY] Data mismatch terdeteksi & diblokir pada:', context);
+  teardownAllListeners();
+  clearSession();
+  showLoginUI();
+  toast('Sesi tidak valid terdeteksi dan telah diamankan. Silakan login kembali.', 'error');
+}
+
+// ============================================================
+// CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('clockDisplay').textContent = `${hh}:${mm}:${ss}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ============================================================
+// DARK / LIGHT MODE
+// ============================================================
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+let isDark = localStorage.getItem('theme') === 'dark';
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+}
+applyTheme();
+themeToggle.addEventListener('click', () => {
+  isDark = !isDark;
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  applyTheme();
+});
+
+// ============================================================
+// WEBSITE GATE
+// ============================================================
+let websiteOpen = true;
+let gateUnsubscribe = null;
+
+function initWebsiteGate() {
+  gateUnsubscribe = db.collection('operatorSettings').doc('daftarUlangConfig')
+    .onSnapshot(snap => {
+      if (!snap.exists) {
+        websiteOpen = true;
+        document.getElementById('websiteGate').classList.remove('active');
+        updateFormatSuratButton('');
+        return;
+      }
+      const data = snap.data();
+      websiteOpen = data.websiteOpen !== false;
+      if (!websiteOpen) {
+        document.getElementById('websiteGate').classList.add('active');
+      } else {
+        document.getElementById('websiteGate').classList.remove('active');
+      }
+      updateFormatSuratButton(data.formatSuratUrl || '');
+    }, err => {
+      console.error('Gate listener error:', err);
+      websiteOpen = true;
+      document.getElementById('websiteGate').classList.remove('active');
+    });
+}
+
+function updateFormatSuratButton(url) {
+  const box = document.getElementById('suratFormatBox');
+  const btn = document.getElementById('btnDownloadFormatSurat');
+  if (!box || !btn) return;
+  const safe = safeURL(url);
+  if (safe) {
+    btn.href = safe;
+    box.classList.remove('hidden');
+  } else {
+    btn.removeAttribute('href');
+    box.classList.add('hidden');
+  }
+}
+
+// ============================================================
+// LOGIN SCHEDULE
+// ============================================================
+let loginSchedule = null;
+let scheduleUnsubscribe = null;
+
+function initLoginSchedule() {
+  scheduleUnsubscribe = db.collection('operatorSettings').doc('daftarUlangSchedule')
+    .onSnapshot(snap => {
+      if (!snap.exists) {
+        loginSchedule = null;
+        return;
+      }
+      loginSchedule = snap.data();
+    }, err => {
+      console.error('Schedule listener error:', err);
+    });
+}
+
+function checkLoginSchedule() {
+  if (!loginSchedule) return { allowed: true, message: null };
+  const now = new Date();
+  const openTime = toJSDate(loginSchedule.openTime);
+  const closeTime = toJSDate(loginSchedule.closeTime);
+
+  if (openTime && now < openTime) {
+    const tgl = openTime.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const jam = openTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    return { allowed: false, message: `Jadwal login daftar ulang calon murid baru dapat dilakukan pada ${tgl} pukul ${jam} WIB.` };
+  }
+  if (closeTime && now > closeTime) {
+    const tgl = closeTime.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const jam = closeTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    return { allowed: false, message: `Mohon maaf, masa daftar ulang telah ditutup sesuai jadwal yang telah ditetapkan pada ${tgl} pukul ${jam} WIB.` };
+  }
+  return { allowed: true, message: null };
+}
+
+// ============================================================
+// SESSION MANAGEMENT
+// ============================================================
+const SESSION_KEY = 'du68_session';
+
+function getSession() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch { return null; }
+}
+function setSession(data) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+}
+function clearSession() {
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+function showLoginUI() {
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('dashboardPage').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = 'none';
+}
+
+// ============================================================
+// LOGIN
+// ============================================================
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const noDaftar = document.getElementById('loginNoDaftar').value.trim();
+  const tglLahir = document.getElementById('loginTglLahir').value;
+  const alertEl = document.getElementById('loginAlert');
+  const alertText = document.getElementById('loginAlertText');
+  const btn = document.getElementById('loginBtn');
+
+  alertEl.classList.add('hidden');
+
+  if (!noDaftar || !tglLahir) {
+    alertText.textContent = 'Nomor pendaftaran dan tanggal lahir wajib diisi.';
+    alertEl.classList.remove('hidden');
+    return;
+  }
+  if (!/^\d{14}$/.test(noDaftar)) {
+    alertText.textContent = 'Nomor pendaftaran harus 14 digit angka.';
+    alertEl.classList.remove('hidden');
+    return;
+  }
+
+  const scheduleCheck = checkLoginSchedule();
+  if (!scheduleCheck.allowed) {
+    alertText.textContent = scheduleCheck.message;
+    alertEl.classList.remove('hidden');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memeriksa...';
+
+  try {
+    const snap = await db.collection('pendaftaranMutasi')
+      .where('noDaftar', '==', noDaftar)
+      .get();
+
+    if (snap.empty) {
+      alertText.textContent = 'Nomor pendaftaran tidak ditemukan.';
+      alertEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Login';
+      return;
+    }
+
+    if (snap.size > 1) {
+      console.error('[DATA INTEGRITY] Ditemukan lebih dari satu dokumen pendaftaranMutasi dengan noDaftar yang sama:', noDaftar, '— mohon periksa database.');
+    }
+
+    const matchByTgl = snap.docs.find(d => toDateInputValue(d.data().tglLahir) === tglLahir);
+    const doc = matchByTgl || snap.docs[0];
+    const data = doc.data();
+
+    if (toDateInputValue(data.tglLahir) !== tglLahir) {
+      alertText.textContent = 'Tanggal lahir tidak sesuai dengan data pendaftaran.';
+      alertEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Login';
+      return;
+    }
+
+    const status = (data.status || '').toLowerCase();
+    if (status !== 'lolos' && status !== 'diterima') {
+      alertText.textContent = 'Mohon maaf, hanya calon murid yang LULUS SELEKSI yang dapat login ke sistem daftar ulang.';
+      alertEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Login';
+      return;
+    }
+
+    const sessionData = {
+      docId: doc.id,
+      noDaftar: noDaftar,
+      nama: data.nama || data.namaLengkap || 'Calon Murid',
+      tglLahir: toDateInputValue(data.tglLahir)
+    };
+    setSession(sessionData);
+    toast(`Login berhasil. Selamat datang, ${sessionData.nama}.`, 'success');
+    startDU(sessionData);
+
+  } catch (err) {
+    console.error(err);
+    alertText.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+    alertEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Login';
+  }
+});
+
+document.getElementById('loginTglLahir').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
+document.getElementById('loginNoDaftar').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginTglLahir').focus(); });
+
+// ============================================================
+// LOGOUT
+// ============================================================
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  teardownAllListeners();
+  clearSession();
+  showLoginUI();
+  document.getElementById('loginNoDaftar').value = '';
+  document.getElementById('loginTglLahir').value = '';
+  document.getElementById('loginAlert').classList.add('hidden');
+  toast('Anda telah logout.', 'info');
+});
+
+function teardownAllListeners() {
+  if (pesertaUnsub) { pesertaUnsub(); pesertaUnsub = null; }
+  if (duUnsub) { duUnsub(); duUnsub = null; }
+  teardownAduanListeners();
+}
+// ============================================================
+// DASHBOARD INIT
+// ============================================================
+let pesertaUnsub = null;
+let duUnsub = null;
+let pesertaData = null;
+let duData = null;
+
+async function startDU(session) {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('dashboardPage').style.display = 'block';
+  document.getElementById('logoutBtn').style.display = 'flex';
+  document.getElementById('welcomeName').textContent = `Selamat datang, ${session.nama}`;
+  switchDUTab('dataDiri');
+
+  subscribePeserta(session.docId);
+
+  try {
+    const pesertaSnap = await db.collection('pendaftaranMutasi').doc(session.docId).get();
+    const pData = pesertaSnap.exists ? pesertaSnap.data() : {};
+    const duDocId = await ensureDaftarUlangDoc(session, pData);
+    session.duDocId = duDocId;
+    setSession(session);
+    subscribeDU(duDocId);
+  } catch (err) {
+    console.error(err);
+    toast('Gagal menyiapkan data daftar ulang: ' + err.message, 'error');
+  }
+
+  initAduanChat(session.noDaftar, session.nama);
+}
+
+function subscribePeserta(docId) {
+  if (pesertaUnsub) { pesertaUnsub(); pesertaUnsub = null; }
+  pesertaUnsub = db.collection('pendaftaranMutasi').doc(docId)
+    .onSnapshot(snap => {
+      if (!snap.exists) return;
+      const data = snap.data();
+      const session = getSession();
+      if (!dataBelongsToSession(session, data)) { rejectForeignData('subscribePeserta'); return; }
+      pesertaData = data;
+      renderDataDiriReadonly(pesertaData);
+      renderOrtuReadonly(pesertaData);
+      renderRecapDocGrid(pesertaData);
+    }, err => {
+      console.error('Peserta listener error:', err);
+    });
+}
+
+async function ensureDaftarUlangDoc(session, pData) {
+  const q = await db.collection('daftarUlang').where('noDaftar', '==', session.noDaftar).get();
+  const own = q.docs.find(d => String(d.data().noDaftar || '').trim() === String(session.noDaftar).trim());
+
+  const baseFields = {
+    noDaftar: session.noDaftar,
+    nama: pData.nama || pData.namaLengkap || session.nama || '',
+    asalSekolah: pData.sekolahAsal || pData.asalSekolah || '',
+    npsn: pData.npsn || '',
+    nisn: pData.nisn || '',
+    telp: pData.telpMurid || pData.telp || '',
+    email: pData.email || '',
+    kelasSaatIni: pData.kelasSaatIni || '',
+    mutasiKe: pData.mutasiKe || '',
+    pesertaDocId: session.docId
+  };
+
+  if (own) {
+    // Merge saja field tampilan dasar — TIDAK PERNAH menimpa suratKesiapan,
+    // finalisasi, status, atau catatan yang sudah ada agar progres siswa
+    // dan tindakan operator tidak pernah tertimpa secara tidak sengaja.
+    await db.collection('daftarUlang').doc(own.id).set(baseFields, { merge: true });
+    return own.id;
+  } else {
+    const newRef = await db.collection('daftarUlang').add({
+      ...baseFields,
+      status: 'proses',
+      suratKesiapan: { status: 'belum' },
+      finalisasi: { selesai: false },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    return newRef.id;
+  }
+}
+
+function subscribeDU(docId) {
+  if (duUnsub) { duUnsub(); duUnsub = null; }
+  duUnsub = db.collection('daftarUlang').doc(docId)
+    .onSnapshot(snap => {
+      if (!snap.exists) return;
+      const data = snap.data();
+      const session = getSession();
+      if (!dataBelongsToSession(session, data)) { rejectForeignData('subscribeDU'); return; }
+      duData = data;
+      if (session) { session.duDocId = docId; setSession(session); }
+      renderSuratCard(duData);
+      renderFinalTab(duData);
+      updateFinalTabLockUI(duData);
+    }, err => {
+      console.error('DU listener error:', err);
+    });
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchDUTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  if (name === 'aduan') markAduanRead();
+}
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.tab === 'final' && !isFinalUnlocked() && !(duData?.finalisasi?.selesai)) {
+      toast('Finalisasi masih terkunci. Pastikan Surat Pernyataan Siap Menjadi Siswa sudah dinyatakan valid oleh operator.', 'warn');
+    }
+    switchDUTab(btn.dataset.tab);
+  });
+});
+
+// ============================================================
+// SECTION: DATA DIRI (READONLY)
+// ============================================================
+function fieldRO(label, value, opts = {}) {
+  const val = (value !== undefined && value !== null && value !== '') ? value : '-';
+  return `<div class="dd-item${opts.full ? ' full' : ''}"><div class="dd-label">${esc(label)}</div><div class="dd-value${opts.mono ? ' mono' : ''}">${esc(val)}</div></div>`;
+}
+
+function renderDataDiriReadonly(d) {
+  const jkText = d.jk === 'L' ? 'Laki-laki' : d.jk === 'P' ? 'Perempuan' : '-';
+  const html = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+      <span class="badge badge-green"><i class="fas fa-circle-check"></i> Lulus Seleksi</span>
+      <span class="badge badge-grey mono">${esc(d.noDaftar || '-')}</span>
+    </div>
+    <div class="foto-wrap">
+      <div class="foto-preview">${d.fotoProfil ? `<img src="${d.fotoProfil}" alt="Foto Profil">` : `<i class="fas fa-camera-retro"></i>`}</div>
+      <div class="foto-meta"><strong>Foto Profil (4x3 Latar Merah)</strong><br>${d.fotoProfil ? 'Foto telah diunggah pada tahap Registrasi Murid Mutasi.' : 'Foto belum diunggah pada tahap Registrasi Murid Mutasi. Silakan lengkapi melalui halaman Registrasi Murid Mutasi.'}</div>
+    </div>
+
+    <div class="dd-section-title"><i class="fas fa-user"></i> Data Pribadi</div>
+    <div class="dd-grid">
+      ${fieldRO('Nama Lengkap', d.nama)}
+      ${fieldRO('Tanggal Lahir', fmtTgl(d.tglLahir))}
+      ${fieldRO('Jenis Kelamin', jkText)}
+      ${fieldRO('Agama', d.agama)}
+      ${fieldRO('NIK', d.nik, { mono: true })}
+      ${fieldRO('NISN', d.nisn, { mono: true })}
+      ${fieldRO('NIS', d.nis, { mono: true })}
+      ${fieldRO('Tempat Lahir', d.tempatLahir)}
+      ${fieldRO('Alamat', d.alamat, { full: true })}
+    </div>
+
+    <div class="dd-section-title"><i class="fas fa-school"></i> Data Sekolah &amp; Mutasi</div>
+    <div class="dd-grid">
+      ${fieldRO('Sekolah Asal', d.sekolahAsal)}
+      ${fieldRO('NPSN Sekolah Asal', d.npsn, { mono: true })}
+      ${fieldRO('Kelas Saat Ini', d.kelasSaatIni)}
+      ${fieldRO('Mutasi ke Kelas', d.mutasiKe)}
+      ${(d.mutasiKe === 'XI' || d.mutasiKe === 'XII') ? fieldRO('Jurusan / Kurikulum', d.kurikulum) : ''}
+    </div>
+
+    <div class="dd-section-title"><i class="fas fa-address-book"></i> Kontak</div>
+    <div class="dd-grid">
+      ${fieldRO('Email', d.email)}
+      ${fieldRO('No. HP Murid', d.telpMurid, { mono: true })}
+      ${fieldRO('No. HP Orang Tua/Wali', d.telpOrtu, { mono: true })}
+    </div>
+
+    <div class="dd-section-title"><i class="fas fa-comment-dots"></i> Alasan Mutasi</div>
+    <div class="dd-grid">
+      ${fieldRO('Alasan Pindah', d.alasan, { full: true })}
+    </div>`;
+  document.getElementById('dataDiriReadonlyBody').innerHTML = html;
+}
+
+// ============================================================
+// SECTION: DATA ORANG TUA (READONLY)
+// ============================================================
+function renderOrtuReadonly(d) {
+  const ayah = d.ayah || {}, ibu = d.ibu || {};
+  const html = `
+    <div class="dd-section-title" style="margin-top:0;"><i class="fas fa-person"></i> Data Ayah</div>
+    <div class="dd-grid">
+      ${fieldRO('Nama Ayah', ayah.nama)}
+      ${fieldRO('Agama Ayah', ayah.agama)}
+      ${fieldRO('Pekerjaan Ayah', ayah.pekerjaan)}
+      ${fieldRO('Penghasilan Ayah', ayah.penghasilan)}
+      ${fieldRO('No. HP Ayah (WhatsApp)', ayah.telp, { mono: true })}
+    </div>
+    <div class="dd-section-title"><i class="fas fa-person-dress"></i> Data Ibu</div>
+    <div class="dd-grid">
+      ${fieldRO('Nama Ibu', ibu.nama)}
+      ${fieldRO('Agama Ibu', ibu.agama)}
+      ${fieldRO('Pekerjaan Ibu', ibu.pekerjaan)}
+      ${fieldRO('Penghasilan Ibu', ibu.penghasilan)}
+      ${fieldRO('No. HP Ibu (WhatsApp)', ibu.telp, { mono: true })}
+    </div>`;
+  document.getElementById('ortuReadonlyBody').innerHTML = html;
+}
+
+// ============================================================
+// SECTION: REKAP DOKUMEN REGISTRASI (READONLY)
+// ============================================================
+function buildDokumenList(mutasiKe) {
+  const list = [
+    { key: 'ktpKia', title: 'KTP atau KIA', icon: 'fa-id-card' },
+    { key: 'kartuKeluarga', title: 'Kartu Keluarga', icon: 'fa-users' },
+    { key: 'kartuPelajar', title: 'Kartu Pelajar', icon: 'fa-id-badge' },
+  ];
+  let semesters;
+  if (mutasiKe === 'XII') semesters = [1, 2, 3, 4];
+  else if (mutasiKe === 'XI') semesters = [1, 2];
+  else semesters = ['Terakhir'];
+  semesters.forEach(s => {
+    const isLast = s === 'Terakhir';
+    list.push({
+      key: isLast ? 'raportTerakhir' : `raportSem${s}`,
+      title: isLast ? 'Nilai Rapor Terakhir' : `Nilai Rapor Semester ${s}`,
+      icon: 'fa-file-lines'
+    });
+  });
+  list.push(
+    { key: 'suratPernyataan', title: 'Surat Pernyataan Calon Murid Mutasi', icon: 'fa-file-signature' },
+    { key: 'suratRekomendasi', title: 'Surat Rekomendasi dari Sekolah', icon: 'fa-file-shield' },
+    { key: 'suratBaik', title: 'Surat Keterangan Berkelakuan Baik', icon: 'fa-user-shield' },
+    { key: 'suratSehat', title: 'Surat Keterangan Sehat', icon: 'fa-notes-medical' },
+    { key: 'aktaLahir', title: 'Akta Kelahiran', icon: 'fa-certificate' },
+    { key: 'suratPindahSekolah', title: 'Surat Persetujuan Pindah dari Sekolah Asal', icon: 'fa-file-export' }
+  );
+  return list;
+}
+
+const STATUS_LABEL_RECAP = { belum: 'Belum Upload', pending: 'Menunggu Verifikasi', valid: 'Berkas Valid', ditolak: 'Berkas Ditolak' };
+
+function renderRecapDocGrid(d) {
+  const list = buildDokumenList(d.mutasiKe);
+  const verif = d.verifikasiDokumen || {};
+  document.getElementById('recapDocGrid').innerHTML = list.map(item => {
+    const entry = verif[item.key];
+    const status = entry?.status || 'belum';
+    const link = entry?.link ? safeURL(entry.link) : '';
+    const stateClass = status === 'pending' ? 'dc-pending' : status === 'valid' ? 'dc-valid' : status === 'ditolak' ? 'dc-ditolak' : '';
+    const badgeClass = { belum: 'badge-grey', pending: 'badge-amber', valid: 'badge-green', ditolak: 'badge-red' }[status];
+    const badgeIcon = { belum: 'fa-minus', pending: 'fa-triangle-exclamation', valid: 'fa-check', ditolak: 'fa-xmark' }[status];
+    return `
+    <div class="doc-card ${stateClass}">
+      <div class="doc-card-top">
+        <div class="doc-icon"><i class="fas ${item.icon}"></i></div>
+        <div style="flex:1;min-width:0;">
+          <div class="doc-title">${esc(item.title)}</div>
+        </div>
+      </div>
+      <span class="badge ${badgeClass}"><i class="fas ${badgeIcon}"></i> ${STATUS_LABEL_RECAP[status]}</span>
+      <div class="doc-foot">
+        <span>${entry?.tanggalUpload ? formatTanggalWaktu(entry.tanggalUpload) : 'Belum ada tanggal'}</span>
+        ${link ? `<a href="${link}" target="_blank" rel="noopener" class="doc-link-btn"><i class="fas fa-arrow-up-right-from-square"></i> Lihat</a>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+// ============================================================
+// SECTION: UPLOAD SURAT PERNYATAAN SIAP MENJADI SISWA
+// ============================================================
+function renderSuratCard(du) {
+  const entry = du?.suratKesiapan || {};
+  const status = entry.status || 'belum';
+  const link = entry.link ? safeURL(entry.link) : '';
+  const stateClass = status === 'pending' ? 'dc-pending' : status === 'valid' ? 'dc-valid' : status === 'ditolak' ? 'dc-ditolak' : '';
+  const badgeClass = { belum: 'badge-grey', pending: 'badge-amber', valid: 'badge-green', ditolak: 'badge-red' }[status];
+  const badgeIcon = { belum: 'fa-minus', pending: 'fa-triangle-exclamation', valid: 'fa-check', ditolak: 'fa-xmark' }[status];
+  const badgeLabel = { belum: 'Belum Upload', pending: 'Menunggu Verifikasi', valid: 'Dokumen Valid', ditolak: 'Ditolak' }[status];
+  const manuallyUnlocked = entry.uploadUnlocked === true;
+  const isWaitingLocked = status === 'pending' && !manuallyUnlocked;
+  const canUpload = status !== 'valid' && !isWaitingLocked;
+
+  let actionHTML = '';
+  if (canUpload) {
+    actionHTML = `<button class="btn btn-primary" id="btnUploadSurat" type="button"><i class="fas fa-cloud-arrow-up"></i> ${link ? 'Upload Ulang' : 'Upload Dokumen'}</button>`;
+  } else if (isWaitingLocked) {
+    actionHTML = `<button class="btn btn-locked" disabled type="button"><i class="fas fa-lock"></i> Menunggu Verifikasi Operator</button>`;
+  }
+
+  document.getElementById('suratCard').innerHTML = `
+    <div class="surat-card ${stateClass}">
+      <div class="surat-top">
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <div class="surat-icon"><i class="fas fa-file-signature"></i></div>
+          <div>
+            <div style="font-weight:800;font-size:.95rem;margin-bottom:6px;">Surat Pernyataan Siap Menjadi Siswa</div>
+            <span class="badge ${badgeClass}"><i class="fas ${badgeIcon}"></i> ${badgeLabel}</span>
+            ${manuallyUnlocked && status === 'pending' ? `<span class="badge badge-blue"><i class="fas fa-unlock"></i> Akses Upload Ulang Dibuka Operator</span>` : ''}
+          </div>
+        </div>
+      </div>
+      ${status === 'ditolak' && entry.alasanDitolak ? `<div class="doc-reason"><i class="fas fa-circle-info"></i><div><strong>Alasan Penolakan:</strong> ${esc(entry.alasanDitolak)}</div></div>` : ''}
+      <div class="surat-actions">
+        ${link ? `<a href="${link}" target="_blank" rel="noopener" class="btn btn-secondary"><i class="fas fa-arrow-up-right-from-square"></i> Lihat Dokumen</a>` : ''}
+        ${actionHTML}
+      </div>
+      <div class="surat-foot">${entry.tanggalUpload ? 'Diupload: ' + formatTanggalWaktu(entry.tanggalUpload) : 'Belum ada dokumen yang diunggah.'}</div>
+    </div>`;
+
+  document.getElementById('btnUploadSurat')?.addEventListener('click', openUploadSuratModal);
+}
+
+function openUploadSuratModal() {
+  const existing = duData?.suratKesiapan?.link || '';
+  document.getElementById('uploadSuratLink').value = existing;
+  openModal('modalUploadSurat');
+}
+document.getElementById('batalUploadSuratBtn').addEventListener('click', () => closeModal('modalUploadSurat'));
+
+let uploadSuratBusy = false;
+document.getElementById('simpanUploadSuratBtn').addEventListener('click', async () => {
+  if (uploadSuratBusy) return;
+  const session = getSession();
+  if (!session || !session.duDocId) { toast('Sesi tidak valid, silakan login ulang.', 'error'); return; }
+  const link = document.getElementById('uploadSuratLink').value.trim();
+  if (!link) { toast('Tautan Google Drive wajib diisi!', 'error'); return; }
+  if (!isValidDriveLink(link)) { toast('Tautan harus berupa link Google Drive (drive.google.com) yang valid!', 'error'); return; }
+  const safe = safeURL(link);
+  if (!safe) { toast('Format tautan tidak valid!', 'error'); return; }
+
+  uploadSuratBusy = true;
+  const btn = document.getElementById('simpanUploadSuratBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+  const nowIso = new Date().toISOString();
+  const update = {
+    'suratKesiapan.link': safe,
+    'suratKesiapan.status': 'pending',
+    'suratKesiapan.tanggalUpload': nowIso,
+    'suratKesiapan.alasanDitolak': firebase.firestore.FieldValue.delete(),
+    'suratKesiapan.uploadUnlocked': false,
+    'suratKesiapan.riwayat': firebase.firestore.FieldValue.arrayUnion({ status: 'pending', catatan: '', waktu: nowIso }),
+    updatedAt: nowIso
+  };
+  try {
+    await db.collection('daftarUlang').doc(session.duDocId).update(update);
+    closeModal('modalUploadSurat');
+    toast('Upload berhasil! Dokumen Anda sedang menunggu verifikasi operator.', 'success');
+    document.getElementById('uploadSuratLink').value = '';
+  } catch (err) {
+    console.error(err);
+    toast('Gagal menyimpan dokumen: ' + err.message, 'error');
+  } finally {
+    uploadSuratBusy = false;
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-check"></i> Simpan &amp; Kirim';
+  }
+});
+// ============================================================
+// SECTION: FINALISASI DAFTAR ULANG
+// ============================================================
+const PERATURAN_DU = [
+  'Calon murid mutasi wajib mematuhi seluruh tata tertib yang berlaku di SMAN 68 Jakarta.',
+  'Calon murid mutasi wajib menyerahkan seluruh dokumen persyaratan yang telah ditentukan dalam jadwal yang telah ditetapkan.',
+  'Calon murid mutasi wajib mengikuti seluruh rangkaian kegiatan orientasi dan pengenalan lingkungan sekolah.',
+  'Calon murid mutasi wajib menggunakan seragam resmi SMAN 68 Jakarta sesuai dengan ketentuan yang berlaku.',
+  'Calon murid mutasi tidak diperkenankan membawa kendaraan bermotor ke lingkungan sekolah.',
+  'Calon murid mutasi wajib menjaga nama baik sekolah dan almamater SMAN 68 Jakarta.',
+  'Calon murid mutasi wajib mengikuti seluruh kegiatan akademik dan non-akademik yang telah dijadwalkan.',
+  'Calon murid mutasi wajib menghormati guru, staf, dan seluruh warga sekolah.',
+  'Calon murid mutasi dilarang terlibat dalam kegiatan yang bersifat kriminal, perundungan, atau penyalahgunaan narkoba.',
+  'Calon murid mutasi wajib mengikuti tes penempatan dan wawancara ulang jika diperlukan oleh panitia.',
+  'Calon murid mutasi bersedia mengikuti masa adaptasi dan pembinaan karakter selama satu semester pertama.',
+  'Calon murid mutasi wajib melengkapi administrasi keuangan sekolah sesuai dengan ketentuan yang berlaku.',
+  'Calon murid mutasi wajib mengikuti kegiatan ekstrakurikuler minimal satu bidang sesuai dengan minat dan bakat.',
+  'Calon murid mutasi wajib menjaga kebersihan, keindahan, dan kenyamanan lingkungan sekolah.',
+  'Seluruh data yang diisi dan dokumen yang diunggah dalam proses daftar ulang adalah benar dan dapat dipertanggungjawabkan, serta bersedia menerima sanksi apabila terbukti memalsukan data.'
+];
+
+function isFinalUnlocked() { return duData?.suratKesiapan?.status === 'valid'; }
+
+function updateFinalTabLockUI(du) {
+  const unlocked = du?.suratKesiapan?.status === 'valid' || du?.finalisasi?.selesai === true;
+  document.getElementById('tabLockFinal').classList.toggle('hidden', unlocked);
+}
+
+function renderFinalTab(du) {
+  const body = document.getElementById('finalBody');
+  const suratStatus = du?.suratKesiapan?.status || 'belum';
+  const alreadyFinal = du?.finalisasi?.selesai === true;
+
+  if (alreadyFinal) { renderSuccessFinal(du); return; }
+
+  if (suratStatus !== 'valid') {
+    body.innerHTML = `
+      <div class="final-locked">
+        <div class="final-lock-icon"><i class="fas fa-lock"></i></div>
+        <h3>Finalisasi Masih Terkunci</h3>
+        <p>Tahap ini akan terbuka otomatis setelah dokumen <strong>Surat Pernyataan Siap Menjadi Siswa</strong> diunggah dan dinyatakan <strong>Valid</strong> oleh operator pada menu Upload Dokumen.</p>
+        <div class="final-progress-list">
+          <div class="final-progress-item pending"><i class="fas fa-circle"></i> Surat Pernyataan Siap Menjadi Siswa: ${STATUS_LABEL_RECAP[suratStatus] || 'Belum Upload'}</div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  body.innerHTML = `
+    <div class="alert alert-warn"><i class="fas fa-triangle-exclamation"></i><span><strong>Pastikan seluruh data yang tercantum pada halaman ini sudah benar.</strong> Setelah Finalisasi Daftar Ulang berhasil, seluruh data tidak dapat diubah kembali.</span></div>
+    <div class="rules-scroll"><ol>${PERATURAN_DU.map(r => `<li>${esc(r)}</li>`).join('')}</ol></div>
+    <div class="checkbox-row" id="finalCheckboxRow">
+      <input type="checkbox" id="agreeFinalDU">
+      <label for="agreeFinalDU">Saya siap menjadi bagian dari keluarga besar SMAN 68 Jakarta dan siap mematuhi seluruh peraturan yang berlaku.</label>
+    </div>
+    <button class="btn btn-locked btn-full btn-lg" id="btnFinalisasiDU" disabled type="button" style="margin-top:16px;">
+      <i class="fas fa-lock"></i> Finalisasi Daftar Ulang
+    </button>`;
+
+  const chk = document.getElementById('agreeFinalDU');
+  const btn = document.getElementById('btnFinalisasiDU');
+  chk.addEventListener('change', () => {
+    if (chk.checked) {
+      btn.disabled = false;
+      btn.className = 'btn btn-success btn-full btn-lg';
+      btn.innerHTML = '<i class="fas fa-flag-checkered"></i> Finalisasi Daftar Ulang';
+    } else {
+      btn.disabled = true;
+      btn.className = 'btn btn-locked btn-full btn-lg';
+      btn.innerHTML = '<i class="fas fa-lock"></i> Finalisasi Daftar Ulang';
+    }
+  });
+  btn.addEventListener('click', submitFinalisasiDU);
+}
+
+let finalisasiBusy = false;
+async function submitFinalisasiDU() {
+  if (finalisasiBusy) return;
+  const session = getSession();
+  if (!session || !session.duDocId) { toast('Sesi tidak valid, silakan login ulang.', 'error'); return; }
+  if (!document.getElementById('agreeFinalDU')?.checked) { toast('Anda wajib menyetujui peraturan terlebih dahulu.', 'warn'); return; }
+  if (duData?.suratKesiapan?.status !== 'valid') { toast('Dokumen belum diverifikasi valid oleh operator.', 'warn'); return; }
+
+  finalisasiBusy = true;
+  const btn = document.getElementById('btnFinalisasiDU');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+  const nowIso = new Date().toISOString();
+  try {
+    await db.collection('daftarUlang').doc(session.duDocId).update({
+      'finalisasi.selesai': true,
+      'finalisasi.waktu': nowIso,
+      status: 'valid',
+      catatan: 'Finalisasi otomatis oleh sistem setelah Surat Pernyataan Siap Menjadi Siswa dinyatakan valid oleh operator.',
+      updatedAt: nowIso
+    });
+    toast('Selamat! Finalisasi Daftar Ulang berhasil.', 'success');
+  } catch (err) {
+    console.error(err);
+    toast('Gagal memproses finalisasi: ' + err.message, 'error');
+    finalisasiBusy = false;
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-flag-checkered"></i> Finalisasi Daftar Ulang';
+  }
+}
+
+function renderSuccessFinal(du) {
+  updateFinalTabLockUI(du);
+  const body = document.getElementById('finalBody');
+  body.innerHTML = `
+    <div class="success-final">
+      <div class="si"><i class="fas fa-circle-check"></i></div>
+      <h2 style="margin-bottom:8px;">Selamat, Anda Telah Resmi Menjadi Keluarga Besar SMAN 68 Jakarta!</h2>
+      <p>Proses Daftar Ulang Murid Mutasi Anda telah berhasil diselesaikan pada ${formatTanggalWaktu(du?.finalisasi?.waktu)}.</p>
+      <div class="slogan-tag">Disiplin &middot; Kreasi &middot; Prestasi</div>
+      <p>Untuk info lebih lanjut mengenai jadwal masuk sekolah, silakan kunjungi media sosial resmi kami:</p>
+      <div class="social-links">
+        <a href="https://www.instagram.com/smanegeri68jakarta/" target="_blank" class="btn-social instagram"><i class="fab fa-instagram"></i> Instagram</a>
+        <a href="https://www.tiktok.com/@smanegeri68jakarta" target="_blank" class="btn-social tiktok"><i class="fab fa-tiktok"></i> TikTok</a>
+      </div>
+      <div class="portal-box">
+        <i class="fas fa-key"></i> <strong>Akun Portal Siswa</strong><br>
+        Untuk melihat akun dan password akses Portal Siswa, silakan menuju halaman Registrasi Murid Mutasi:<br>
+        <a href="https://www.sman68jakarta.xyz/reg-murid-mutasi.sman68jkt" target="_blank" rel="noopener">https://www.sman68jakarta.xyz/reg-murid-mutasi.sman68jkt</a>
+      </div>
+      <p style="margin-top:18px;">Terima kasih atas kepercayaan Anda kepada SMAN 68 Jakarta.</p>
+    </div>`;
+}
+// ============================================================
+// SECTION: ADUAN / LIVE CHAT OPERATOR (REALTIME)
+// ============================================================
+const ADUAN_TEMPLATES_DU = [
+  'Mohon buka kembali akses upload ulang untuk Surat Pernyataan Siap Menjadi Siswa saya, terdapat kesalahan pada file yang saya kirim.',
+  'Dokumen Surat Pernyataan saya belum diverifikasi, mohon dicek kembali.',
+  'Mengapa Surat Pernyataan saya ditolak? Mohon penjelasan lebih lanjut.',
+  'Saya sudah upload Surat Pernyataan tetapi status belum berubah.',
+  'Bagaimana cara mengganti tautan Google Drive Surat Pernyataan yang salah?',
+  'Saya sudah Finalisasi Daftar Ulang, apa langkah selanjutnya?',
+  'Saya mengalami kendala saat login ke halaman Daftar Ulang ini.',
+  'Data diri saya pada halaman ini tidak sesuai, mohon dibantu perbaikannya.',
+  'Data orang tua/wali saya pada halaman ini tidak sesuai, mohon dibantu perbaikannya.',
+  'Kapan jadwal masuk sekolah dan Masa Pengenalan Lingkungan Sekolah (MPLS) diumumkan?',
+  'Apakah saya masih bisa melakukan Daftar Ulang jika melewati batas waktu yang ditentukan?',
+  'Saya ingin menanyakan kelengkapan dokumen registrasi yang masih berstatus belum valid.',
+  'Bagaimana cara mendapatkan akun dan password Portal Siswa?',
+  'Saya membutuhkan surat keterangan telah Daftar Ulang untuk keperluan administrasi sekolah asal.',
+  'Saya ingin menanyakan informasi seragam dan perlengkapan sekolah SMAN 68 Jakarta.'
+];
+
+let aduanMsgRef = null, aduanTypingOpRef = null, aduanTypingMeRef = null;
+let typingIdleTimer = null;
+let lastSendTime = 0;
+
+function initAduanChat(noDaftar, namaSiswa) {
+  if (!rtdb || !noDaftar) {
+    document.getElementById('chatTemplates').innerHTML = '<span style="font-size:11.5px;color:var(--text-muted)">Fitur aduan realtime tidak tersedia saat ini.</span>';
+    return;
+  }
+
+  document.getElementById('chatTemplates').innerHTML = ADUAN_TEMPLATES_DU.map(t => `<button class="tpl-chip" type="button">${esc(t)}</button>`).join('');
+  document.querySelectorAll('.tpl-chip').forEach((chip, i) => {
+    chip.addEventListener('click', () => {
+      const input = document.getElementById('chatInput');
+      input.value = ADUAN_TEMPLATES_DU[i];
+      input.focus();
+    });
+  });
+
+  if (aduanMsgRef) aduanMsgRef.off();
+  aduanMsgRef = rtdb.ref(`aduanDU/${noDaftar}/messages`);
+  aduanMsgRef.on('value', snap => {
+    renderChatMessages(snap.val() || {});
+  }, err => console.error('Aduan DU listener error:', err));
+
+  if (aduanTypingOpRef) aduanTypingOpRef.off();
+  aduanTypingOpRef = rtdb.ref(`aduanDU/${noDaftar}/typing/operator`);
+  aduanTypingOpRef.on('value', snap => {
+    document.getElementById('typingIndicatorSlot')?.remove();
+    if (snap.val() === true) {
+      const bodyEl = document.getElementById('chatBody');
+      const wrap = document.createElement('div');
+      wrap.id = 'typingIndicatorSlot';
+      wrap.innerHTML = `<div class="typing-row"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
+      bodyEl.appendChild(wrap);
+      bodyEl.scrollTop = bodyEl.scrollHeight;
+    }
+  });
+
+  aduanTypingMeRef = rtdb.ref(`aduanDU/${noDaftar}/typing/siswa`);
+  aduanTypingMeRef.onDisconnect().set(false);
+
+  rtdb.ref(`aduanDU/${noDaftar}/meta`).update({ namaSiswa: namaSiswa || noDaftar, noDaftar }).catch(() => {});
+}
+
+function teardownAduanListeners() {
+  if (aduanMsgRef) { aduanMsgRef.off(); aduanMsgRef = null; }
+  if (aduanTypingOpRef) { aduanTypingOpRef.off(); aduanTypingOpRef = null; }
+  if (aduanTypingMeRef) { aduanTypingMeRef.set(false).catch(() => {}); aduanTypingMeRef = null; }
+  clearTimeout(typingIdleTimer);
+}
+
+function renderChatMessages(val) {
+  const bodyEl = document.getElementById('chatBody');
+  const entries = Object.entries(val).sort((a, b) => (a[1].waktu || 0) - (b[1].waktu || 0));
+
+  const unreadCount = entries.filter(([, m]) => m.sender === 'operator' && !m.dibaca).length;
+  const badge = document.getElementById('tabBadgeAduan');
+  if (unreadCount > 0) { badge.textContent = unreadCount; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
+
+  if (!entries.length) {
+    bodyEl.innerHTML = `<div class="chat-empty"><i class="fas fa-comment-dots"></i>Belum ada percakapan. Pilih template atau ketik pesan Anda.</div>`;
+    return;
+  }
+  bodyEl.innerHTML = entries.map(([, m]) => {
+    const isMe = m.sender === 'siswa';
+    const time = m.waktu ? new Date(m.waktu).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+    return `<div class="msg-row ${isMe ? 'me' : 'them'}"><div class="msg-bubble">${esc(m.text || '')}</div><div class="msg-meta">${time}${isMe && m.dibaca ? ' &middot; <i class="fas fa-check-double" style="color:var(--green)"></i> Dibaca' : ''}</div></div>`;
+  }).join('');
+  bodyEl.scrollTop = bodyEl.scrollHeight;
+}
+
+function markAduanRead() {
+  const session = getSession();
+  if (!aduanMsgRef || !session?.noDaftar) return;
+  aduanMsgRef.once('value').then(snap => {
+    const val = snap.val() || {};
+    const updates = {};
+    Object.entries(val).forEach(([id, m]) => { if (m.sender === 'operator' && !m.dibaca) updates[`${id}/dibaca`] = true; });
+    if (Object.keys(updates).length) aduanMsgRef.update(updates).catch(err => console.error(err));
+  }).catch(err => console.error(err));
+  rtdb?.ref(`aduanDU/${session.noDaftar}/meta/unreadSiswa`).set(false).catch(() => {});
+}
+
+document.getElementById('chatInput').addEventListener('input', () => {
+  if (!aduanTypingMeRef) return;
+  aduanTypingMeRef.set(true).catch(() => {});
+  clearTimeout(typingIdleTimer);
+  typingIdleTimer = setTimeout(() => aduanTypingMeRef.set(false).catch(() => {}), 2000);
+});
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAduanMessage(); }
+});
+document.getElementById('chatSendBtn').addEventListener('click', sendAduanMessage);
+
+function sendAduanMessage() {
+  const session = getSession();
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  if (Date.now() - lastSendTime < 1200) { toast('Mohon tunggu sebentar sebelum mengirim pesan lagi.', 'warn'); return; }
+  if (!aduanMsgRef || !session?.noDaftar) { toast('Fitur aduan tidak tersedia saat ini.', 'error'); return; }
+  lastSendTime = Date.now();
+  const btn = document.getElementById('chatSendBtn');
+  btn.disabled = true;
+  const noDaftar = session.noDaftar;
+  aduanMsgRef.push({ sender: 'siswa', text: text.slice(0, 1000), waktu: firebase.database.ServerValue.TIMESTAMP, dibaca: false })
+    .then(() => {
+      input.value = '';
+      aduanTypingMeRef?.set(false).catch(() => {});
+      rtdb?.ref(`aduanDU/${noDaftar}/meta`).update({
+        namaSiswa: session.nama || noDaftar,
+        noDaftar,
+        lastMessage: text.slice(0, 120),
+        lastWaktu: firebase.database.ServerValue.TIMESTAMP,
+        unreadOperator: true
+      }).catch(() => {});
+    })
+    .catch(err => { console.error(err); toast('Gagal mengirim pesan. Coba lagi.', 'error'); })
+    .finally(() => { btn.disabled = false; });
+}
+
+// ============================================================
+// APP BOOTSTRAP
+// ============================================================
+function init() {
+  initWebsiteGate();
+  initLoginSchedule();
+  const session = getSession();
+  if (session && session.noDaftar) {
+    db.collection('pendaftaranMutasi').where('noDaftar', '==', session.noDaftar).get()
+      .then(snap => {
+        if (!snap.empty) {
+          const matchByTgl = snap.docs.find(d => toDateInputValue(d.data().tglLahir) === session.tglLahir);
+          const chosenDoc = matchByTgl || snap.docs[0];
+          const data = chosenDoc.data();
+          const status = (data.status || '').toLowerCase();
+          if (status === 'lolos' || status === 'diterima') {
+            session.docId = chosenDoc.id;
+            session.nama = data.nama || data.namaLengkap || session.nama;
+            setSession(session);
+            startDU(session);
+            return;
+          }
+        }
+        clearSession();
+        showLoginUI();
+      })
+      .catch(() => { clearSession(); showLoginUI(); });
+  } else {
+    showLoginUI();
+  }
+}
+init();
+</script>
+</body>
+</html>
